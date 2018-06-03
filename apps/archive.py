@@ -1,0 +1,60 @@
+from dash.dependencies import Input, Output
+import dash_html_components as html
+import dash_core_components as dcc
+
+from app import app
+
+layout = html.Div([
+    #Header
+    html.Div([
+       html.H1('Archive', className='header-title'),
+        dcc.Input(
+            placeholder='Search',
+            type='text',
+            value='',
+            className='search-form item-element-margin header-button'
+        )
+       ], className='wrapper-white header-wrapper page-width'),
+
+    #body-wrapper
+    html.Div([
+
+    #body-Content
+    html.Div([
+
+#item-wrapper
+html.Div([
+    html.Div([
+       html.H4('Report Name', className='header-title table-col-3'),
+       html.H4('Time', className='header-title table-col-3'),
+       html.H4('Mode', className='header-title table-col-3'),
+       html.H4('Action', className='header-title table-col-1'),
+    ], className='table-heading overflow-auto item-element-margin'),
+
+    html.Div([
+       html.H4('Relationship of fuel against speed', className='table-col-3'),
+       html.H4('25/08/2018, 15:34:00', className='table-col-3'),
+       html.H4('2D', className='table-col-3'),
+       dcc.Link('Delete', href='/apps/viewGraph', className='table-col-1 delete-button')
+    ], className='table-row overflow-auto item-element-margin'),
+
+    html.Div([
+       html.H4('Relationship of propulsion against speed', className='table-col-3'),
+       html.H4('26/08/2018, 15:54:00', className='table-col-3'),
+       html.H4('3D', className='table-col-3'),
+       dcc.Link('Delete', href='/apps/viewGraph', className='table-col-1 delete-button')
+    ], className='table-row overflow-auto item-element-margin'),
+
+
+    ], className='item-wrapper'),
+    ], className='content-wrapper page-width')
+    ], className='wrapper-grey')
+
+])
+
+
+@app.callback(
+    Output('archive-display-value', 'children'),
+    [Input('archive-dropdown', 'value')])
+def display_value(value):
+    return 'You have selected "{}"'.format(value)

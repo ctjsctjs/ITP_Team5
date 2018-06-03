@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from app import app
-from apps import generateGraph, viewGraph, database
+from apps import generateGraph, viewGraph, database, archive
 
 app.layout = html.Div([
 
@@ -13,6 +13,7 @@ app.layout = html.Div([
 
                     html.Li(dcc.Link('Logo', href='/'), className='nav-li'),
                     html.Li(dcc.Link('Graphs', href='/apps/graph'), className='nav-li'),
+                    html.Li(dcc.Link('Archive', href='/apps/archive'), className='nav-li'),
                     html.Li(dcc.Link('Database', href='/apps/database'), className='nav-li'),
 
                     ], className='nav-ul'),
@@ -36,6 +37,8 @@ def display_page(pathname):
          return generateGraph.layout
     elif pathname == '/apps/database':
          return database.layout
+    elif pathname == '/apps/archive':
+         return archive.layout
     elif pathname == '/apps/viewGraph':
          return viewGraph.layout
     else:

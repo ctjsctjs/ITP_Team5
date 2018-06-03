@@ -38,6 +38,26 @@ body {
   margin-right:0px !important;
 }
 
+input,
+label,
+select,
+button,
+textarea
+{
+	margin:0;
+	border:0;
+	padding:0;
+	display:inline-block;
+	vertical-align:middle;
+	white-space:normal;
+	background:none;
+	line-height:1;
+
+	/* Browsers have different default form fonts */
+	font-size:13px;
+	font-family:Arial;
+}
+
 h1{
   font-size: 24px;
   font-weight:700;
@@ -185,4 +205,32 @@ h2{
 
 h4{
   font-size:14px;
+}
+
+.search-form{
+  padding: 12px 12px;
+  background-color: white;
+  border: 1px solid #33bbb0;
+  color: #33bbb0;
+  border-radius: 4px;
+  text-align: left;
+  font-size:12px;
+  width: max-content;
+  font-size:14px;
+  min-width: 120px;
+}
+
+.table-col-3{
+  width: 30%;
+  float: left;
+}
+
+.table-col-1{
+  width: 10%;
+  float: left;
+}
+
+.delete-button{
+  color:  grey;
+  font-size: 14px;;
 }
