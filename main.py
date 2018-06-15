@@ -1,7 +1,7 @@
 from dash.dependencies import Input, Output
 
 
-from controller.page_controllers import GenerateGraph, ViewGraph, Database, Graph, Filter, Test
+from controller.page_controllers import GenerateGraph, ViewGraph, Graph, Filter, Test
 from view.pages import index
 from app import app
 from config.routes import *

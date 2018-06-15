@@ -1,10 +1,10 @@
 from dash.dependencies import Input, Output
 import pandas as pd
 
-from model.database import SQL
+##from model.database import SQL
 from view.pages.graph import layout
 from view.templates.table import generate_table
-from view.templates.graph2D_json import generate_graph2D_actual
+from view.templates.graph2D_json import generate_graph2D
 from app import app
 
 # Hardcoded Elements TODO: Remove once deemed unnecessary
@@ -16,10 +16,10 @@ table_name = 'test-graph-table'
     Output('graph-table-store', 'children'),
     [Input('graph-dummy', 'children')])
 def obtain_data(dummy):
-    sql = SQL()
-    dff = sql.get_table(table_name)
+##    sql = SQL()
+##    dff = sql.get_table(table_name)
 
-    return dff.to_json()
+    return 
 
 
 # Table
@@ -27,9 +27,9 @@ def obtain_data(dummy):
     Output('graph-table-container', 'children'),
     [Input('graph-table-store', 'children')])
 def get_table(dff_json):
-    dff = pd.read_json(dff_json)
+##    dff = pd.read_json(dff_json)
 
-    return generate_table(dff)
+    return 
 
 
 # Dropdown options for X-Axis Selection
@@ -37,8 +37,8 @@ def get_table(dff_json):
     Output('graph-dropdown-x', 'options'),
     [Input('graph-table-store', 'children')])
 def create_options_x(dff_json):
-    dff = pd.read_json(dff_json)
-    return [{'label': i, 'value': i} for i in dff.columns]
+##    dff = pd.read_json(dff_json)
+    return 
 
 
 # Dropdown options for Y-Axis Selection
@@ -46,8 +46,8 @@ def create_options_x(dff_json):
     Output('graph-dropdown-y', 'options'),
     [Input('graph-table-store', 'children')])
 def create_options_y(dff_json):
-    dff = pd.read_json(dff_json)
-    return [{'label': i, 'value': i} for i in dff.columns]
+##    dff = pd.read_json(dff_json)
+    return
 
 
 # Graph
@@ -57,5 +57,6 @@ def create_options_y(dff_json):
      Input('graph-dropdown-x', 'value'),
      Input('graph-dropdown-y', 'value')])
 def get_graph(dff_json, dropdown_x, dropdown_y):
-    dff = pd.read_json(dff_json)
-    return generate_graph2D_actual(dff, dropdown_x, dropdown_y)
+##    dff = pd.read_json(dff_json)
+##    return generate_graph2D_actual(dff, dropdown_x, dropdown_y)
+    return generateGraphTest()

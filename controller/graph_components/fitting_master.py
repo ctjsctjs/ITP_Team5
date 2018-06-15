@@ -35,49 +35,128 @@ from operator import mul
 # K Means
 from sklearn.cluster import KMeans
 
-# Test Comparison
-wb = load_workbook(filename='C:\\Users\\Sean\\Downloads\\DSME 10700_2018_Combined_A.xlsx', data_only=True)
-ws = wb['Before DD']
-ws2 = wb['After DD']
+def generateGraphTest():
+    # Test Comparison
+    wb = load_workbook(filename='C:\\Users\\Sean\\Downloads\\DSME 10700_2018_Combined_A.xlsx', data_only=True)
+    ws = wb['Before DD']
+    ws2 = wb['After DD']
 
-beforeSpeed = []
-beforeME = []
-count = 0
-for row in ws.rows:
-    count += 1
-    ##    if count == 12:
-    ##        break
-    if count <= 1:
-        continue
-    ##    if row[0].value == 'APL BARCELONA':
-    if (row[9].value is not None) and (row[20].value is not None):
-        beforeSpeed.append(float(row[9].value))
-        beforeME.append(float(row[20].value))
-    else:
-        pass
+    beforeSpeed = []
+    beforeME = []
+    count = 0
+    for row in ws.rows:
+        count += 1
+        ##    if count == 12:
+        ##        break
+        if count <= 1:
+            continue
+        ##    if row[0].value == 'APL BARCELONA':
+        if (row[9].value is not None) and (row[20].value is not None):
+            beforeSpeed.append(float(row[9].value))
+            beforeME.append(float(row[20].value))
+        else:
+            pass
 
-x = beforeSpeed
-y = beforeME
+    x = beforeSpeed
+    y = beforeME
 
-afterSpeed = []
-afterME = []
-count = 0
-for row in ws2.rows:
-    count += 1
-    ##    if count == 12:
-    ##        break
-    if count <= 1:
-        continue
-    ##    if row[0].value == 'APL BARCELONA':
-    if (row[9].value is not None) and (row[20].value is not None):
-        afterSpeed.append(float(row[9].value))
-        afterME.append(float(row[20].value))
-    else:
-        pass
+    afterSpeed = []
+    afterME = []
+    count = 0
+    for row in ws2.rows:
+        count += 1
+        ##    if count == 12:
+        ##        break
+        if count <= 1:
+            continue
+        ##    if row[0].value == 'APL BARCELONA':
+        if (row[9].value is not None) and (row[20].value is not None):
+            afterSpeed.append(float(row[9].value))
+            afterME.append(float(row[20].value))
+        else:
+            pass
 
-x2 = afterSpeed
-y2 = afterME
+    x2 = afterSpeed
+    y2 = afterME
 
+    print 'K-Means applied to data\n'
+    numClusters = len(x) / 3
+    numClusters2 = len(x2) / 3
+    beforeCoords = np.c_[np.array(x), np.array(y)]
+    kmeans = KMeans(n_clusters=numClusters, random_state=0).fit(beforeCoords)
+    x = [xN for xN, yN in kmeans.cluster_centers_]
+    y = [yN for xN, yN in kmeans.cluster_centers_]
+
+    afterCoords = np.c_[np.array(x2), np.array(y2)]
+    kmeans2 = KMeans(n_clusters=numClusters2, random_state=0).fit(afterCoords)
+    x2 = [xN for xN, yN in kmeans2.cluster_centers_]
+    y2 = [yN for xN, yN in kmeans2.cluster_centers_]
+
+    # Polyfit method master race 1=linear, 2=quadratic, 3=cubic, 4=idk
+    z = np.polyfit(x, y, 2)
+    f = np.poly1d(z)
+    print 'Before DD Formula'
+    print f
+    print 'After DD Formula'
+    z2 = np.polyfit(x2, y2, 2)
+    f2 = np.poly1d(z2)
+    print f2
+    print 'Individual Values of After DD formula (debug purposes)'
+    for item in f2:
+        print item  # individual value
+
+    # calculate new x's and y's
+    x_new = np.linspace(min(x), max(x), max(x))
+    y_new = f(x_new)
+
+    x_new2 = np.linspace(min(x2), max(x2), max(x2))
+    y_new2 = f2(x_new2)
+
+    # Creating the dataset, and generating the plot
+    trace1 = go.Scatter(
+        x=x_new2,
+        y=y_new2,
+        mode='lines',
+        marker=go.Marker(color='rgb(255, 127, 14)'),
+        name='After DD'
+    )
+
+    trace2 = go.Scatter(
+        x=x_new,
+        y=y_new,
+        mode='lines',
+        marker=go.Marker(color='rgb(31, 119, 180)'),
+        name='Before DD'
+    )
+
+    trace3 = go.Scatter(
+        x=x,
+        y=y,
+        mode='markers',
+        marker=go.Marker(color='rgb(255, 127, 14)'),
+        name='Before DD'
+    )
+
+    trace4 = go.Scatter(
+        x=x2,
+        y=y2,
+        mode='markers',
+        marker=go.Marker(color='rgb(31, 119, 180)'),
+        name='After DD '
+    )
+
+    layout = go.Layout(
+        title='FO Consumption & Speed Graph',
+        plot_bgcolor='rgb(229, 229, 229)',
+        xaxis=go.XAxis(title='Avg speed (knts)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+        yaxis=go.YAxis(title='FO cons. / 24 hrs (tons)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+        ##                  annotations=[annotation]
+    )
+
+    ##data = [trace1, trace2]
+    data = [trace1, trace2, trace3, trace4]
+    fig = go.Figure(data=data, layout=layout)
+    return fig
 
 def calculate_r(xList, yList):
     ##    Defective Cubic R**2
@@ -116,82 +195,6 @@ def calculate_r(xList, yList):
 ##calculate_r(x2, y2)
 
 # K Means (Comment this block to view original graph)
-print 'K-Means applied to data\n'
-numClusters = len(x) / 3
-numClusters2 = len(x2) / 3
-beforeCoords = np.c_[np.array(x), np.array(y)]
-kmeans = KMeans(n_clusters=numClusters, random_state=0).fit(beforeCoords)
-x = [xN for xN, yN in kmeans.cluster_centers_]
-y = [yN for xN, yN in kmeans.cluster_centers_]
 
-afterCoords = np.c_[np.array(x2), np.array(y2)]
-kmeans2 = KMeans(n_clusters=numClusters2, random_state=0).fit(afterCoords)
-x2 = [xN for xN, yN in kmeans2.cluster_centers_]
-y2 = [yN for xN, yN in kmeans2.cluster_centers_]
 
-# Polyfit method master race 1=linear, 2=quadratic, 3=cubic, 4=idk
-z = np.polyfit(x, y, 2)
-f = np.poly1d(z)
-print 'Before DD Formula'
-print f
-print 'After DD Formula'
-z2 = np.polyfit(x2, y2, 2)
-f2 = np.poly1d(z2)
-print f2
-print 'Individual Values of After DD formula (debug purposes)'
-for item in f2:
-    print item  # individual value
-
-# calculate new x's and y's
-x_new = np.linspace(min(x), max(x), max(x))
-y_new = f(x_new)
-
-x_new2 = np.linspace(min(x2), max(x2), max(x2))
-y_new2 = f2(x_new2)
-
-# Creating the dataset, and generating the plot
-trace1 = go.Scatter(
-    x=x_new2,
-    y=y_new2,
-    mode='lines',
-    marker=go.Marker(color='rgb(255, 127, 14)'),
-    name='After DD'
-)
-
-trace2 = go.Scatter(
-    x=x_new,
-    y=y_new,
-    mode='lines',
-    marker=go.Marker(color='rgb(31, 119, 180)'),
-    name='Before DD'
-)
-
-trace3 = go.Scatter(
-    x=x,
-    y=y,
-    mode='markers',
-    marker=go.Marker(color='rgb(255, 127, 14)'),
-    name='Before DD'
-)
-
-trace4 = go.Scatter(
-    x=x2,
-    y=y2,
-    mode='markers',
-    marker=go.Marker(color='rgb(31, 119, 180)'),
-    name='After DD '
-)
-
-layout = go.Layout(
-    title='FO Consumption & Speed Graph',
-    plot_bgcolor='rgb(229, 229, 229)',
-    xaxis=go.XAxis(title='Avg speed (knts)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-    yaxis=go.YAxis(title='FO cons. / 24 hrs (tons)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-    ##                  annotations=[annotation]
-)
-
-##data = [trace1, trace2]
-data = [trace1, trace2, trace3, trace4]
-fig = go.Figure(data=data, layout=layout)
-
-py.plot(fig, filename='FO Consumption & Speed Polynomial Graph')
+##py.plot(fig, filename='FO Consumption & Speed Polynomial Graph')

@@ -1,6 +1,6 @@
 import dash_html_components as html
 import dash_core_components as dcc
-
+import controller.graph_components.fitting_master as fm
 layout = \
     html.Div([
         html.H1("GRAPH"),
@@ -23,7 +23,7 @@ layout = \
             ),
 
             # Graph
-            html.Div(dcc.Graph(id='graph-graph'), className="")
+            html.Div(dcc.Graph(id='graph-graph', figure=fm.generateGraphTest() ), className="")
         ], className=""),
 
         # Generated Graph
