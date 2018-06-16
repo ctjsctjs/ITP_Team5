@@ -9,9 +9,9 @@ class FileType(Enum):
 
 
 class DataFrame:
-    def __init__(self, df, file_type=FileType.VOMSII):
+    def __init__(self, file, file_type=FileType.VOMSII):
         self.__fileType = file_type         # 0 - VLOG, 1 - VOMSII, 2 - V2PS
-        self.__dataFrame = df
+        self.__dataFrame = self.__readfile__(file)
         self.__columns = self.__get_columns()
 
     """

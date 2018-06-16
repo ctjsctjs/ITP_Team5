@@ -1,6 +1,7 @@
-import pymysql
+from pymysql import connect, Error
 import pandas as pd
 import config.database_settings as dbconf
+from model.dataframe import *
 
 
 class SQL:
@@ -35,7 +36,18 @@ class SQL:
     def connection(self):
         return self.__connection
 
+    def get_table(self, table=None):
+        if table is None:
+            return None
+
+        query = "SELECT * FROM `" + table + "`"
+
+        self.__reconnect()
+        return pd.read_sql(sql=query, con=self.__connection)
+
+    # Method to obtain all column names in a table
     def get_column_names(self, table=None):
+        # TODO: # TODO: Better 'default table' handling
         if table is None:
             table = self.__default_table
 
@@ -51,60 +63,25 @@ class SQL:
         # Return Data
         return column_names
 
-    def get_table(self, table=None):
-        if table is None:
-            return None
-
-        query = "SELECT * FROM `" + table + "`"
-
-        self.__reconnect()
-        return pd.read_sql(sql=query, con=self.__connection)
-
-    # SQL Create Table Method
-    def create(self, table=None, columns=[], datatype=[]):
-        # TODO: Handle invalid arguments(i.e 'id' in 'columns')
-        # TODO: Handle error where 'columns' and 'data' do not match(i.e different number of elements)
-        # TODO: Handle event where 'table' already exists in Database(i.e Replace or Combine?). Currently replacing
-
-        # TODO: Better 'default table' handling
+    # Method to obtain the datatype and size of each column in a table
+    def get_column_datatypes(self, table=None, distinct=False):
+        # TODO: # TODO: Better 'default table' handling
         if table is None:
             table = self.__default_table
 
-        # Drop table if it already exist in Database
-        sql_drop = "DROP TABLE IF EXISTS `" + table + "`"
-        self.__query(sql_drop)
+        # Get Column datatypes from Database
+        condition = "table_name = '" + table + "'"
+        result = self.select(columns="DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
 
-        # First part of query, with 'id' as an auto incrementing index
-        sql = "CREATE TABLE `" + table + "` (`id` int(11) NOT NULL AUTO_INCREMENT,"
+        # Clean Data before returning
+        column_datatypes = []
+        for col_name, col_type in result:
+            column_datatypes.append([col_name, col_type])
 
-        # Add each column name with its data type to statement
-        for i in range(len(columns)):
-            line = "`" + columns[i] + "`"
-
-            # Check data type of column and add accordingly
-            if datatype[i] == 'datetime64[ns]':
-                line += " DATETIME"
-            elif datatype[i] == 'object':
-                if "Remarks" in columns[i] or "Reason" in columns[i]:
-                    line += " VARCHAR(512)"
-                elif "Email" in columns[i]:
-                    line += " VARCHAR(100)"
-                else:
-                    line += " VARCHAR(50)"
-            elif datatype[i] == 'int64':
-                line += " INT"
-            elif datatype[i] == 'float64':
-                line += " FLOAT"
-
-            # Include comma and add portion to query
-            line += ","
-            sql += line
-
-        # End part of query
-        sql += "PRIMARY KEY (`id`)) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin"
-
-        # Run Query
-        self.__query(sql)
+        # Return Data
+        if distinct:
+            return [list(x) for x in set(tuple(x) for x in column_datatypes)]
+        return column_datatypes
 
     # SQL Select Method
     def select(self, columns="*", table=None, condition=None):
@@ -155,12 +132,92 @@ class SQL:
     def query(self, statement, expect_result=False):
         return self.__query(statement, expect_result)
 
+    # Excel-to-SQL Function
+    def xlsx_to_sql(self, table_name, xlsx, filetype=FileType.VOMSII,):
+        df = DataFrame(xlsx, filetype)
+        columns = df.get_columns()
+
+        # Create empty table in database
+        self.__create(table=table_name, columns=columns, datatype=df.get_column_datatypes())
+
+        # Populate table with xlsx data
+        for i in range(df.len()):
+            row = df.get_row(i + 1)
+
+            col = ""
+            val = ""
+            valid_rows = len(columns)
+
+            for j in range(len(columns) - 1, -1, -1):
+                if not pandas.isnull(row[j]):
+                    break
+                valid_rows -= 1
+
+            for j in range(valid_rows):
+                if not pandas.isnull(row[j]):
+                    col += "`" + columns[j] + "`"
+                    val += '"' + unicode(row[j]).replace('"', '\\"') + '"'
+
+                    if j is not (valid_rows - 1):
+                        col += ","
+                        val += ","
+
+            insert_query = "INSERT INTO `" + table_name + "` (" + col + ") VALUES (" + val + ")"
+            err = self.__query(insert_query)
+            if err is not None:
+                print(err)
+
+    # SQL Create Table Method
+    def __create(self, table=None, columns=[], datatype=[]):
+        # TODO: Handle invalid arguments(i.e 'id' in 'columns')
+        # TODO: Handle error where 'columns' and 'data' do not match(i.e different number of elements)
+        # TODO: Handle event where 'table' already exists in Database(i.e Replace or Combine?). Currently replacing
+
+        # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        # Drop table if it already exist in Database
+        sql_drop = "DROP TABLE IF EXISTS `" + table + "`"
+        self.__query(sql_drop)
+
+        # First part of query, with 'id' as an auto incrementing index
+        sql = "CREATE TABLE `" + table + "` (`id` int(11) NOT NULL AUTO_INCREMENT,"
+
+        # Add each column name with its data type to statement
+        for i in range(len(columns)):
+            line = "`" + columns[i] + "`"
+
+            # Check data type of column and add accordingly
+            if datatype[i] == 'datetime64[ns]':
+                line += " DATETIME"
+            elif datatype[i] == 'object':
+                if "Remarks" in columns[i] or "Reason" in columns[i]:
+                    line += " VARCHAR(512)"
+                elif "Email" in columns[i]:
+                    line += " VARCHAR(100)"
+                else:
+                    line += " VARCHAR(50)"
+            elif datatype[i] == 'int64':
+                line += " INT"
+            elif datatype[i] == 'float64':
+                line += " FLOAT"
+
+            # Include comma and add portion to query
+            line += ","
+            sql += line
+
+        # End part of query
+        sql += "PRIMARY KEY (`id`)) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin"
+
+        # Run Query
+        self.__query(sql)
+
     # Basic Query Function
     def __query(self, statement, expect_result=False):
         self.__reconnect()
 
         result = None
-        print(statement)
         try:
             with self.__cursor as cursor:
                 # Run SQL Query
@@ -170,6 +227,8 @@ class SQL:
                 # If result is expected
                 if expect_result:
                     result = cursor.fetchall()
+        except Error as e:
+            print("Error %d: %s" % (e.args[0], e.args[1]))
         finally:
             return result
 
@@ -177,7 +236,7 @@ class SQL:
     def __reconnect(self):
         self.__close()
 
-        self.__connection = pymysql.connect(host=self.__host, user=self.__user, password=self.__password, db=self.__db)
+        self.__connection = connect(host=self.__host, user=self.__user, password=self.__password, db=self.__db)
         self.__cursor = self.__connection.cursor()
 
     # Close Connection Method
