@@ -4,7 +4,7 @@ import pandas as pd
 from model.database import SQL
 from view.pages.graph import layout
 from view.templates.table import generate_table
-from view.templates.graph2D_json import generate_graph2D_actual
+from view.templates.graph2D_json import generate_graph2D
 from app import app
 
 # Hardcoded Elements TODO: Remove once deemed unnecessary
@@ -66,7 +66,7 @@ def create_options_y2(dff_json):
      Input('graph-dropdown-y', 'value')])
 def get_graph(dff_json, dropdown_x, dropdown_y):
     dff = pd.read_json(dff_json)
-    return generate_graph2D_actual(dff, dropdown_x, dropdown_y)
+    return generate_graph2D(dff, dropdown_x, dropdown_y)
 
 #Calculate Differences between 2 y-axis
 @app.callback(
