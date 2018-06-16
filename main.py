@@ -1,6 +1,5 @@
 from dash.dependencies import Input, Output
 
-
 from controller.page_controllers import GenerateGraph, ViewGraph, Database, Graph, Filter, Test
 from view.pages import index
 from app import app
@@ -13,13 +12,15 @@ app.layout = index.layout
               [Input('url', 'pathname')])
 def display_page(path):
     if path == pathname['Home']:
-        return Test.layout
+        return GenerateGraph.layout
     elif path == pathname['Graphs']:
         return Graph.layout
     elif path == pathname['Database']:
         return Database.layout
     elif path == pathname['ViewGraph']:
         return ViewGraph.layout
+    elif path == pathname['GenerateGraph']:
+        return GenerateGraph.layout
     elif path == pathname['Filter']:
         return Filter.layout
     elif path == pathname['Test']:
