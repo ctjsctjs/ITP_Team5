@@ -110,7 +110,17 @@ layout = html.Div([
                                     'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E',
                                     'Parameter F'
                                 ]
-                            ])
+                            ]),
+                            dcc.Dropdown(
+                                id='app-graph-dropdown',
+                                className='panel-item-dropdown item-element-margin',
+                                placeholder="Parameter Y2",
+                                options=[
+                                    {'label': i, 'value': i} for i in [
+                                        'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E',
+                                        'Parameter F'
+                                    ]
+                                ])
                     ], className='item-wrapper'),
                 ], className='panel-left'),
 

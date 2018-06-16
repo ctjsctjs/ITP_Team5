@@ -50,7 +50,15 @@ def create_options_y(dff_json):
     return [{'label': i, 'value': i} for i in dff.columns]
 
 
-# Graph
+# Dropdown options for Y2-Axis Selection
+@app.callback(
+    Output('graph-dropdown-y2', 'options'),
+    [Input('graph-table-store', 'children')])
+def create_options_y2(dff_json):
+    dff = pd.read_json(dff_json)
+    return [{'label': i, 'value': i} for i in dff.columns]
+
+#Graph
 @app.callback(
     Output('graph-graph', 'figure'),
     [Input('graph-table-store', 'children'),
@@ -59,3 +67,17 @@ def create_options_y(dff_json):
 def get_graph(dff_json, dropdown_x, dropdown_y):
     dff = pd.read_json(dff_json)
     return generate_graph2D_actual(dff, dropdown_x, dropdown_y)
+
+#Calculate Differences between 2 y-axis
+@app.callback(
+    Output('different', 'value'),
+    [Input('graph-table-store', 'children'),
+     Input('graph-dropdown-y', 'value'),
+     Input('graph-dropdown-y2', 'value')])
+def calculate_difference(dff_json,dropdown_y,dropdown_y2):
+    diff=[]
+    dff = pd.read_json(dff_json)
+    df1=dff[[dropdown_y,dropdown_y2]]
+    for index,row in df1.iterrows():
+        diff.append(row[dropdown_y] - row[dropdown_y2])
+    return diff

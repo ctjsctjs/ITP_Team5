@@ -1,6 +1,6 @@
 import dash_html_components as html
 import dash_core_components as dcc
-import dash_table_experiments as dt
+# import dash_table_experiments as dt
 
 
 from config.routes import pathname
@@ -18,7 +18,7 @@ layout = \
 
         # body-wrapper
         html.Div([
-            html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}),
+            # html.Div(dt.DataTable(rows=[{}]), style={'display': 'none'}),
             # body-Content
             html.Div([
 

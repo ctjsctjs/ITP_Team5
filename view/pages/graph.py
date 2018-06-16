@@ -22,8 +22,15 @@ layout = \
                 clearable=False,
             ),
 
+            # Dropdown for Y2-Axis
+            html.Label('Select Y2'),
+            dcc.Dropdown(
+                id='graph-dropdown-y2',
+                clearable=False,
+            ),
             # Graph
             html.Div(dcc.Graph(id='graph-graph'), className="")
+
         ], className=""),
 
         # Generated Graph
@@ -33,5 +40,6 @@ layout = \
 
         # Hidden Elements
         html.Div(id='graph-dummy', style={'display': 'none'}),
-        html.Div(id='graph-table-store', style={'display': 'none'})
+        html.Div(id='graph-table-store', style={'display': 'none'}),
+        html.Div(id='different',style={'display': 'none'})
     ])
