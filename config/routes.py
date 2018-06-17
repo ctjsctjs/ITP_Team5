@@ -1,6 +1,7 @@
 pathname = {
     'Home': '/',
     'Graphs': '/Graphs',
+    'Archive': '/Archive',
     'Database': '/Database',
     'ViewGraph': '/ViewGraph',
     'GenerateGraph': '/GenerateGraph',
