@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 import pandas_datareader as web
 import pandas as pd
 import datetime
+import controller.graph_components.fitting_master as fm
 
 from config.routes import pathname
 
@@ -131,19 +132,12 @@ layout = html.Div([
                         html.Div([
                             html.Div([
                                 html.H3('Column 3'),
-                                dcc.Graph(id='g2', figure={'data': [{'y': [1, 2, 3]}],
-                                                           'layout': go.Layout(
-                                                               xaxis={
-                                                                   'title': "Engine Power",
-                                                                   'type': 'linear'
-                                                               },
-                                                               yaxis={
-                                                                   'title': "Engine Speed",
-                                                                   'type': 'linear'
-                                                               },
-                                                               margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-                                                               hovermode='closest'
-                                                           )})
+                                dcc.Graph(id='g2', figure=fm.generateGraphTest(
+                                xData = [12.0,20.3,20.4,20.1,20.2,20.2,20.2,19.9,21.7,20.0,19.4,12.9,20.0],
+                                yData = [62.2,165.7,157.2,154.6,152.3,160.3,159.4,160.2,159.4,160.0,148.4,29.3,42.7],
+                                xData2 = [19.0,12.6,19.0,20.0,19.9,19.4,12.5,18.8,18.7,20.2,19.8,17.1,18.0],
+                                yData2=[132.4,43.2,129.1,139.4,139.8,144.6,115.8,160.8,119.9,139.7,139.2,134.5,135.2])
+                                )
                             ], className="eight columns")
                         ], className="row"),
                     ], className='item-wrapper'),
