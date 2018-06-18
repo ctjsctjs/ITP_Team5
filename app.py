@@ -9,7 +9,7 @@ app.config.supress_callback_exceptions = True
 
 external_css = [
     # 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css'
-    # 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css',
+    'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css',
     '/static/css/base.css'
 ]
 

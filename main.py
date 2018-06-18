@@ -12,7 +12,8 @@ app.layout = index.layout
               [Input('url', 'pathname')])
 def display_page(path):
     if path == pathname['Home']:
-        return GenerateGraph.layout
+        return Test.layout
+        # return GenerateGraph.layout
     elif path == pathname['Graphs']:
         return Graph.layout
     elif path == pathname['Archive']:
