@@ -1,5 +1,5 @@
 from enum import Enum
-import pandas
+import pandas as pd
 
 
 class FileType(Enum):
@@ -9,9 +9,12 @@ class FileType(Enum):
 
 
 class DataFrame:
-    def __init__(self, file, file_type=FileType.VOMSII):
+    def __init__(self, data, file_type=FileType.VOMSII):
         self.__fileType = file_type         # 0 - VLOG, 1 - VOMSII, 2 - V2PS
-        self.__dataFrame = self.__readfile__(file)
+        if type(data) is pd.DataFrame:
+            self.__dataFrame = data
+        else:
+            self.__dataFrame = self.__readfile__(data)
         self.__columns = self.__get_columns()
 
     """
@@ -109,7 +112,7 @@ class DataFrame:
         # Read VOSMII
         elif self.__fileType is FileType.VOMSII:
             # TODO: 'skiprows' should be customisable by user
-            return pandas.read_excel(file, skiprows=[])
+            return pd.read_excel(file, skiprows=[])
         # Reads V2PS    -- FOR FUTURE SCALABILITY --
         elif self.__fileType is FileType.V2PS:
             return

@@ -2,9 +2,11 @@ from dash.dependencies import Input, Output, State
 import dash_html_components as html
 from datetime import datetime as dt
 
-from view.pages.test import layout, value_input, option_input, date_input
+from view.pages.test import layout, value_input, option_input, date_input, generate_vessel_filter, \
+    generate_filter_input
 from view.templates.table import generate_table
 from model.database import SQL
+from model.dataframe import DataFrame
 from app import app
 
 
@@ -28,8 +30,8 @@ def sample_generate_table(dataframe, max_rows=10):
 def test(dummy):
     test_sql = SQL()
     df = test_sql.get_table("testtable")
-    print(df.columns)
     return generate_table(df)
+
 
 # Input Test
 @app.callback(
@@ -77,19 +79,60 @@ def test(dump, min_val, max_val):
 """
 Usable Stuff
 """
+dfs = {}
 
 
-# Obtain Vessel Data with dropdown
+# Populate Vessel Choice dropdown
 @app.callback(
-    Output('test-dropdown-vessel', 'options'),
+    Output('test-vessel-dropdown', 'options'),
     [Input('test-start', 'children')])
-def load_dropdown_option_vessel(dump):
+def load_vessel_choice(dump):
     return [{'label': i, 'value': i} for i in SQL().get_vessels()]
 
 
-# Obtain Vessel Dropdown Input
+# Populate Filter Choice dropdown and load vessel data
 @app.callback(
-    Output('test-dropdown-vessel-store', 'children'),
-    [Input('test-dropdown-vessel', 'value')])
-def get_result(value):
-    print(value)
+    Output('test-vessel-filter', 'children'),
+    [Input('test-vessel-dropdown', 'value')])
+def load_filter_choice(vessel):
+    # If nothing selected. Prevents loading empty filter options
+    if vessel is not None:
+        # Load Vessel Data
+        if vessel not in dfs:
+            dfs[vessel] = SQL().get_vessel(vessel=vessel)
+
+        # Populate Options
+        options = [{'label': i[0], 'value': i[1]} for i in SQL().get_filter_options()]
+        return generate_vessel_filter(options=options)
+
+
+# Generate Filter Specification
+@app.callback(
+    Output('test-vessel-filter-specification', 'children'),
+    [Input('test-vessel-filter-option', 'value')])
+def load_filter_specification(option):
+    # If nothing selected. Prevents loading empty filter options
+    if option is not None:
+        return generate_filter_input(option)
+
+
+# Get Filter Specification Input
+@app.callback(
+    Output('test-vessel-filter-1-input-dump', 'children'),
+    [Input('test-vessel-filter-specification-submit', 'n_clicks')],
+    [State('test-vessel-dropdown', 'value'),
+     State('test-vessel-filter-option', 'value'),
+     State('test-vessel-filter-specification-input', 'value')])
+def get_result(dump, vessel, option, input):
+    print(dfs[vessel].get_columns())
+
+
+@app.callback(
+    Output('test-vessel-filter-2-input-dump', 'children'),
+    [Input('test-vessel-filter-specification-submit2', 'n_clicks')],
+    [State('test-vessel-dropdown', 'value'),
+     State('test-vessel-filter-option', 'value'),
+     State('test-vessel-filter-specification-input1', 'value'),
+     State('test-vessel-filter-specification-input2', 'value')])
+def get_result(dump, vessel, option, input1, input2):
+    print("HELLO")

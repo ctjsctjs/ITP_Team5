@@ -1,5 +1,6 @@
 from pymysql import connect, Error
 import pandas as pd
+
 import config.database_settings as dbconf
 from model.dataframe import *
 
@@ -16,7 +17,7 @@ class SQL:
         self.__connection = None
         self.__cursor = None
         self.__encoding = encoding
-
+        self.__filter_limit = 100
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
         self.__default_table = "vomsii_data"
 
@@ -25,12 +26,6 @@ class SQL:
 
     def destroy(self):
         self.__del__()
-
-    # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-    def test(self):
-        self.__reconnect()
-        frame = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Code`='AJIAPL'", con=self.__connection)
-        return frame
 
     # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
     def connection(self):
@@ -96,6 +91,38 @@ class SQL:
 
         return [i[0] for i in (self.select(columns=column))]
 
+    # Method to obtain filter options
+    def get_filter_options(self, table=None):
+        # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        # Get Column Info from Database TODO: Use SQL 'DISTINCT'
+        condition = "table_name = '" + table + "'"
+        info = self.select(columns="COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
+
+        # Filter
+        filtered_info = []
+        for item in info:
+            if item[2] <= self.__filter_limit:
+                filtered_info.append(item)
+
+        return filtered_info
+
+    # Method to obtain data for a particular vessel
+    def get_vessel(self, table=None, vessel=None):
+        # TODO: # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        # TODO: Handle 'No vessel given' event
+        if vessel is None:
+            return
+
+        self.__reconnect()
+        df = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
+        return DataFrame(df)
+
     # SQL Select Method
     def select(self, columns="*", table=None, condition=None):
         # TODO: Handle 404
@@ -110,7 +137,6 @@ class SQL:
         # If condition given
         if condition is not None:
             sql += " WHERE " + condition
-            print(False)
 
         # Run Query
         return self.__query(sql, expect_result=True)
