@@ -126,6 +126,10 @@ def load_filter_specification(option):
 def get_result(dump, vessel, option, input):
     print(dfs[vessel].get_columns())
 
+    # Return DF after filter
+    return
+
+
 
 @app.callback(
     Output('test-vessel-filter-2-input-dump', 'children'),
@@ -136,3 +140,6 @@ def get_result(dump, vessel, option, input):
      State('test-vessel-filter-specification-input2', 'value')])
 def get_result(dump, vessel, option, input1, input2):
     print("HELLO")
+    
+    # Return DF after filter
+    return
