@@ -2,9 +2,9 @@ from dash.dependencies import Input, Output, State
 import dash_html_components as html
 from datetime import datetime as dt
 
-from view.pages.test import layout, text_input, value_input, date_input
+from view.pages.test import layout, value_input, option_input, date_input
 from view.templates.table import generate_table
-import model.database as db
+from model.database import SQL
 from app import app
 
 
@@ -26,10 +26,10 @@ def sample_generate_table(dataframe, max_rows=10):
     Output('test-table-container', 'children'),
     [Input('test-dump1', 'children')])
 def test(dummy):
-    test_sql = db.SQL()
+    test_sql = SQL()
     df = test_sql.get_table("testtable")
+    print(df.columns)
     return generate_table(df)
-
 
 # Input Test
 @app.callback(
@@ -45,14 +45,14 @@ def test(input_value):
     [Input('test-dropdown', 'value')])
 def test(value):
     if value == 'option':
-        return text_input
+        return option_input
     elif value == 'value':
         return value_input
     elif value == 'datetime':
         return date_input
 
 
-# Read Input Test
+# Read Input Test. Works for int/float and datetime
 @app.callback(
     Output('test-dump2', 'children'),
     [Input('test-submit', 'n_clicks')],
@@ -73,3 +73,23 @@ def test(dump, min_val, max_val):
 # def test(dump, start, end):
 #     print("Start Date: " + str(dt.strptime(start, '%Y-%m-%d')))
 #     print("End Date: " + str(dt.strptime(end, '%Y-%m-%d')))
+
+"""
+Usable Stuff
+"""
+
+
+# Obtain Vessel Data with dropdown
+@app.callback(
+    Output('test-dropdown-vessel', 'options'),
+    [Input('test-start', 'children')])
+def load_dropdown_option_vessel(dump):
+    return [{'label': i, 'value': i} for i in SQL().get_vessels()]
+
+
+# Obtain Vessel Dropdown Input
+@app.callback(
+    Output('test-dropdown-vessel-store', 'children'),
+    [Input('test-dropdown-vessel', 'value')])
+def get_result(value):
+    print(value)

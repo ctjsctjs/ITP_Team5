@@ -18,7 +18,7 @@ class SQL:
         self.__encoding = encoding
 
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-        self.__default_table = "table_1"
+        self.__default_table = "vomsii_data"
 
     def __del__(self):
         self.__close()
@@ -69,7 +69,7 @@ class SQL:
         if table is None:
             table = self.__default_table
 
-        # Get Column datatypes from Database
+        # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
         condition = "table_name = '" + table + "'"
         result = self.select(columns="DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
 
@@ -82,6 +82,19 @@ class SQL:
         if distinct:
             return [list(x) for x in set(tuple(x) for x in column_datatypes)]
         return column_datatypes
+
+    # Method to obtain distinct vessel codes/names TODO: Too reliant on hardcode. Possible redesign required
+    def get_vessels(self, table=None, column=None):
+        # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        # TODO: Better handle 'No column given' condition
+        if column is None:
+            column = 'DISTINCT `Vessel Name`'
+            # column = 'DISTINCT `Vessel Code`'
+
+        return [i[0] for i in (self.select(columns=column))]
 
     # SQL Select Method
     def select(self, columns="*", table=None, condition=None):

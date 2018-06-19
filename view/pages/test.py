@@ -19,6 +19,15 @@ layout = \
             value=''
         ),
 
+        # Vessal Data Dropdown Test
+        html.Div([
+            dcc.Dropdown(
+                id='test-dropdown-vessel',
+                className='',
+                clearable='True'
+            ),
+        ]),
+
         # Dropdown Test
         html.Div([
             dcc.Dropdown(
@@ -36,7 +45,10 @@ layout = \
         # Hidden Elements
         html.Div(id='test-dump1', style={'display': 'none'}),
         html.Div(id='test-dump2', style={'display': 'none'}),
-        html.Div(id='test-dump3', style={'display': 'none'})
+        html.Div(id='test-dump3', style={'display': 'none'}),
+        html.Div(id='test-start', style={'display': 'none'}),
+        html.Div(id='test-dropdown-vessel-store', style={'display': 'none'}),
+        html.Div(id='test-store', style={'display': 'none'})
     ], className='')
 
 # Input form to obtain text
