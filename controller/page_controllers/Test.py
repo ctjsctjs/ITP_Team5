@@ -1,5 +1,6 @@
 from dash.dependencies import Input, Output, State
 import dash_html_components as html
+import pandas as pd
 from datetime import datetime as dt
 
 from view.pages.test import layout, value_input, option_input, date_input, generate_vessel_filter, \
@@ -102,7 +103,7 @@ def load_filter_choice(vessel):
             dfs[vessel] = SQL().get_vessel(vessel=vessel)
 
         # Populate Options
-        options = [{'label': i[0], 'value': i[1]} for i in SQL().get_filter_options()]
+        options = [{'label': i[0], 'value': i[0]} for i in SQL().get_filter_options()]
         return generate_vessel_filter(options=options)
 
 
@@ -113,24 +114,34 @@ def load_filter_choice(vessel):
 def load_filter_specification(option):
     # If nothing selected. Prevents loading empty filter options
     if option is not None:
-        return generate_filter_input(option)
+        option_type = SQL().get_column_datatypes(column=option, singular=True)
+        return generate_filter_input(option_type)
 
 
-# Get Filter Specification Input
+# Get Filter Specification Input and Return DataFrame as Json
 @app.callback(
     Output('test-vessel-filter-1-input-dump', 'children'),
     [Input('test-vessel-filter-specification-submit', 'n_clicks')],
     [State('test-vessel-dropdown', 'value'),
      State('test-vessel-filter-option', 'value'),
      State('test-vessel-filter-specification-input', 'value')])
-def get_result(dump, vessel, option, input):
-    print(dfs[vessel].get_columns())
+def get_specification(dump, vessel, option, input_value):
+    # TODO: Account for multiple specifications
+    # Prepare data for specification
+    option_type = SQL().get_column_datatypes(column=option, singular=True)
+    if option_type == 'varchar':
+        comparison = "=="
 
-    # Return DF after filter
-    return
+    # Assemble specifications
+    conditions = [
+        (option, comparison, input_value)
+    ]
+
+    df = dfs[vessel].get_filtered(conditions=conditions)
+    return df.to_json()
 
 
-
+# Double Input Component TODO: Integrate with dynamic specification input
 @app.callback(
     Output('test-vessel-filter-2-input-dump', 'children'),
     [Input('test-vessel-filter-specification-submit2', 'n_clicks')],
@@ -138,8 +149,29 @@ def get_result(dump, vessel, option, input):
      State('test-vessel-filter-option', 'value'),
      State('test-vessel-filter-specification-input1', 'value'),
      State('test-vessel-filter-specification-input2', 'value')])
-def get_result(dump, vessel, option, input1, input2):
+def get_specification2(dump, vessel, option, input1, input2):
     print("HELLO")
-    
+
     # Return DF after filter
     return
+
+
+# Generate and Populate Table
+@app.callback(
+    Output('test-vessel-table-container', 'children'),
+    [Input('test-vessel-filter-1-input-dump', 'children')])
+def get_table(df_json):
+    if df_json is not None:
+        df = pd.read_json(df_json)
+        return generate_table(df)
+
+
+# Generate Graph with Axis Selection
+@app.callback(
+    Output('test-vessel-graph-container', 'children'),
+    [Input('test-vessel-filter-1-input-dump', 'children')])
+def get_table(df_json):
+    if df_json is not None:
+        df = pd.read_json(df_json)
+
+        return None

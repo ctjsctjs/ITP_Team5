@@ -52,9 +52,25 @@ class DataFrame:
         return len(self.__dataFrame)
 
     """
+    Methode to get filtered data
+    """
+    def get_filtered(self, conditions=[]):
+        data_frame = self.__dataFrame
+
+        con = ''
+        for condition in conditions:
+            if condition is not conditions[0]:
+                con += " | "
+            con += ('(data_frame["%s"] %s "%s")' % condition)
+
+        exec('data_frame = (data_frame.loc[%s])' % con)
+
+        return data_frame
+
+    """
     Method to get data for a 2D Graph
     """
-    def get_2D_data(self, x_axis, y_axis):
+    def get_2D_data(self, x_axis, y_axis, conditions=None, clean=False):
         # If X-axis is not a column in DataFrame
         if not self.__does_column_exist(x_axis):
             print("Unknown column:'" + x_axis + "' does not exist")
@@ -64,11 +80,17 @@ class DataFrame:
             print("Unknown column:'" + y_axis + "' does not exist")
             return
 
+        # Filter Data is condition given
+        if conditions is not None:
+            data_frame = self.get_filtered(conditions)
+        else:
+            data_frame = self.__dataFrame
         # Get data based on given axis
-        data_frame = self.__dataFrame[[x_axis, y_axis]]
+        data_frame = data_frame[[x_axis, y_axis]]
 
         # Clean DataFrame
-        data_frame = self.__clean_data(data_frame)
+        if clean:
+            data_frame = self.__clean_data(data_frame)
 
         return data_frame
 

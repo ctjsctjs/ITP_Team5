@@ -21,6 +21,12 @@ layout = \
 
         # Vessal Data Dropdown Test
         html.Div([
+            # Graph
+            html.Div(id='test-vessel-graph-container'),
+
+            # Table View of Data
+            html.Div(id='test-vessel-table-container'),
+
             # User Vessel Choice
             dcc.Dropdown(
                 id='test-vessel-dropdown',
@@ -33,20 +39,20 @@ layout = \
             html.Div(id='test-vessel-filter')
         ]),
 
-        # Dropdown Test
-        html.Div([
-            dcc.Dropdown(
-                id='test-dropdown',
-                placeholder='HELLO',
-                className='',
-                clearable='True',
-                options=[
-                    {'label': 'Option', 'value': 'option'},
-                    {'label': 'Value', 'value': 'value'},
-                    {'label': 'DateTime', 'value': 'datetime'}]
-            ),
-            html.Div(id='test-dropdown-output', className='')
-        ], className=''),
+        # # Dropdown Test
+        # html.Div([
+        #     dcc.Dropdown(
+        #         id='test-dropdown',
+        #         placeholder='HELLO',
+        #         className='',
+        #         clearable='True',
+        #         options=[
+        #             {'label': 'Option', 'value': 'option'},
+        #             {'label': 'Value', 'value': 'value'},
+        #             {'label': 'DateTime', 'value': 'datetime'}]
+        #     ),
+        #     html.Div(id='test-dropdown-output', className='')
+        # ], className=''),
 
         # Hidden Elements
         html.Div(id='test-dump1', style={'display': 'none'}),
@@ -149,6 +155,12 @@ def generate_vessel_filter(options):
             clearable='True',
             options=options
         ),
+
+        # Data Graph and Table. Loads after specification given
+        html.Div(id='test-vessel-data-display', className=''),
+
+        # Filter Option Specifications
+        html.Div(id='test-vessel-filter-specification', className=''),
 
         # Filter Option Specifications
         html.Div(id='test-vessel-filter-specification', className=''),

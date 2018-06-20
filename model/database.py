@@ -59,24 +59,33 @@ class SQL:
         return column_names
 
     # Method to obtain the datatype and size of each column in a table
-    def get_column_datatypes(self, table=None, distinct=False):
-        # TODO: # TODO: Better 'default table' handling
+    def get_column_datatypes(self, table=None, distinct=False, column=None, singular=False):
+        # TODO: Invalid argument handling
+        # TODO: Better 'default table' handling
         if table is None:
             table = self.__default_table
 
-        # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
-        condition = "table_name = '" + table + "'"
-        result = self.select(columns="DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
+        if singular and column is not None:
+            # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
+            condition = ("table_name = '%s' AND column_name = '%s'" % (table, column))
+            result = self.select(columns="DATA_TYPE", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
 
-        # Clean Data before returning
-        column_datatypes = []
-        for col_name, col_type in result:
-            column_datatypes.append([col_name, col_type])
+            # Clean and Return Data
+            return result[0][0]
+        else:
+            # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
+            condition = ("table_name = '%s'" % table)
+            result = self.select(columns="DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
 
-        # Return Data
-        if distinct:
-            return [list(x) for x in set(tuple(x) for x in column_datatypes)]
-        return column_datatypes
+            # Clean Data before returning
+            column_datatypes = []
+            for col_name, col_type in result:
+                column_datatypes.append([col_name, col_type])
+
+            # Return Data
+            if distinct:
+                return [list(x) for x in set(tuple(x) for x in column_datatypes)]
+            return column_datatypes
 
     # Method to obtain distinct vessel codes/names TODO: Too reliant on hardcode. Possible redesign required
     def get_vessels(self, table=None, column=None):
@@ -188,12 +197,12 @@ class SQL:
             valid_rows = len(columns)
 
             for j in range(len(columns) - 1, -1, -1):
-                if not pandas.isnull(row[j]):
+                if not pd.isnull(row[j]):
                     break
                 valid_rows -= 1
 
             for j in range(valid_rows):
-                if not pandas.isnull(row[j]):
+                if not pd.isnull(row[j]):
                     col += "`" + columns[j] + "`"
                     val += '"' + unicode(row[j]).replace('"', '\\"') + '"'
 
@@ -227,7 +236,7 @@ class SQL:
         for i in range(len(columns)):
             line = "`" + columns[i] + "`"
 
-            # Check data type of column and add accordingly
+            # Check data type of column and add accordingly TODO: Reconsider hardcoded data sizes
             if datatype[i] == 'datetime64[ns]':
                 line += " DATETIME"
             elif datatype[i] == 'object':
