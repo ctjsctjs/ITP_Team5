@@ -23,7 +23,8 @@ app.layout = html.Div([
         html.Div([
 
             dcc.Location(id='url', refresh=False),
-            html.Div(id='page-content')
+            html.Div(id='page-content'),
+            html.Div(id='data-content')
 
         ]),
 ])

@@ -101,6 +101,10 @@ background-color: #33bbb0;
 height:60px;
 }
 
+.hidden{
+  display:none;
+}
+
 .nav-ul{
 }
 
