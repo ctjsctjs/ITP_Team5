@@ -31,7 +31,7 @@ html.Div([
     html.Div([
     dcc.Dropdown(
         id='app-graph-dropdown-filter',
-        className='item-dropdown item-element-margin',
+        className='item-element-margin',
         placeholder="Filter",
         options=[
             {'label': i, 'value': i} for i in [
@@ -41,14 +41,14 @@ html.Div([
     html.Div([], id="filter-field"),
     dcc.Dropdown(
             id='app-graph-dropdown-mode',
-            className='item-dropdown item-element-margin',
+            className='item-element-margin',
             placeholder="Mode",
             value="2D",
             options=[
                 {'label': i, 'value': i} for i in [
                     '2D', '3D'
                     ]
-                ]),
+            ]),
     ], className='item-row item-element-margin item-select-height'),
 
     #item-row, parameters
@@ -83,24 +83,24 @@ def display_value(value):
         html.Div([
         dcc.Dropdown(
             id='app-graph-dropdown-filter-2',
-            className='item-dropdown item-element-margin',
+            className='item-element-margin',
             placeholder="Filter",
             options=[
                 {'label': i, 'value': i} for i in [
                     'Series', 'Name', 'Date'
                 ]
-        ]),
+        ], class="item-dropdown"),
         html.Div([], id="filter-field-2"),
         dcc.Dropdown(
                 id='app-graph-dropdown-mode',
-                className='item-dropdown item-element-margin',
+                className=' item-element-margin',
                 placeholder="Mode",
                 value="2D",
                 options=[
                     {'label': i, 'value': i} for i in [
                         '2D', '3D'
                         ]
-                    ]),
+                    ], class="item-dropdown"),
         ], className='item-row item-element-margin item-select-height'),
 
         #item-row, parameters
@@ -120,28 +120,28 @@ def display_value(value):
         return html.Div([
         dcc.Dropdown(
             id='app-graph-dropdown',
-            className='item-dropdown item-element-margin',
+            className='item-element-margin',
             placeholder="Parameter X",
             options=[
                 {'label': i, 'value': i} for i in [
                     'Speed', 'Power', 'Draft', 'RPM'
                     ]
-        ]),
+        ], class="item-dropdown"),
         dcc.Dropdown(
             id='app-graph-dropdown',
-            className='item-dropdown item-element-margin',
+            className='item-element-margin',
             placeholder="Parameter Y",
             options=[
                 {'label': i, 'value': i} for i in [
                     'Speed', 'Power', 'Draft', 'RPM'
                     ]
-    ])
+        ], class="item-dropdown"),
     ])
     else:
         return html.Div([
         dcc.Dropdown(
             id='app-graph-dropdown',
-            className='item-dropdown item-element-margin',
+            className='item-element-margin',
             placeholder="Parameter X",
             options=[
                 {'label': i, 'value': i} for i in [
@@ -150,7 +150,7 @@ def display_value(value):
         ]),
         dcc.Dropdown(
             id='app-graph-dropdown',
-            className='item-dropdown item-element-margin',
+            className='item-element-margin',
             placeholder="Parameter Y",
             options=[
                 {'label': i, 'value': i} for i in [
@@ -159,7 +159,7 @@ def display_value(value):
             ]),
         dcc.Dropdown(
             id='app-graph-dropdown',
-            className='item-dropdown item-element-margin',
+            className=' item-element-margin',
             placeholder="Parameter Z",
             options=[
                 {'label': i, 'value': i} for i in [
@@ -177,7 +177,7 @@ def display_value(value):
         return html.Div([
         dcc.Dropdown(
                 id='app-graph-dropdown',
-                className='item-dropdown item-element-margin',
+                className='item-element-margin',
                 placeholder="Name",
                 options=[
                     {'label': i, 'value': i} for i in [
