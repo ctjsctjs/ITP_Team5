@@ -4,6 +4,7 @@ import datetime
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from datetime import datetime as dt
 
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -43,7 +44,7 @@ html.Div([
             html.Div([
             html.H5('Filters', className='item-element-margin'),
             dcc.Dropdown(
-                id='app-graph-dropdown-filter',
+                id='add-filter-input',
                 className='item-dropdown item-element-margin',
                 placeholder="Filter",
                 options=[
@@ -56,13 +57,13 @@ html.Div([
         #item-row, settings
             html.Div([
                 html.H5('Filter', className='item-element-margin')
-            ], id="filter-field"),
+            ], id="viewGraph-filter-field"),
 
             #items added
             html.Div([], id="filter-list"),
 
             #item-button, add graph
-            html.Button('Add filter', className='button item-element-margin', id="add-filter")
+            html.Button('Add filter', className='button item-element-margin', id="add-filter-input")
             ], className='item-wrapper', id="item-wrapper"),
         ])
     ], className='content-wrapper page-width')
@@ -75,13 +76,13 @@ html.Div([
 @app.callback(
     Output('filter-list', 'children'),
     [],
-    [],
+    [State('filter-input1', 'value')],
     [Event('add-filter', 'click')]
     )
-def display_value():
-    newFilter = {"label": "Filter " + str(len(filterList)), "value": str('input')}
+def display_value(input1, input2):
+    newFilter = {"label": "Filter " + str(len(filterList)),"value": str(input1)}
     filterList.append(newFilter)
-    #print "New Graph settings: " + str(graphSettings) + "\n"
+    print "New Graph settings: " + str(filterList) + "\n"
 
     return html.Div([
         html.H5('Filter List', className='item-element-margin'),
@@ -91,3 +92,36 @@ def display_value():
         labelStyle={'display': 'block'}
     )
 ], className='item-row item-element-margin item-select-height ', id="item-wrapper-2")
+
+
+@app.callback(
+    Output('viewGraph-filter-field', 'children'),
+    [Input('add-filter-input', 'value')])
+def display_value(value):
+    if (value=="Series" or value=="Name"):
+        return html.Div([
+        html.H5('Filters', className='item-element-margin'),
+        dcc.Dropdown(
+                id='filter-input1',
+                className='item-dropdown item-element-margin',
+                placeholder="Name",
+                options=[
+                    {'label': i, 'value': i} for i in [
+                        'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
+                    ]
+                ])
+            ], className='item-row item-element-margin item-select-height item-border-bottom' )
+    elif (value=="Date"):
+            return html.Div([
+            html.H5('Filters', className='item-element-margin'),
+            dcc.DatePickerSingle(
+                clearable=True,
+                with_portal=True,
+                date=dt.now()
+                ),
+            dcc.DatePickerSingle(
+                clearable=True,
+                with_portal=True,
+                date=dt.now()
+                )
+        ], className='item-row item-element-margin item-select-height item-border-bottom' )

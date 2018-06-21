@@ -6,6 +6,7 @@ from datetime import datetime as dt
 from app import app
 
 graphSettings = []
+sliderList=[]
 
 layout = html.Div([
 #Header
@@ -13,8 +14,14 @@ html.Div([
    html.H1('Generate Graph', className='header-title'),
 
    #item-button, generate graph
-   dcc.Link('Generate Graph', href='/apps/viewGraph', className='button item-element-margin header-button')
+   dcc.Link('Generate Graph', href='/apps/viewGraph', className='button item-element-margin header-button'),
+   html.Button('Add a slider', id='button', n_clicks=0),
+    html.Div(id='slider-container'),
 
+    # this is a hack: include a hidden dcc component so that
+    # dash registers and serve's this component's JS and CSS
+    # libraries
+    dcc.Input(style={'display': 'none'})
    ], className='wrapper-white header-wrapper page-width'),
 
 #body-wrapper
@@ -196,3 +203,35 @@ def display_value(value):
                 date=dt.now()
                 )
         ], className='item-row item-element-margin item-select-height item-border-bottom' )
+
+
+###SLIDER TEST TO GENERATE INFINITE COMPONENTS
+@app.callback(
+    Output('slider-container', 'children'),
+    [Input('button', 'n_clicks')])
+def add_sliders(n_clicks):
+    #sliderList.append("1")
+    #print "LENGTH" + str(sliderList)
+    return \
+        html.Div([
+            html.Div([
+                html.Div(dcc.Slider(id='slider-{}'.format(i))),
+                dcc.Input(
+                    id='input-{}'.format(i),
+                    placeholder='Graph Name',
+                    type='text',
+                    value=''
+                ),
+                html.Div(id='output-{}'.format(i), style={'marginTop': 30})
+            ]) for i in range(n_clicks)]
+        )
+
+
+# up to 10 sliders
+for i in range(10):
+    @app.callback(
+        Output('slider-{}'.format(i), 'children'),
+        [Input('slider-{}'.format(i), 'value'),
+        Input('input-{}'.format(i), 'value')])
+    def update_output(slider_i_value, input_i_value):
+        return str(slider_i_value) + str(input_i_value)
