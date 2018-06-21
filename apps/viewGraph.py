@@ -68,28 +68,10 @@ html.Div([
     dcc.Dropdown(
         id='app-graph-dropdown',
         className='panel-item-dropdown item-element-margin',
-        placeholder="Series",
-        options=[
-            {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
-            ]
-    ]),
-    dcc.Dropdown(
-    id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-    placeholder="Name",
-    options=[
-        {'label': i, 'value': i} for i in [
-            'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
-        ]
-    ]),
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
         placeholder="Mode",
         options=[
             {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
+                '2D', '3D'
             ]
     ]),
     dcc.Dropdown(
@@ -98,7 +80,7 @@ html.Div([
         placeholder="Parameter X",
         options=[
             {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
+                'Speed', 'Power', 'Draft', 'RPM'
             ]
     ]),
     dcc.Dropdown(
@@ -107,9 +89,29 @@ html.Div([
         placeholder="Parameter Y",
         options=[
             {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
+                'Speed', 'Power', 'Draft', 'RPM'
             ]
-        ])
+        ]),
+    dcc.Dropdown(
+            id='app-graph-dropdown',
+            className='panel-item-dropdown item-element-margin',
+            placeholder="Filter",
+            options=[
+                {'label': i, 'value': i} for i in [
+                    'Series', 'Name', 'Date'
+                ]
+        ]),
+    dcc.Dropdown(
+            id='app-graph-dropdown',
+            className='panel-item-dropdown item-element-margin',
+            placeholder="Name",
+            options=[
+                {'label': i, 'value': i} for i in [
+                    'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
+                ]
+            ]),
+    html.Button('Add Filter', className='button item-element-margin', id="add-button", n_clicks=0)
+
 ], className='item-wrapper'),
 ], className='panel-left'),
 

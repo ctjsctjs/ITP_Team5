@@ -1,11 +1,9 @@
-from dash.dependencies import Input, Output, State, Event
+from dash.dependencies import Input, Output
 import dash_html_components as html
 import dash_core_components as dcc
 from datetime import datetime as dt
 
 from app import app
-
-graphSettings = []
 
 layout = html.Div([
 #Header
@@ -27,18 +25,10 @@ html.Div([
     html.Div([
 
     #item-header
-    html.Div([
-        html.H5('Graph name', className='item-element-margin'),
-        dcc.Input(
-            placeholder='Graph Name',
-            type='text',
-            value=''
-        )
-    ], className='item-row item-element-margin item-select-height item-border-bottom'),
+    html.H2('Graph 1', className='item-element-margin'),
 
     #item-row, settings
     html.Div([
-    html.H5('Settings', className='item-element-margin'),
     dcc.Dropdown(
         id='app-graph-dropdown-filter',
         className='item-dropdown item-element-margin',
@@ -48,7 +38,7 @@ html.Div([
                 'Series', 'Name', 'Date'
             ]
     ]),
-
+    html.Div([], id="filter-field"),
     dcc.Dropdown(
             id='app-graph-dropdown-mode',
             className='item-dropdown item-element-margin',
@@ -59,21 +49,16 @@ html.Div([
                     '2D', '3D'
                     ]
                 ]),
-    ], className='item-row item-element-margin item-select-height item-border-bottom'),
-
-#item-row, settings
-    html.Div([
-        html.H5('Filter', className='item-element-margin')
-    ], id="filter-field"),
+    ], className='item-row item-element-margin item-select-height'),
 
     #item-row, parameters
     html.Div([
+
     ], className='item-row item-element-margin item-select-height', id="field-params"),
 
     #html.Div(id='app-graph-display-value' ),
     ], className='item-wrapper', id="item-wrapper"),
 
-    #items added
     html.Div([], id="add-item-wrapper"),
 
     #item-button, add graph
@@ -83,27 +68,48 @@ html.Div([
     ], className='wrapper-grey')
 ])
 
-#callback for add button
+
 @app.callback(
     Output('add-item-wrapper', 'children'),
-    [],
-    [State('app-graph-dropdown-filter', 'value'),
-    State('app-graph-dropdown-mode', 'value')],
-    [Event('add-button', 'click')]
-    )
-def display_value(input1,input2):
-    newGraph = {"label": "Graph " + str(len(graphSettings)), "value": str(input1) + "," + str(input2)}
-    graphSettings.append(newGraph)
-    print "New Graph settings: " + str(graphSettings) + "\n"
+    [Input('add-button', 'n_clicks')])
+def display_value(value):
+    if (value>0):
+        return html.Div([
 
-    return html.Div([
-        html.H5('Graph List', className='item-element-margin'),
-        dcc.Checklist(
-        options=graphSettings,
-        values= [i for i in [graphSettings]],
-        labelStyle={'display': 'block'}
-    )
-], className='item-wrapper item-select-height', id="item-wrapper-2")
+        #item-header
+        html.H2('Graph 2', className='item-element-margin'),
+
+        #item-row, settings
+        html.Div([
+        dcc.Dropdown(
+            id='app-graph-dropdown-filter-2',
+            className='item-dropdown item-element-margin',
+            placeholder="Filter",
+            options=[
+                {'label': i, 'value': i} for i in [
+                    'Series', 'Name', 'Date'
+                ]
+        ]),
+        html.Div([], id="filter-field-2"),
+        dcc.Dropdown(
+                id='app-graph-dropdown-mode',
+                className='item-dropdown item-element-margin',
+                placeholder="Mode",
+                value="2D",
+                options=[
+                    {'label': i, 'value': i} for i in [
+                        '2D', '3D'
+                        ]
+                    ]),
+        ], className='item-row item-element-margin item-select-height'),
+
+        #item-row, parameters
+        html.Div([
+
+        ], className='item-row item-element-margin item-select-height', id="field-params-2"),
+
+        #html.Div(id='app-graph-display-value' ),
+        ], className='item-wrapper', id="item-wrapper-2")
 
 
 @app.callback(
@@ -112,7 +118,6 @@ def display_value(input1,input2):
 def display_value(value):
     if (value=="2D"):
         return html.Div([
-        html.H5('Parameters', className='item-element-margin'),
         dcc.Dropdown(
             id='app-graph-dropdown',
             className='item-dropdown item-element-margin',
@@ -134,7 +139,6 @@ def display_value(value):
     ])
     else:
         return html.Div([
-        html.H5('Parameters', className='item-element-margin'),
         dcc.Dropdown(
             id='app-graph-dropdown',
             className='item-dropdown item-element-margin',
@@ -171,7 +175,6 @@ def display_value(value):
 def display_value(value):
     if (value=="Series" or value=="Name"):
         return html.Div([
-        html.H5('Filters', className='item-element-margin'),
         dcc.Dropdown(
                 id='app-graph-dropdown',
                 className='item-dropdown item-element-margin',
@@ -181,10 +184,9 @@ def display_value(value):
                         'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
                     ]
                 ])
-            ], className='item-row item-element-margin item-select-height item-border-bottom' )
+            ])
     elif (value=="Date"):
             return html.Div([
-            html.H5('Filters', className='item-element-margin'),
             dcc.DatePickerSingle(
                 clearable=True,
                 with_portal=True,
@@ -195,4 +197,4 @@ def display_value(value):
                 with_portal=True,
                 date=dt.now()
                 )
-        ], className='item-row item-element-margin item-select-height item-border-bottom' )
+        ])
