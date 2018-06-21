@@ -1,4 +1,4 @@
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State, Event
 import pandas_datareader.data as web
 import datetime
 import dash
@@ -10,33 +10,7 @@ import plotly.graph_objs as go
 import pandas as pd
 from app import app
 
-# Read data from a csv and setup 3D graph data
-z_data = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/api_docs/mt_bruno_elevation.csv')
-data = [
-go.Surface(
-z=z_data.as_matrix()
-)
-]
-layout = go.Layout(
-title='Graph 1',
-autosize=False,
-width=500,
-height=500,
-margin=dict(
-l=65,
-r=50,
-b=65,
-t=90
-)
-)
-
-stock = 'TSLA'
-start = datetime.datetime(2015, 1, 1)
-end = datetime.datetime(2018, 2, 8)
-df = web.DataReader(stock, 'morningstar', start, end)
-df.reset_index(inplace=True)
-df.set_index("Date", inplace=True)
-df = df.drop("Symbol", axis=1)
+filterList = []
 
 layout = html.Div([
 
@@ -56,97 +30,64 @@ html.Div([
 
     #body-Content
     html.Div([
+        html.Details([
+        #item-wrapper
+            html.Div([
 
-#item-row
-html.Div([
+            #item-header
+            html.Div([
+                html.H2('Graph name', className='item-element-margin'),
+            ], className='item-row item-element-margin item-select-height item-border-bottom'),
 
-#panel-left
-html.Div([
-html.Div([
-    html.H2('Graph 1', className='item-element-margin'),
+            #item-row, settings
+            html.Div([
+            html.H5('Filters', className='item-element-margin'),
+            dcc.Dropdown(
+                id='app-graph-dropdown-filter',
+                className='item-dropdown item-element-margin',
+                placeholder="Filter",
+                options=[
+                    {'label': i, 'value': i} for i in [
+                        'Series', 'Name', 'Date'
+                    ]
+            ])
+            ], className='item-row item-element-margin item-select-height item-border-bottom'),
 
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-        placeholder="Mode",
-        options=[
-            {'label': i, 'value': i} for i in [
-                '2D', '3D'
-            ]
-    ]),
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-        placeholder="Parameter X",
-        options=[
-            {'label': i, 'value': i} for i in [
-                'Speed', 'Power', 'Draft', 'RPM'
-            ]
-    ]),
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-        placeholder="Parameter Y",
-        options=[
-            {'label': i, 'value': i} for i in [
-                'Speed', 'Power', 'Draft', 'RPM'
-            ]
-        ]),
-    dcc.Dropdown(
-            id='app-graph-dropdown',
-            className='panel-item-dropdown item-element-margin',
-            placeholder="Filter",
-            options=[
-                {'label': i, 'value': i} for i in [
-                    'Series', 'Name', 'Date'
-                ]
-        ]),
-    dcc.Dropdown(
-            id='app-graph-dropdown',
-            className='panel-item-dropdown item-element-margin',
-            placeholder="Name",
-            options=[
-                {'label': i, 'value': i} for i in [
-                    'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
-                ]
-            ]),
-    html.Button('Add Filter', className='button item-element-margin', id="add-button", n_clicks=0)
+        #item-row, settings
+            html.Div([
+                html.H5('Filter', className='item-element-margin')
+            ], id="filter-field"),
 
-], className='item-wrapper'),
-], className='panel-left'),
+            #items added
+            html.Div([], id="filter-list"),
 
-    #panel-right
-    html.Div([
-        html.Div([
-            html.Div(id='app-graph-display-value'),
-                html.Div([
-                html.Div([
-                        html.H3('Column 3'),
-                        dcc.Graph(id='g2', figure={'data': [{'y': [1, 2, 3]}],
-                                                   'layout': go.Layout(
-                                                    xaxis={
-                                                        'title': "Engine Power",
-                                                        'type': 'linear'
-                                                    },
-                                                    yaxis={
-                                                        'title': "Engine Speed",
-                                                        'type': 'linear'
-                                                    },
-                                                    margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-                                                    hovermode='closest'
-                                                )})
-                    ], className="eight columns")
-            ], className="row"),
-        ], className='item-wrapper'),
-        ], className='panel-right'),
-        ], className='item-row item-element-margin overflow-auto'),
-        ], className='content-wrapper page-width')],
-    className='wrapper-grey')
+            #item-button, add graph
+            html.Button('Add filter', className='button item-element-margin', id="add-filter")
+            ], className='item-wrapper', id="item-wrapper"),
+        ])
+    ], className='content-wrapper page-width')
+    ], className='wrapper-grey')
 ])
 
 
+
+#callback for add button
 @app.callback(
-Output('app-2-display-value', 'children'),
-[Input('app-2-dropdown', 'value')])
-def display_value(value):
-    return 'You have selected "{}"'.format(value)
+    Output('filter-list', 'children'),
+    [],
+    [],
+    [Event('add-filter', 'click')]
+    )
+def display_value():
+    newFilter = {"label": "Filter " + str(len(filterList)), "value": str('input')}
+    filterList.append(newFilter)
+    #print "New Graph settings: " + str(graphSettings) + "\n"
+
+    return html.Div([
+        html.H5('Filter List', className='item-element-margin'),
+        dcc.Checklist(
+        options=filterList,
+        values= [i for i in [filterList]],
+        labelStyle={'display': 'block'}
+    )
+], className='item-row item-element-margin item-select-height ', id="item-wrapper-2")
