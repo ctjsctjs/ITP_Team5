@@ -7,3 +7,4 @@ host = 'localhost'
 user = 'root'
 password = ''
 db = 'database'
+port = 3307

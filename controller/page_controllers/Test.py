@@ -2,13 +2,14 @@ from dash.dependencies import Input, Output, State
 import dash_html_components as html
 import pandas as pd
 from datetime import datetime as dt
-
+import controller.graph_components.fitting_master as fm
 from view.pages.test import layout, value_input, option_input, date_input, generate_vessel_filter, \
     generate_filter_input, generate_graph
 from view.templates.table import generate_table
 from model.database import SQL
 from model.dataframe import DataFrame
 from app import app
+import unicodedata
 
 
 # Sample Table Function
@@ -88,6 +89,7 @@ dfs = {}
     Output('test-vessel-dropdown', 'options'),
     [Input('test-start', 'children')])
 def load_vessel_choice(dump):
+    print("Populate vessel choice dropdown")
     return [{'label': i, 'value': i} for i in SQL().get_vessels()]
 
 
@@ -101,11 +103,9 @@ def load_filter_choice(vessel):
         # Load Vessel Data
         if vessel not in dfs:
             dfs[vessel] = SQL().get_vessel(vessel=vessel)
-
         # Populate Options
         options = [{'label': i[0], 'value': i[0]} for i in SQL().get_filter_options()]
         return generate_vessel_filter(options=options)
-
 
 # Generate Filter Specification
 @app.callback(
@@ -115,6 +115,7 @@ def load_filter_specification(option):
     # If nothing selected. Prevents loading empty filter options
     if option is not None:
         option_type = SQL().get_column_datatypes(column=option, singular=True)
+        print("OPTION TYPE: " + option_type)
         return generate_filter_input(option_type)
 
 
@@ -128,13 +129,13 @@ def load_filter_specification(option):
 def get_specification(dump, vessel, option, input_value):
     # TODO: Account for multiple specifications
     # Prepare data for specification
+    print("WHAT ARE WE DOING HERE")
     option_type = SQL().get_column_datatypes(column=option, singular=True)
     if option_type == 'varchar':
         comparison = "=="
-
     # Assemble specifications
     conditions = [
-        (option, comparison, input_value)
+        (option, comparison, str(input_value))
     ]
 
     df = dfs[vessel].get_filtered(conditions=conditions)
@@ -150,10 +151,20 @@ def get_specification(dump, vessel, option, input_value):
      State('test-vessel-filter-specification-input1', 'value'),
      State('test-vessel-filter-specification-input2', 'value')])
 def get_specification2(dump, vessel, option, input1, input2):
-    print("HELLO")
-
+    print("JUST TO SUFFER?")
+    print(dump, vessel, option, input1, input2)
     # Return DF after filter
-    return
+    # Test above code ** 1 FIELD TEST !@!@!@
+    comparison = ">="
+    # Assemble specifications
+    option = unicodedata.normalize('NFKD', option).encode('ascii','ignore')
+    print(type(option), type(comparison), type(input1))
+    conditions = [
+        (option, comparison, input1)
+    ]
+
+    df = dfs[vessel].get_filtered(conditions=conditions)
+    return df.to_json()
 
 
 # Generate and Populate Table
@@ -165,7 +176,6 @@ def get_table(df_json):
         df = pd.read_json(df_json)
         return generate_table(df)
 
-
 # Generate Graph with Axis Selection
 @app.callback(
     Output('test-vessel-graph-container', 'children'),
@@ -176,20 +186,45 @@ def get_table(df_json):
         print("get table")
         return generate_graph()
 
+# Generate Graph with Axis Selection 2
+@app.callback(
+    Output('test-vessel-graph-container2', 'children'),
+    [Input('test-vessel-filter-2-input-dump', 'children')])
+def get_table(df_json):
+    if df_json is not None:
+        df = pd.read_json(df_json)
+        print("get table")
+        return generate_graph()
+
+# Populate Graph
+# @app.callback(
+#     Output('test-vessel-graph', 'figure'),
+#     [Input('test-vessel-graph-button', 'n_clicks')])
+# def load_graph(dump):
+#     graph_data = {
+#         'data': [
+#             {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
+#             {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': 'Hello'},
+#         ],
+#         'layout': {
+#             'title': 'Dash Data Visualization'
+#         }
+#     }
+#     return graph_data
 
 # Populate Graph
 @app.callback(
     Output('test-vessel-graph', 'figure'),
-    [Input('test-vessel-graph-button', 'n_clicks')])
-def load_graph(dump):
-    graph_data = {
-        'data': [
-            {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-            {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': 'Hello'},
-        ],
-        'layout': {
-            'title': 'Dash Data Visualization'
-        }
-    }
-
-    return graph_data
+    [Input('test-vessel-graph-button', 'n_clicks')],
+    [State('test-vessel-filter-option', 'value'),
+     State('test-vessel-filter-2-input-dump', 'children')])
+def load_graph(clicks, filter, df_json):
+    print("Mirage")
+    if df_json is not None:
+        df = pd.read_json(df_json)
+        # TEMPORARY hardcoded
+        yaxisLabel = "Speed Made Good (Kts)"
+        # print(list(df.columns.values))
+        # print(df.loc[:, "Speed Made Good (Kts)"])
+        return fm.generateSingleGraphTest(graphMode=2, xAxis=filter, xData=df.loc[:, filter].values.tolist(), yAxis=yaxisLabel, yData=df.loc[:, yaxisLabel].values.tolist());
+    return None

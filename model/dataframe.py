@@ -1,7 +1,6 @@
 from enum import Enum
 import pandas as pd
 
-
 class FileType(Enum):
     VLOG = 0
     VOMSII = 1
@@ -61,8 +60,9 @@ class DataFrame:
         for condition in conditions:
             if condition is not conditions[0]:
                 con += " | "
-            con += ('(data_frame["%s"] %s "%s")' % condition)
-
+            con += ('(data_frame["%s"] %s %d)' % condition)
+        print(type(con))
+        print(con)
         exec('data_frame = (data_frame.loc[%s])' % con)
 
         return data_frame

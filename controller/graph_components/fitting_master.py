@@ -34,52 +34,51 @@ from operator import mul
 
 # K Means
 from sklearn.cluster import KMeans
-
-
 # Possible extention to allow user to choose graph degree for each data set???
-def generateGraphTest(graphMode=1, xData=[], xData2=[], yData=[], yData2=[], zData=[], zData2=[], kmeansOn=False):
+def generateGraphTest(graphMode=1, xData=[], xData2=[], yData=[], yData2=[], zData=[], zData2=[], kmeansOn=False, viewMarkers=False):
     # Test Comparison
-    ##    wb = load_workbook(filename='C:\\Users\\Sean\\Downloads\\DSME 10700_2018_Combined_A.xlsx', data_only=True)
-    ##    ws = wb['Before DD']
-    ##    ws2 = wb['After DD']
-    ##
-    ##    beforeSpeed = []
-    ##    beforeME = []
-    ##    count = 0
-    ##    for row in ws.rows:
-    ##        count += 1
-    ##        ##    if count == 12:
-    ##        ##        break
-    ##        if count <= 1:
-    ##            continue
-    ##        ##    if row[0].value == 'APL BARCELONA':
-    ##        if (row[9].value is not None) and (row[20].value is not None):
-    ##            beforeSpeed.append(float(row[9].value))
-    ##            beforeME.append(float(row[20].value))
-    ##        else:
-    ##            pass
-    ##
-    ##    x = beforeSpeed
-    ##    y = beforeME
-    ##
-    ##    afterSpeed = []
-    ##    afterME = []
-    ##    count = 0
-    ##    for row in ws2.rows:
-    ##        count += 1
-    ##        ##    if count == 12:
-    ##        ##        break
-    ##        if count <= 1:
-    ##            continue
-    ##        ##    if row[0].value == 'APL BARCELONA':
-    ##        if (row[9].value is not None) and (row[20].value is not None):
-    ##            afterSpeed.append(float(row[9].value))
-    ##            afterME.append(float(row[20].value))
-    ##        else:
-    ##            pass
-    ##
-    ##    x2 = afterSpeed
-    ##    y2 = afterME
+    # wb = load_workbook(filename='C:\\Users\\Sean\\Downloads\\DSME 10700_2018_Combined_A.xlsx', data_only=True)
+    # ws = wb['Before DD']
+    # ws2 = wb['After DD']
+    #
+    # beforeSpeed = []
+    # beforeME = []
+    # count = 0
+    # for row in ws.rows:
+    #     count += 1
+    #    ##    if count == 12:
+    #    ##        break
+    #     if count <= 1:
+    #        continue
+    #    ##    if row[0].value == 'APL BARCELONA':
+    #     if (row[9].value is not None) and (row[20].value is not None):
+    #         beforeSpeed.append(float(row[9].value))
+    #         beforeME.append(float(row[20].value))
+    #     else:
+    #         pass
+    #
+    # x = beforeSpeed
+    # y = beforeME
+    #
+    # afterSpeed = []
+    # afterME = []
+    # count = 0
+    # for row in ws2.rows:
+    #     count += 1
+    #     ##    if count == 12:
+    #     ##        break
+    #     if count <= 1:
+    #         continue
+    #     ##    if row[0].value == 'APL BARCELONA':
+    #     if (row[9].value is not None) and (row[20].value is not None):
+    #         afterSpeed.append(float(row[9].value))
+    #         afterME.append(float(row[20].value))
+    #     else:
+    #         pass
+    #
+    # x2 = afterSpeed
+    # y2 = afterME
+
     x = xData
     y = yData
     x2 = xData2
@@ -87,8 +86,8 @@ def generateGraphTest(graphMode=1, xData=[], xData2=[], yData=[], yData2=[], zDa
 
     if kmeansOn is True:
         print 'K-Means applied to data\n'
-        numClusters = len(x) / 3
-        numClusters2 = len(x2) / 3
+        numClusters = len(x) / 5
+        numClusters2 = len(x2) / 5
         beforeCoords = np.c_[np.array(x), np.array(y)]
         kmeans = KMeans(n_clusters=numClusters, random_state=0).fit(beforeCoords)
         x = [xN for xN, yN in kmeans.cluster_centers_]
@@ -136,37 +135,106 @@ def generateGraphTest(graphMode=1, xData=[], xData2=[], yData=[], yData2=[], zDa
         marker=go.Marker(color='rgb(31, 119, 180)'),
         name='After DD'
     )
+    if viewMarkers:
+        trace3 = go.Scatter(
+            x=x,
+            y=y,
+            mode='markers',
+            marker=go.Marker(color='rgb(31, 119, 180)'),
+            name='After DD'
+        )
 
-    trace3 = go.Scatter(
-        x=x,
-        y=y,
-        mode='markers',
-        marker=go.Marker(color='rgb(31, 119, 180)'),
-        name='After DD'
-    )
-
-    trace4 = go.Scatter(
-        x=x2,
-        y=y2,
-        mode='markers',
-        marker=go.Marker(color='rgb(255, 127, 14)'),
-        name='Before DD '
-    )
+        trace4 = go.Scatter(
+            x=x2,
+            y=y2,
+            mode='markers',
+            marker=go.Marker(color='rgb(255, 127, 14)'),
+            name='Before DD '
+        )
 
     layout = go.Layout(
         title='FO Consumption & Speed Graph',
         plot_bgcolor='rgb(229, 229, 229)',
         xaxis=go.XAxis(title='Avg speed (knts)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-        yaxis=go.YAxis(title='FO cons. / 24 hrs (tons)', zerolinecolor='rgb(255,255,255)',
-                       gridcolor='rgb(255,255,255)'),
+        yaxis=go.YAxis(title='FO cons. / 24 hrs (tons)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
         ##                  annotations=[annotation]
     )
 
-    ##data = [trace1, trace2]
-    data = [trace1, trace2, trace3, trace4]
+    if viewMarkers:
+        data = [trace1, trace2, trace3, trace4]
+    else:
+        data = [trace1, trace2]
+
     fig = go.Figure(data=data, layout=layout)
     return fig
 
+def generateSingleGraphTest(graphMode=1, xAxis="x-axis", xData=[], yAxis="y-axis", yData=[], zData=[], kmeansOn=False, viewMarkers=False):
+    # x = [x for x in xData if str(x) != 'nan']
+    # y = [y for y in yData if str(y) != 'nan']
+    x = []
+    y = []
+    # Workaround for NaN
+    for i in range(len(xData)):
+        if str(xData[i]) == 'nan' or str(yData[i]) == 'nan':
+            continue
+        else:
+            x.append(xData[i])
+            y.append(yData[i])
+
+    print(x)
+    print(y)
+    if kmeansOn is True:
+        print 'K-Means applied to data\n'
+        numClusters = len(x) / 5
+        beforeCoords = np.c_[np.array(x), np.array(y)]
+        kmeans = KMeans(n_clusters=numClusters, random_state=0).fit(beforeCoords)
+        x = [xN for xN, yN in kmeans.cluster_centers_]
+        y = [yN for xN, yN in kmeans.cluster_centers_]
+
+    # Polyfit method master race 1=linear, 2=quadratic, 3=cubic, 4=idk
+    print "Graph Mode is " + str(graphMode)
+    z = np.polyfit(x, y, graphMode)
+    f = np.poly1d(z)
+    print 'After DD Formula'
+    print f
+
+    # calculate new x's and y's
+    x_new = np.linspace(min(x), max(x), max(x))
+    y_new = f(x_new)
+
+    # Creating the dataset, and generating the plot
+    trace2 = go.Scatter(
+        x=x_new,
+        y=y_new,
+        mode='lines',
+        marker=go.Marker(color='rgb(31, 119, 180)'),
+        name='After DD'
+    )
+
+    if viewMarkers:
+        trace3 = go.Scatter(
+            x=x,
+            y=y,
+            mode='markers',
+            marker=go.Marker(color='rgb(31, 119, 180)'),
+            name='After DD'
+        )
+
+    layout = go.Layout(
+        title='FO Consumption & Speed Graph',
+        plot_bgcolor='rgb(229, 229, 229)',
+        xaxis=go.XAxis(title=xAxis, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+        yaxis=go.YAxis(title=yAxis, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+        ##                  annotations=[annotation]
+    )
+
+    if viewMarkers:
+        data = [trace2, trace3]
+    else:
+        data = [trace2]
+
+    fig = go.Figure(data=data, layout=layout)
+    return fig
 
 def calculate_r(xList, yList):
     ##    Defective Cubic R**2
@@ -195,6 +263,7 @@ def calculate_r(xList, yList):
     print "R=" + str(rValue)
     print "R-Squared=" + str(rValue ** 2)
     return rValue
+
 
 # linregress method with R value
 ##slope, intercept, r_value, p_value, std_err = stats.linregress(x2,y2)

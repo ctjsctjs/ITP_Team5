@@ -23,7 +23,7 @@ layout = \
         html.Div([
             # Graph
             html.Div(id='test-vessel-graph-container'),
-
+            html.Div(id='test-vessel-graph-container2'),
             # Table View of Data
             html.Div(id='test-vessel-table-container'),
 
@@ -245,6 +245,8 @@ def generate_filter_input(option_type):
                 id='test-vessel-filter-specification-submit2',
                 className=''
             )
+            # Testing for Graph output, idk if this is how its supposed to be done
+            #generate_graph()
         ]
 
     return filter_input
