@@ -10,7 +10,7 @@ layout = \
         html.Div([
             # body-Content
             # call method with dataframe as input
-            html.Div(id='generate-table')
+            html.Div(id='generate-table',style={'margin-left':'100px'})
         ]),
         # hidden-store
         html.Div(id='table-store', style={'display': 'none'}),
