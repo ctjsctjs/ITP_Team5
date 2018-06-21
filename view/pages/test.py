@@ -248,3 +248,16 @@ def generate_filter_input(option_type):
         ]
 
     return filter_input
+
+
+def generate_graph():
+    return [
+        dcc.Graph(id='test-vessel-graph'),
+
+        # Test button
+        html.Button(
+            'Press',
+            id='test-vessel-graph-button',
+            className=''
+        )
+    ]

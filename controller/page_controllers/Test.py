@@ -4,7 +4,7 @@ import pandas as pd
 from datetime import datetime as dt
 
 from view.pages.test import layout, value_input, option_input, date_input, generate_vessel_filter, \
-    generate_filter_input
+    generate_filter_input, generate_graph
 from view.templates.table import generate_table
 from model.database import SQL
 from model.dataframe import DataFrame
@@ -173,5 +173,23 @@ def get_table(df_json):
 def get_table(df_json):
     if df_json is not None:
         df = pd.read_json(df_json)
+        print("get table")
+        return generate_graph()
 
-        return None
+
+# Populate Graph
+@app.callback(
+    Output('test-vessel-graph', 'figure'),
+    [Input('test-vessel-graph-button', 'n_clicks')])
+def load_graph(dump):
+    graph_data = {
+        'data': [
+            {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
+            {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': 'Hello'},
+        ],
+        'layout': {
+            'title': 'Dash Data Visualization'
+        }
+    }
+
+    return graph_data
