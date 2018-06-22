@@ -61,8 +61,9 @@ class DataFrame:
         for condition in conditions:
             if condition is not conditions[0]:
                 con += " | "
-            con += ('(data_frame["%s"] %s "%s")' % condition)
+            con += ('(data_frame["%s"] %s %s)' % condition)
 
+        print('data_frame = (data_frame.loc[%s])' % con)
         exec('data_frame = (data_frame.loc[%s])' % con)
 
         return data_frame
