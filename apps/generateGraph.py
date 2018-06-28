@@ -60,42 +60,43 @@ def display_value(n_clicks):
                     className="Select-control",
                     id='gen-name-input-{}'.format(i),
                 )
-            ])
-        ], className='item-row item-element-margin item-select-height item-border-bottom item-inline'),
+            ]),
+            dcc.Dropdown(
+                    id='gen-mode-input-{}'.format(i),
+                    placeholder="Mode",
+                    value="2D",
+                    options=[
+                        {'label': k, 'value': k} for k in [
+                            '2D', '3D'
+                            ]
+                        ])
+        ], className='item-row item-select-height item-border-bottom item-inline'),
+
+        #item-row, parameters
+        html.Div([], className='item-border-bottom ', id='gen-param-wrapper-{}'.format(i)),
 
         #item-row, settings
         html.Div([
-        html.H5('Settings', className='item-element-margin'),
+
+        html.Div([
+        html.H5('Filter options', className='item-element-margin'),
         dcc.Dropdown(
             id='gen-filter-input-{}'.format(i),
-            className=' item-element-margin',
             placeholder="Filter",
             options=[
                 {'label': k, 'value': k} for k in [
                     'Series', 'Name', 'Date'
                 ]
         ]),
-
-        dcc.Dropdown(
-                id='gen-mode-input-{}'.format(i),
-                className=' item-element-margin',
-                placeholder="Mode",
-                value="2D",
-                options=[
-                    {'label': k, 'value': k} for k in [
-                        '2D', '3D'
-                        ]
-                    ]),
-        ], className='item-row item-element-margin item-select-height item-border-bottom  item-inline'),
+        ], className='item-row item-select-height item-inline'),
 
         #item-row, settings
         html.Div([
-        ], id='gen-filter-wrapper-{}'.format(i)),
+        ], id='gen-filter-wrapper-{}'.format(i))
+        ], className='item-row item-wrapper-bordered item-filter-section'),
 
-        #item-row, parameters
-        html.Div([], id='gen-param-wrapper-{}'.format(i))
         #html.Div(id='app-graph-display-value' ),
-        ], className='item-wrapper', id="item-wrapper") for i in range(n_clicks)
+        ], className='item-wrapper item-wrapper-bordered', id="item-wrapper") for i in range(n_clicks)
     ])
 
 limit = 10;
@@ -108,33 +109,31 @@ for i in range(limit):
     def update_filer(filter):
         if (filter=="Series"):
             return html.Div([
-                html.H5('Filters', className='item-element-margin'),
+                html.H5('Filter input', className='item-element-margin'),
                 dcc.Dropdown(
                     id='gen-filter-input-value-{}'.format(i),
-                    className=' item-element-margin',
                     placeholder="Series",
                     options=[
                         {'label': k, 'value': k} for k in [
                             'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
                         ]
                     ])
-                ], className='item-row item-element-margin item-select-height item-border-bottom  item-inline' )
+                ], className='item-row item-select-height  item-inline' )
         elif (filter=="Name"):
                 return html.Div([
-                html.H5('Filters', className='item-element-margin'),
+                html.H5('Filter input', className='item-element-margin'),
                 dcc.Dropdown(
                     id='gen-filter-input-value-{}'.format(i),
-                    className=' item-element-margin',
                     placeholder="Name",
                     options=[
                         {'label': k, 'value': k} for k in [
                             'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
                         ]
                     ])
-                ], className='item-row item-element-margin item-select-height item-border-bottom  item-inline' )
+                ], className='item-row item-select-height item-inline' )
         elif (filter=="Date"):
                 return html.Div([
-                html.H5('Filters', className='item-element-margin'),
+                html.H5('Filter input', className='item-element-margin'),
                 dcc.DatePickerSingle(
                     clearable=True,
                     with_portal=True,
@@ -145,7 +144,7 @@ for i in range(limit):
                     with_portal=True,
                     date=dt.now()
                     )
-            ], className='item-row item-element-margin item-select-height item-border-bottom item-inline' )
+            ], className='item-row item-select-height item-inline' )
 
 #Callback to display 2 or 3 input for 2D or 3D graph
 for i in range(limit):
@@ -158,7 +157,6 @@ for i in range(limit):
             html.H5('Parameters', className='item-element-margin'),
             dcc.Dropdown(
                 id='gen-2D-input-value1-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter X",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -167,7 +165,6 @@ for i in range(limit):
             ]),
             dcc.Dropdown(
                 id='gen-2D-input-value2-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter Y",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -181,7 +178,6 @@ for i in range(limit):
             html.H5('Parameters', className='item-element-margin'),
             dcc.Dropdown(
                 id='gen-2D-input-value1-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter X",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -190,7 +186,6 @@ for i in range(limit):
             ]),
             dcc.Dropdown(
                 id='gen-2D-input-value2-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter Y",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -199,7 +194,6 @@ for i in range(limit):
                 ]),
             dcc.Dropdown(
                 id='gen-2D-input-value3-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter Z",
                 options=[
                     {'label': k, 'value': k} for k in [

@@ -11,7 +11,33 @@ import plotly.graph_objs as go
 import pandas as pd
 from app import app
 
-filterList = []
+# Read data from a csv and setup 3D graph data
+z_data = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/api_docs/mt_bruno_elevation.csv')
+data = [
+    go.Surface(
+        z=z_data.as_matrix()
+    )
+]
+layout = go.Layout(
+    title='Graph 1',
+    autosize=False,
+    width=500,
+    height=500,
+    margin=dict(
+        l=65,
+        r=50,
+        b=65,
+        t=90
+    )
+)
+
+stock = 'TSLA'
+start = datetime.datetime(2015, 1, 1)
+end = datetime.datetime(2018, 2, 8)
+df = web.DataReader(stock, 'morningstar', start, end)
+df.reset_index(inplace=True)
+df.set_index("Date", inplace=True)
+df = df.drop("Symbol", axis=1)
 
 layout = html.Div([
 
@@ -34,7 +60,7 @@ html.Div([
     html.Div([], id="view-item-wrapper"),
 
     #item-button, add graph
-    html.Button('invis', className='button item-element-margin hidden', id="init-button", n_clicks=3)
+    html.Button('invis', className='button item-element-margin hidden', id="init-button", n_clicks=1)
 
     ], className='content-wrapper page-width')
     ], className='wrapper-grey')
@@ -47,6 +73,23 @@ html.Div([
     )
 def display_value(n_clicks):
     return html.Div([
+        html.Div([
+        html.Div([
+            html.H3('Column 3'),
+            dcc.Graph(id='g2', figure={'data': [{'y': [1, 2, 3]}],
+                                       'layout': go.Layout(
+                                           xaxis={
+                                               'title': "Engine Power",
+                                               'type': 'linear'
+                                           },
+                                           yaxis={
+                                               'title': "Engine Speed",
+                                               'type': 'linear'
+                                           },
+                                           margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+                                           hovermode='closest'
+                                       )})
+        ], className="eight columns"),
         html.Details([
 
         #item-wrapper
@@ -65,51 +108,86 @@ def display_value(n_clicks):
                     className="Select-control",
                     id='view-name-input-{}'.format(i),
                 )
-            ])
+            ]),
+
+            dcc.Dropdown(
+                    id='view-mode-input-{}'.format(i),
+                    placeholder="Mode",
+                    value="2D",
+                    className="hidden",
+                    options=[
+                        {'label': k, 'value': k} for k in [
+                            '2D', '3D'
+                            ]
+                        ]),
         ], className='item-row item-element-margin item-select-height item-border-bottom item-inline'),
+
+
+
+        #item-row, parameters
+        html.Div([], className='item-border-bottom ',id='view-param-wrapper-{}'.format(i)),
+
+        html.Div([
 
         #item-row, settings
         html.Div([
-        html.H5('Settings', className='item-element-margin'),
+        html.H5('Filter options', className='item-element-margin'),
         dcc.Dropdown(
             id='view-filter-input-{}'.format(i),
-            className=' item-element-margin',
             placeholder="Filter",
+            value='Series',
             options=[
                 {'label': k, 'value': k} for k in [
                     'Series', 'Name', 'Date'
                 ]
         ]),
-
-        dcc.Dropdown(
-                id='view-mode-input-{}'.format(i),
-                className=' item-element-margin',
-                placeholder="Mode",
-                value="2D",
-                options=[
-                    {'label': k, 'value': k} for k in [
-                        '2D', '3D'
-                        ]
-                    ]),
-        ], className='item-row item-element-margin item-select-height item-border-bottom  item-inline'),
+        ], className='item-row item-select-height item-inline'),
 
         #item-row, settings
-        html.Div([
-        ], id='view-filter-wrapper-{}'.format(i)),
+        html.Div([], id='view-filter-wrapper-{}'.format(i))
 
-        #item-row, parameters
-        html.Div([], id='view-param-wrapper-{}'.format(i)),
+        ], className='item-row item-wrapper-bordered item-filter-section'),
+
+        html.Div([], id='view-add-filter-wrapper-{}'.format(i)),
 
             #item-button, add graph
-        html.Button('Add Filter', className='button item-element-margin', id='add-filter-button-{}'.format(i), n_clicks=0)
+        html.Button('Add Filter', className='button margin-top-12', id='add-filter-button-{}'.format(i), n_clicks=0)
 
         #html.Div(id='app-graph-display-value' ),
-        ], className='item-wrapper', id="item-wrapper")
+        ], className='item-wrapper item-wrapper-bordered', id="item-wrapper")
+        ])
         ]) for i in range(n_clicks)
     ])
 
 
 limit = 10;
+
+for i in range(limit):
+    @app.callback(
+        Output('view-add-filter-wrapper-{}'.format(i), 'children'),
+        [Input('add-filter-button-{}'.format(i), 'n_clicks')])
+    def add_filter(n_clicks):
+        return html.Div([
+            html.Div([
+
+            #item-row, settings
+            html.Div([
+            html.H5('Filter options', className='item-element-margin'),
+            dcc.Dropdown(
+                id='view-added-filter-input-{}'.format(i),
+                placeholder="Filter",
+                options=[
+                    {'label': k, 'value': k} for k in [
+                        'Series', 'Name', 'Date'
+                    ]
+            ]),
+            ], className='item-row item-select-height item-inline'),
+
+            #item-row, settings
+            html.Div([], id='view-added-filter-wrapper-{}'.format(i))
+
+            ], className='item-row item-wrapper-bordered item-filter-section')  for i in range(n_clicks)
+        ])
 
 #Generate components for filter settings when filter option is selectd
 for i in range(limit):
@@ -119,33 +197,31 @@ for i in range(limit):
     def update_filer(filter):
         if (filter=="Series"):
             return html.Div([
-                html.H5('Filters', className='item-element-margin'),
+                html.H5('Filter input', className='item-element-margin'),
                 dcc.Dropdown(
                     id='view-filter-input-value-{}'.format(i),
-                    className=' item-element-margin',
                     placeholder="Series",
                     options=[
                         {'label': k, 'value': k} for k in [
                             'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
                         ]
                     ])
-                ], className='item-row item-element-margin item-select-height item-border-bottom  item-inline' )
+                ], className='item-row item-select-height item-border-bottom  item-inline' )
         elif (filter=="Name"):
                 return html.Div([
-                html.H5('Filters', className='item-element-margin'),
+                html.H5('Filter input', className='item-element-margin'),
                 dcc.Dropdown(
                     id='view-filter-input-value-{}'.format(i),
-                    className=' item-element-margin',
                     placeholder="Name",
                     options=[
                         {'label': k, 'value': k} for k in [
                             'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
                         ]
                     ])
-                ], className='item-row item-element-margin item-select-height item-border-bottom  item-inline' )
+                ], className='item-row item-select-height item-border-bottom  item-inline' )
         elif (filter=="Date"):
                 return html.Div([
-                html.H5('Filters', className='item-element-margin'),
+                html.H5('Filter input', className='item-element-margin'),
                 dcc.DatePickerSingle(
                     clearable=True,
                     with_portal=True,
@@ -156,7 +232,7 @@ for i in range(limit):
                     with_portal=True,
                     date=dt.now()
                     )
-            ], className='item-row item-element-margin item-select-height item-border-bottom item-inline' )
+            ], className='item-row item-select-height item-border-bottom item-inline' )
 
 #Callback to display 2 or 3 input for 2D or 3D graph
 for i in range(limit):
@@ -169,7 +245,6 @@ for i in range(limit):
             html.H5('Parameters', className='item-element-margin'),
             dcc.Dropdown(
                 id='view-2D-input-value1-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter X",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -178,7 +253,6 @@ for i in range(limit):
             ]),
             dcc.Dropdown(
                 id='view-2D-input-value2-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter Y",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -192,7 +266,6 @@ for i in range(limit):
             html.H5('Parameters', className='item-element-margin'),
             dcc.Dropdown(
                 id='view-2D-input-value1-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter X",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -201,7 +274,6 @@ for i in range(limit):
             ]),
             dcc.Dropdown(
                 id='view-2D-input-value2-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter Y",
                 options=[
                     {'label': k, 'value': k} for k in [
@@ -210,7 +282,6 @@ for i in range(limit):
                 ]),
             dcc.Dropdown(
                 id='view-2D-input-value3-{}'.format(i),
-                className=' item-element-margin',
                 placeholder="Parameter Z",
                 options=[
                     {'label': k, 'value': k} for k in [
