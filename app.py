@@ -17,7 +17,8 @@ server = app.server
 app.config.supress_callback_exceptions = True
 
 external_css = [
-    '/static/css/base.css'
+    '/static/css/base.css',
+    '/static/css/all.css'
 ]
 
 external_js = [

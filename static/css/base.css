@@ -60,11 +60,21 @@ font-family:Arial;
 h1{
 font-size: 24px;
 font-weight:700;
+color:#525252;
 }
 
 h2{
 font-size: 18px;
 font-weight:700;
+color:#525252;
+}
+
+input[type="radio"], input[type="checkbox"]{
+    margin-right:12px;
+}
+
+.font-awesome{
+  font-family: FontAwesome !important;
 }
 
 .wrapper-white{
@@ -109,10 +119,16 @@ height:60px;
 
 .nav-ul .nav-li{
 display: inline-block;
-color:white;
+color:#efefef;
 padding-top:24px;
 padding-bottom:24px;
 padding-right:24px;
+font-size:14px;
+cursor: pointer;
+}
+
+.nav-ul .nav-li:hover{
+color:white;
 }
 
 .button{
@@ -125,7 +141,7 @@ width: max-content;
 font-size:14px;
 cursor: pointer;
 min-width: 120px;
-
+font-weight: 700;
 }
 
 .item-wrapper{
@@ -138,21 +154,15 @@ border-radius: 4px;
 border:1px solid #e7e7e7;
 }
 
-.item-settings-panel{
-  max-width:50%;
-}
-
 .item-wrapper-bordered{
-  border-left: 3px solid #33bbb0;
+  border-left: 2px solid #33bbb0;
 }
 
-.item-orange-border{
-  border-left: 3px solid #ff952e;
-}
 
 .Select-control{
-  float:left;
+  font-size:12px;
 }
+
 .item-wrapper-transparent{
 padding:24px;
 width: 100%;
@@ -160,23 +170,32 @@ margin-bottom:12px;
 }
 
 .left-panel{
+  width:30%;
   float:left;
 }
 
 .right-panel{
   float:right;
-  width: calc(50% - 12px);
+  width: calc(70% - 12px);
 }
 
 .item-element-margin{
 margin-bottom: 12px;
 }
 
+.item-element-margin-top{
+margin-top: 12px;
+}
+
+.item-element-padding{
+padding: 12px;
+}
+
 .item-filter-section{
   padding-left: 12px;
   padding-right:12px;
   border:1px solid #e7e7e7;
-  border-left: 3px solid #ff952e;
+  border-left: 2px solid #33bbb0;
   margin-bottom:12px;
 }
 .settings-info{
@@ -214,6 +233,8 @@ float:right;
 display:inline-block;
 margin-left:12px;
 min-width: 120px;
+font-weight: 700;
+
 }
 
 .header-title{
@@ -246,7 +267,7 @@ background-color: white;
 color:black;
 width:100%;
 padding:12px;
-border-left: 3px solid #33bbb0;
+border-left: 2px solid #33bbb0;
 }
 
 h4{
@@ -255,7 +276,7 @@ font-size:14px;
 
 h5{
 font-size:12px;
-color:#ccc;
+color:#a8a8a8;
 }
 
 .search-form{
@@ -283,7 +304,9 @@ float: left;
 
 .delete-button{
 color:  grey;
-font-size: 14px;;
+font-size: 14px;
+font-weight: 700;
+
 }
 
 .margin-top-12{
