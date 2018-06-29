@@ -14,7 +14,7 @@ from app import app
 layout = html.Div([
 #Header
 html.Div([
-   html.H1('Generate Graph', className='header-title'),
+   html.H1('Ship Performance Analysis', className='header-title'),
 
    #item-button, generate graph
    dcc.Link('Add Graph', href='#', className='button item-element-margin header-button'),

@@ -11,7 +11,7 @@ app.layout = html.Div([
             html.Div([
                 html.Ul([
 
-                    html.Li(dcc.Link('Logo', href='/'), className='nav-li'),
+                    html.Li(dcc.Link('Ship Data Analytic System', href='/'), className='nav-li'),
                     html.Li(dcc.Link('Graphs', href='/apps/graph'), className='nav-li'),
                     html.Li(dcc.Link('Archive', href='/apps/archive'), className='nav-li'),
                     html.Li(dcc.Link('Database', href='/apps/database'), className='nav-li'),
