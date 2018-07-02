@@ -56,66 +56,46 @@ layout = html.Div([
                     html.Div(id='gen-vessel-store')
                 ], className='item-row item-select-height item-inline'),
 
-                # Filters section 1
-                html.Div([
-                    html.Div([
-                        html.H5('Filter option 1', className='item-element-margin'),
-                        dcc.Dropdown(
-                            id='gen-filter-input-1',
-                            placeholder="Filter",
-                        ),
-                        html.Div([], id="gen-filter-wrapper-1"),
-                        html.Div(id="gen-filter-dump-1", style={'display': 'none'})
-                    ], className='item-row item-select-height item-inline'),
-                ], className='item-row  item-filter-section'),
-
-                # Filter section 2
-                html.Div([
-                    html.Div([
-                        html.H5('Filter option 2', className='item-element-margin'),
-                        dcc.Dropdown(
-                            id='gen-filter-input-2',
-                            placeholder="Filter",
-                        ),
-                        html.Div([], id="gen-filter-wrapper-2"),
-                        html.Div(id="gen-filter-dump-2", style={'display': 'none'})
-                    ], className='item-row item-select-height item-inline'),
-                ], className='item-row  item-filter-section'),
-
-                # Filter section 3
-                html.Div([
-                    html.Div([
-                        html.H5('Filter option 3', className='item-element-margin'),
-                        dcc.Dropdown(
-                            id='gen-filter-input-3',
-                            placeholder="Filter",
-                        ),
-                        html.Div([], id="gen-filter-wrapper-3"),
-                        html.Div(id="gen-filter-dump-3", style={'display': 'none'})
-                    ], className='item-row item-select-height item-inline'),
-                ], className='item-row item-filter-section'),
-
+                # # Filter section 3
+                # html.Div([
+                #     html.Div([
+                #         html.H5('Filter option 3', className='item-element-margin'),
+                #         dcc.Dropdown(
+                #             id='gen-filter-input-3',
+                #             placeholder="Filter",
+                #         ),
+                #         html.Div([], id="gen-filter-wrapper-3"),
+                #         html.Div(id="gen-filter-dump-3", style={'display': 'none'})
+                #     ], className='item-row item-select-height item-inline'),
+                # # ], className='item-row item-filter-section'),
+                # html.Div([
+                #     html.Div([
+                #         html.Div(dcc.Slider(id='slider-{}'.format(i))),
+                #         html.Div(id='output-{}'.format(i), style={'marginTop': 30})
+                #     ]) for i in range(n_clicks)]
+                # )
                 # Hidden Element
                 html.Div(id='gen-filter-store', style={'display': 'none'}),
 
                 html.Button(
-                    id='gen-filter-add',
+                    'Add Filter',
                     className='button item-element-margin',
-                    children='Add Filter',
-                ),
+                    id='gen-filter-add'),
 
                 html.Button(
                     'Generate Graph',
                     className='button item-element-margin',
                     id="gen-button-1"),
-            ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
 
+                #call filter layout
+                html.Div(id='gen-filter'),
+
+            ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
             html.Div([], id="gen-right-panel-wrapper"),
 
         ], className='content-wrapper page-width')
     ], className='wrapper-grey')
 ])
-
 
 def generate_filter_input(option_type, option_id):
     # Setup Input Type Label Text TODO: Reconsider hardcoded option types
@@ -185,3 +165,59 @@ def generate_filter_input(option_type, option_id):
         ]
 
     return filter_input
+
+def add_filters(n_clicks):
+    return \
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.H5('Filter option {}'.format(k+1), className='item-element-margin'),
+                    dcc.Dropdown(
+                        id='gen-filter-input-{}'.format(k+1),
+                        placeholder="Filter",
+                    ),
+                    html.Div([], id="gen-filter-wrapper-{}".format(k+1)),
+                    html.Div(id="gen-filter-dump-{}".format(k+1), style={'display': 'none'})
+                ], className='item-row item-select-height item-inline')
+                for k in range(n_clicks)
+            ], className='item-row item-filter-section'),
+        ],id='gen-filter'),
+
+def generate_axis_parameters(value, options):
+    label_x = "Parameter X"
+    label_y = "Parameter Y"
+    label_z = "Parameter Z"
+
+    axis_parameters = [
+        # Axis Parameters Input store
+        html.Div(id='gen-params-store', style={'display': 'none'}),
+
+        # Axis Parameters Dropdowns
+        dcc.Dropdown(
+            id='gen-paramX-input-1',
+            placeholder=label_x,
+            options=options,
+            className='item-element-margin'
+        ),
+        dcc.Dropdown(
+            id='gen-paramY-input-1',
+            placeholder=label_y,
+            options=options
+        ),
+    ]
+
+    if value == '3D':
+        axis_parameters.append(
+            dcc.Dropdown(
+                id='gen-paramZ-input-1',
+                placeholder=label_z,
+                className="item-element-margin-top",
+                options=options,
+            )
+        )
+    else:
+        axis_parameters.append(
+            dcc.Input(id='gen-paramZ-input-1', style={'display': 'none'})
+        )
+
+    return axis_parameters
