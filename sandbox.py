@@ -3,6 +3,7 @@ import pandas as pd
 from model.database import SQL
 from model.dataframe import DataFrame
 
+
 # result = SQL().get_filter_options()
 # df = pd.DataFrame(result)
 
@@ -29,4 +30,14 @@ from model.dataframe import DataFrame
 # print(vessel.get_filtered(conditions))
 # print(SQL().get_column_datatypes(column="Mode Code", singular=True))
 
-print(SQL().get_column_datatypes(column='Vessel Code', singular=True))
+# print(SQL().get_column_datatypes(column='Vessel Code', singular=True))
+
+
+# def func(*args):
+#     for item in args:
+#         print(args)
+#
+# func(1,2,3)
+
+for i in range(3, 10, 3):
+    print i

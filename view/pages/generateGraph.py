@@ -51,12 +51,9 @@ layout = html.Div([
                     # Vessel field
                     dcc.Dropdown(
                         id='gen-vessel-input-1',
-                        placeholder="Vessel",
-                        options=[
-                            {'label': k, 'value': k} for k in [
-                                'A', 'B', 'C'
-                            ]
-                        ]),
+                        placeholder="Vessel"
+                    ),
+                    html.Div(id='gen-vessel-store')
                 ], className='item-row item-select-height item-inline'),
 
                 # Filters section 1
@@ -98,12 +95,19 @@ layout = html.Div([
                     ], className='item-row item-select-height item-inline'),
                 ], className='item-row item-filter-section'),
 
+                # Hidden Element
+                html.Div(id='gen-filter-store', style={'display': 'none'}),
+
                 html.Button(
-                    id='get-filter',
+                    id='gen-filter-add',
                     className='button item-element-margin',
+                    children='Add Filter',
                 ),
 
-                html.Button('Generate Graph', className='button item-element-margin', id="gen-button-1"),
+                html.Button(
+                    'Generate Graph',
+                    className='button item-element-margin',
+                    id="gen-button-1"),
             ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
 
             html.Div([], id="gen-right-panel-wrapper"),
@@ -126,9 +130,26 @@ def generate_filter_input(option_type, option_id):
         input_type = 'date'
         label1 = 'Start'
         label2 = 'End'
+    else:
+        input_type = None
+        label1 = None
+        label2 = None
+
+    # No Input [Used to generate id]
+    if input_type is None:
+        filter_input = [
+            dcc.Input(
+                id='gen-filter-value1-%d' % option_id,
+                style={'display': 'none'}
+            ),
+            dcc.Input(
+                id='gen-filter-value2-%d' % option_id,
+                style={'display': 'none'}
+            )
+        ]
 
     # Single Input
-    if input_type == 'text':
+    elif input_type == 'text':
         filter_input = [
             dcc.Input(
                 id='gen-filter-value1-%d' % option_id,

@@ -141,7 +141,7 @@ def get_specification(dump, vessel, option, input_value):
     return df.to_json()
 
 
-# Double Input Component TODO: Integrate with dynamic specification input
+# # Double Input Component TODO: Integrate with dynamic specification input
 @app.callback(
     Output('test-vessel-filter-2-input-dump', 'children'),
     [Input('test-vessel-filter-specification-submit2', 'n_clicks')],
