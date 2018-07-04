@@ -100,22 +100,23 @@ layout = html.Div([
                     className='button item-element-margin',
                     id="gen-button-1"),
 
+                # call filter layout
+                html.Div(id='gen-filter'),
+                
                 html.Button(
                     id='gen-filter-submit',
                     className='button item-element-margin',
                     children='Submit'
                 ),
-
-                html.Button(
-                    id='gen-filter-line',
-                    className='button item-element-margin',
-                    children='Line'
-                ),
+                #
+                # html.Button(
+                #     id='gen-filter-line',
+                #     className='button item-element-margin',
+                #     children='Line'
+                # ),
 
                 # generate_filter_id(),
 
-                # call filter layout
-                html.Div(id='gen-filter'),
 
             ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
             html.Div([], id="gen-right-panel-wrapper"),
