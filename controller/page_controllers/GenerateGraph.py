@@ -38,6 +38,7 @@ default_figure = {
         hovermode='closest'
     )}
 
+
 # TODO: Load vessel options based on series
 # Populate Vessel field options
 @app.callback(
@@ -64,8 +65,8 @@ for n in range(n_filters):
         Output('gen-filter-input-{}'.format(n + 1), 'options'),
         [Input('gen-filter-dump-{}'.format(n + 1), 'children')])
     def load_filter(dump):
-        #return [{'label': i, 'value': i} for i in SQL().get_column_names()]
-        return [1,2,3]
+        return [{'label': i, 'value': i} for i in SQL().get_column_names()]
+        # return [{'label': i, 'value': i} for i in [1, 2, 3]]
 
 
 # Generates callbacks for filter options
@@ -75,6 +76,7 @@ def create_callback(filter_number):
         [Input('gen-filter-input-{}'.format(filter_number), 'value')])
     def update_filer(filter):
         return generate_filter_input(get_option_type(filter), filter_number)
+
 
 # @app.callback(
 #     Output('gen-filter-wrapper-{}'.format(filter_number),'children'),
@@ -139,6 +141,7 @@ def get_params_input(mode, input_x, input_y, input_z):
     print(input_z)
     return [mode, input_x, input_y, input_z]
 
+
 @app.callback(
     Output('g2', 'figure'),
     [Input('gen-params-store', 'children')],
@@ -201,6 +204,7 @@ def update_graph(value, figure, vessel):
 
         return figure
     return default_figure
+
 
 # callback to generate parameter fields depending on mode selected
 @app.callback(
@@ -338,20 +342,43 @@ def get_condition(option, value1, value2):
 @app.callback(
     Output('gen-filter', 'children'),
     [Input('gen-filter-add', 'n_clicks'),
-    Input('gen-filter-dump','children')],
-    [State('gen-filter','children')])
-def add_filter(n_clicks,dump,container):
-    if (n_clicks is None):
+     Input('gen-filter-dump', 'children')],
+    [State('gen-filter', 'children')])
+def add_filter(n_clicks, dump, container):
+    if n_clicks is None:
         print "Hello"
         return add_hidden_filters(n_filters)
-    else:
-        #print container[0]['props']['children'][0]
-        print container[0]['props']['children'][n_clicks]
-        container[0]['props']['children'][n_clicks] = generate_dropdown_filter(n_clicks)
-        print "Hello"
-        print container[0]['props']['children'][n_clicks]
-        return container
-        #return add_filters(n_clicks)
+    elif n_clicks <= n_filters:
+        container[0]['props']['children'][n_clicks - 1]['props']['style'] = {}
+        print container[0]['props']['children'][n_clicks - 1]['props']['style']
+    return container
+
+    #     print container[0]['props']['children'][n_clicks]
+    #     container[0]['props']['children'][n_clicks] = generate_dropdown_filter(n_clicks)
+    #     print "Hello"
+    #     print container[0]['props']['children'][n_clicks]
+    #     return container
+    #     # return add_filters(n_clicks)
+
+
+# @app.callback(
+#     Output('gen-filter', 'children'),
+#     [Input('gen-filter-add', 'n_clicks'),
+#      Input('gen-filter-dump', 'children')],
+#     [State('gen-filter', 'children')])
+# def add_filter(n_clicks, dump, container):
+#     if n_clicks is None:
+#         print "Hello"
+#         return add_hidden_filters(n_filters)
+#     else:
+#         # print container[0]['props']['children'][0]
+#         print container[0]['props']['children'][n_clicks]
+#         container[0]['props']['children'][n_clicks] = generate_dropdown_filter(n_clicks)
+#         print "Hello"
+#         print container[0]['props']['children'][n_clicks]
+#         return container
+#         # return add_filters(n_clicks)
+
 
 # @app.callback(
 #     Output('gen-filter-container','children'),

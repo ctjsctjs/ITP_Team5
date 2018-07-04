@@ -204,6 +204,7 @@ def add_filters(n_clicks):
                     dcc.Dropdown(
                         id='gen-filter-input-{}'.format(k + 1),
                         placeholder="Filter",
+                        style={'display': 'none'}
                     ),
                     html.Div([], id="gen-filter-wrapper-{}".format(k + 1)),
                     html.Div(id="gen-filter-dump-{}".format(k + 1), style={'display': 'none'})
@@ -212,30 +213,32 @@ def add_filters(n_clicks):
             ], className='item-row item-filter-section'),
         ], id='gen-filter'),
 
+
 def add_hidden_filters(n_clicks):
     return \
+        html.Div([
             html.Div([
+                html.H5('Filter option {}'.format(k), className='item-element-margin'),
+                dcc.Dropdown(
+                    id='gen-filter-input-{}'.format(k),
+                    placeholder="Filter",
+                ),
                 html.Div([
-                    html.H5('Filter option {}'.format(k), className='item-element-margin',style={'display': 'none'}),
                     dcc.Input(
-                        id='gen-filter-input-{}'.format(k),
-                        #placeholder="Filter",
+                        id='gen-filter-value1-{}'.format(k),
                         style={'display': 'none'}
                     ),
-                    html.Div([
-                            dcc.Input(
-                                id='gen-filter-value1-{}'.format(k),
-                                style={'display': 'none'}
-                            ),
-                            dcc.Input(
-                                id='gen-filter-value2-{}'.format(k),
-                                style={'display': 'none'}
-                            )
-                    ], id="gen-filter-wrapper-{}".format(k),style={'display': 'none'}),
-                    html.Div(id="gen-filter-dump-{}".format(k), style={'display': 'none'})
-                ], className='item-row item-select-height item-inline')
-                for k in range(n_clicks)
-            ], className='item-row item-filter-section'),
+                    dcc.Input(
+                        id='gen-filter-value2-{}'.format(k),
+                        style={'display': 'none'}
+                    )
+                ], id="gen-filter-wrapper-{}".format(k)),
+                html.Div(id="gen-filter-dump-{}".format(k))
+            ], className='item-row item-select-height item-inline', style={'display': 'none'})
+            for k in range(1, n_clicks + 1)
+        ], className='item-row item-filter-section'),
+
+
 def generate_dropdown_filter(n):
     return \
         html.Div([
@@ -243,19 +246,21 @@ def generate_dropdown_filter(n):
             dcc.Dropdown(
                 id='gen-filter-input-{}'.format(n),
                 placeholder="Filter",
+            ),
+            html.Div([
+                dcc.Input(
+                    id='gen-filter-value1-{}'.format(n),
+                    style={'display': 'none'}
                 ),
-                html.Div([
-                    dcc.Input(
-                        id='gen-filter-value1-{}'.format(n),
-                        style={'display': 'none'}
-                    ),
-                    dcc.Input(
-                        id='gen-filter-value2-{}'.format(n),
-                        style={'display': 'none'}
-                    )
-            ], id="gen-filter-wrapper-{}".format(n),style={'display': 'none'}),
+                dcc.Input(
+                    id='gen-filter-value2-{}'.format(n),
+                    style={'display': 'none'}
+                )
+            ], id="gen-filter-wrapper-{}".format(n), style={'display': 'none'}),
             html.Div(id="gen-filter-dump-{}".format(n), style={'display': 'none'})
         ], className='item-row item-select-height item-inline'),
+
+
 def generate_axis_parameters(mode, options):
     label_x = "Parameter X"
     label_y = "Parameter Y"
