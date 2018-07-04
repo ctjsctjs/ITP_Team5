@@ -93,6 +93,9 @@ class DataFrame:
         if clean:
             data_frame = self.__clean_data(data_frame)
 
+        # Sort DataFrame
+        data_frame = data_frame.sort_values(x_axis)
+
         return data_frame
 
     """

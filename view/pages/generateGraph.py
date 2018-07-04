@@ -1,6 +1,18 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
+
+def generate_filter_id():
+    filter_ids = []
+    for i in range(1, 3):
+        filter_ids.append(html.Div(id='gen-filter-input-{}'.format(i)))
+
+    return html.Div(
+        id='',
+        children=filter_ids
+    )
+
+
 layout = html.Div([
     # Header
     html.Div([
@@ -87,7 +99,21 @@ layout = html.Div([
                     className='button item-element-margin',
                     id="gen-button-1"),
 
-                #call filter layout
+                html.Button(
+                    id='gen-filter-submit',
+                    className='button item-element-margin',
+                    children='Submit'
+                ),
+
+                html.Button(
+                    id='gen-filter-line',
+                    className='button item-element-margin',
+                    children='Line'
+                ),
+
+                # generate_filter_id(),
+
+                # call filter layout
                 html.Div(id='gen-filter'),
 
             ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
@@ -96,6 +122,7 @@ layout = html.Div([
         ], className='content-wrapper page-width')
     ], className='wrapper-grey')
 ])
+
 
 def generate_filter_input(option_type, option_id):
     # Setup Input Type Label Text TODO: Reconsider hardcoded option types
@@ -166,24 +193,26 @@ def generate_filter_input(option_type, option_id):
 
     return filter_input
 
+
 def add_filters(n_clicks):
     return \
         html.Div([
             html.Div([
                 html.Div([
-                    html.H5('Filter option {}'.format(k+1), className='item-element-margin'),
+                    html.H5('Filter option {}'.format(k + 1), className='item-element-margin'),
                     dcc.Dropdown(
-                        id='gen-filter-input-{}'.format(k+1),
+                        id='gen-filter-input-{}'.format(k + 1),
                         placeholder="Filter",
                     ),
-                    html.Div([], id="gen-filter-wrapper-{}".format(k+1)),
-                    html.Div(id="gen-filter-dump-{}".format(k+1), style={'display': 'none'})
+                    html.Div([], id="gen-filter-wrapper-{}".format(k + 1)),
+                    html.Div(id="gen-filter-dump-{}".format(k + 1), style={'display': 'none'})
                 ], className='item-row item-select-height item-inline')
                 for k in range(n_clicks)
             ], className='item-row item-filter-section'),
-        ],id='gen-filter'),
+        ], id='gen-filter'),
 
-def generate_axis_parameters(value, options):
+
+def generate_axis_parameters(mode, options):
     label_x = "Parameter X"
     label_y = "Parameter Y"
     label_z = "Parameter Z"
@@ -191,6 +220,7 @@ def generate_axis_parameters(value, options):
     axis_parameters = [
         # Axis Parameters Input store
         html.Div(id='gen-params-store', style={'display': 'none'}),
+        html.Div(id='gen-test-store', style={'display': 'none'}),
 
         # Axis Parameters Dropdowns
         dcc.Dropdown(
@@ -206,7 +236,7 @@ def generate_axis_parameters(value, options):
         ),
     ]
 
-    if value == '3D':
+    if mode == '3D':
         axis_parameters.append(
             dcc.Dropdown(
                 id='gen-paramZ-input-1',
@@ -221,3 +251,122 @@ def generate_axis_parameters(value, options):
         )
 
     return axis_parameters
+
+
+def generate_graph(mode, options):
+    return html.Div([
+        # Graph Panel
+        html.Div([
+            html.H2('Graph Panel', className='item-element-margin'),
+            dcc.Graph(
+                id='g2'
+            )
+        ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+
+        # Hidden Graph Store
+        html.Div(id='g2-store', style={'display': 'none'}),
+        html.Div(id='g2-param-store', style={'display': 'none'}),
+
+        # Information Panel
+        html.Div([
+            html.Div([
+                html.H2('Information Panel', className='item-element-margin'),
+                html.Span([], className="settings-info", id='gen-settings-mode-1'),
+                html.Span([], className="settings-info", id='gen-settings-series-1'),
+                html.Span([], className="settings-info", id='gen-settings-vessel-1'),
+                html.Span([], className="settings-info", id='gen-settings-filter1-1'),
+                html.Span([], className="settings-info", id='gen-settings-filter2-1'),
+                html.Span([], className="settings-info", id='gen-settings-filter3-1'),
+                html.Span([], className="settings-info", id='gen-output-value1-1'),
+                html.Span([], className="settings-info", id='gen-output-value2-1'),
+                html.Span([], className="settings-info", id='gen-output-value3-1'),
+                html.Span([], className="settings-info", id='gen-paramX-output-1'),
+                html.Span([], className="settings-info", id='gen-paramY-output-1'),
+                html.Span([], className="settings-info", id='gen-paramZ-output-1'),
+                html.Span([], className="settings-info", id='gen-settings-output-1'),
+            ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
+
+            # Customise Panel
+            html.Div([
+                html.H2('Customize Panel', className='item-element-margin'),
+                html.Div([
+                    html.H5('Parameter options', className='item-element-margin'),
+
+                    # DIV to populate paramater fields
+                    html.Div(
+                        id="gen-params-wrapper",
+                        className='item-inline item-element-margin',
+                        children=generate_axis_parameters(mode, options)
+                    ),
+
+                    # Settings checklist form
+                    html.H5('Settings options', className='item-element-margin'),
+                    dcc.Checklist(
+                        id="gen-settings-input-1",
+                        options=[
+                            {'label': 'Clustering', 'value': 'clustering'},
+                            {'label': 'Regression', 'value': 'regression'},
+                            {'label': 'Color', 'value': 'color'}
+                        ],
+                        labelStyle={'display': 'block', 'margin-bottom': '6px'},
+                        values=[]
+                    )
+                ], className='item-row item-select-height item-inline'),
+            ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+        ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+    ])
+
+# def generate_graph():
+#     return html.Div([
+#         # Graph Panel
+#         html.Div([
+#             html.H2('Graph Panel', className='item-element-margin'),
+#             dcc.Graph(
+#                 id='g2'
+#             )
+#         ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+#
+#         # Information Panel
+#         html.Div([
+#             html.Div([
+#                 html.H2('Information Panel', className='item-element-margin'),
+#                 html.Span([], className="settings-info", id='gen-settings-mode-1'),
+#                 html.Span([], className="settings-info", id='gen-settings-series-1'),
+#                 html.Span([], className="settings-info", id='gen-settings-vessel-1'),
+#                 html.Span([], className="settings-info", id='gen-settings-filter1-1'),
+#                 html.Span([], className="settings-info", id='gen-settings-filter2-1'),
+#                 html.Span([], className="settings-info", id='gen-settings-filter3-1'),
+#                 html.Span([], className="settings-info", id='gen-output-value1-1'),
+#                 html.Span([], className="settings-info", id='gen-output-value2-1'),
+#                 html.Span([], className="settings-info", id='gen-output-value3-1'),
+#                 html.Span([], className="settings-info", id='gen-paramX-output-1'),
+#                 html.Span([], className="settings-info", id='gen-paramY-output-1'),
+#                 html.Span([], className="settings-info", id='gen-paramZ-output-1'),
+#                 html.Span([], className="settings-info", id='gen-settings-output-1'),
+#             ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
+#
+#             # Customise Panel
+#             html.Div([
+#                 html.H2('Customize Panel', className='item-element-margin'),
+#                 html.Div([
+#                     html.H5('Parameter options', className='item-element-margin'),
+#
+#                     # DIV to populate paramater fields
+#                     html.Div([], className='item-inline item-element-margin', id="gen-params-wrapper"),
+#
+#                     # Settings checklist form
+#                     html.H5('Settings options', className='item-element-margin'),
+#                     dcc.Checklist(
+#                         id="gen-settings-input-1",
+#                         options=[
+#                             {'label': 'Clustering', 'value': 'clustering'},
+#                             {'label': 'Regression', 'value': 'regression'},
+#                             {'label': 'Color', 'value': 'color'}
+#                         ],
+#                         labelStyle={'display': 'block', 'margin-bottom': '6px'},
+#                         values=[]
+#                     )
+#                 ], className='item-row item-select-height item-inline'),
+#             ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+#         ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+#     ])

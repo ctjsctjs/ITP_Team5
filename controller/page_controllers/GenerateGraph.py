@@ -10,13 +10,31 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 import pandas as pd
 
-from view.pages.generateGraph import layout, generate_filter_input,add_filters,generate_axis_parameters
+from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
+    generate_graph
 from model.database import SQL
 from app import app
 
+# Init
 sql = SQL()
-n_filters = 8
+options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
+n_filters = 1
 dfs = {}
+
+figure = {
+    'data': [{'y': [1, 2, 3]}],
+    'layout': go.Layout(
+        xaxis={
+            'title': "Engine Power",
+            'type': 'linear'
+        },
+        yaxis={
+            'title': "Engine Speed",
+            'type': 'linear'
+        },
+        margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+        hovermode='closest'
+    )}
 
 
 # TODO: Load vessel options based on series
@@ -70,7 +88,7 @@ for n in range(n_filters):
 # Actual callback for retrieving inputs
 @app.callback(
     Output('gen-filter-store', 'children'),
-    [Input('gen-filter-add', 'n_clicks')],
+    [Input('gen-filter-submit', 'n_clicks')],
     filter_inputs)
 def get_filtered_df(dump, *values):
     # Get specifications
@@ -88,6 +106,7 @@ def get_filtered_df(dump, *values):
     df = dfs[values[0]].get_filtered(conditions=conditions)
     print(df)
     return
+
 
 # callback to generate parameter fields depending on mode selected
 @app.callback(
@@ -110,82 +129,43 @@ def get_params_input(mode, input_x, input_y, input_z):
     print(input_x)
     print(input_y)
     print(input_z)
+    return [mode, input_x, input_y, input_z]
+
+
+@app.callback(
+    Output('g2', 'figure'),
+    [Input('gen-params-store', 'children')],
+    [State('g2', 'figure'),
+     State('gen-vessel-input-1', 'value')])
+def update_graph(value, fig, vessel):
+    if fig is not None:
+        # Update Axis Titles based on Axis Parameters
+        fig['layout']['xaxis']['title'] = value[1]
+        fig['layout']['yaxis']['title'] = value[2]
+        if value[0] == '3D' and value[3] is not None:
+            fig['layout']['yaxis']['title'] = value[3]
+
+        # Populate with 2D Data TODO: Multiple lines/curves
+        if value[1] is not None and value[2] is not None:
+            print("THIS IS VESSEL: {}".format(vessel))
+            df = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
+            fig['data'][0]['x'] = df[value[1]]
+            fig['data'][0]['y'] = df[value[2]]
+
+        print(fig['data'])
+
+        return fig
+    return figure
 
 
 # callback to generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-right-panel-wrapper', 'children'),
-    [Input('gen-button-1', 'n_clicks')])
-def update_filer(value):
+    [Input('gen-button-1', 'n_clicks')],
+    [State('gen-mode-input-1', 'value')])
+def update_filer(value, mode):
     if value > 0:
-        return html.Div([
-            # Graph Panel
-            html.Div([
-                html.H2('Graph Panel', className='item-element-margin'),
-                dcc.Graph(
-                    id='g2',
-                    figure={
-                        'data': [{'y': [1, 2, 3]}],
-                        'layout': go.Layout(
-                            xaxis={
-                                'title': "Engine Power",
-                                'type': 'linear'
-                            },
-                            yaxis={
-                                'title': "Engine Speed",
-                                'type': 'linear'
-                            },
-                            margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-                            hovermode='closest'
-                        )}
-                )
-            ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
-
-            # Information Panel
-            html.Div([
-                html.Div([
-                    html.H2('Information Panel', className='item-element-margin'),
-                    html.Span([], className="settings-info", id='gen-settings-mode-1'),
-                    html.Span([], className="settings-info", id='gen-settings-series-1'),
-                    html.Span([], className="settings-info", id='gen-settings-vessel-1'),
-                    html.Span([], className="settings-info", id='gen-settings-filter1-1'),
-                    html.Span([], className="settings-info", id='gen-settings-filter2-1'),
-                    html.Span([], className="settings-info", id='gen-settings-filter3-1'),
-                    html.Span([], className="settings-info", id='gen-output-value1-1'),
-                    html.Span([], className="settings-info", id='gen-output-value2-1'),
-                    html.Span([], className="settings-info", id='gen-output-value3-1'),
-                    html.Span([], className="settings-info", id='gen-paramX-output-1'),
-                    html.Span([], className="settings-info", id='gen-paramY-output-1'),
-                    html.Span([], className="settings-info", id='gen-paramZ-output-1'),
-                    html.Span([], className="settings-info", id='gen-settings-output-1'),
-                ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
-
-                # Customise Panel
-                html.Div([
-                    html.H2('Customize Panel', className='item-element-margin'),
-                    html.Div([
-                        html.H5('Parameter options', className='item-element-margin'),
-
-                        # DIV to populate paramater fields
-                        html.Div([], className='item-inline item-element-margin', id="gen-params-wrapper"),
-
-                        # Settings checklist form
-                        html.H5('Settings options', className='item-element-margin'),
-                        dcc.Checklist(
-                            id="gen-settings-input-1",
-                            options=[
-                                {'label': 'Clustering', 'value': 'clustering'},
-                                {'label': 'Regression', 'value': 'regression'},
-                                {'label': 'Color', 'value': 'color'}
-                            ],
-                            labelStyle={'display': 'block', 'margin-bottom': '6px'},
-                            values=[]
-                        )
-                    ], className='item-row item-select-height item-inline'),
-                ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
-            ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
-        ]
-        )
+        return generate_graph(mode, options)
 
 
 # callback for retriving inputs
@@ -310,8 +290,39 @@ def get_condition(option, value1, value2):
 
     return result
 
+
 @app.callback(
     Output('gen-filter', 'children'),
     [Input('gen-filter-add', 'n_clicks')])
 def add_filter(n_clicks):
     return add_filters(n_clicks)
+
+
+# TEST Catch data in graph
+@app.callback(
+    Output('g2-store', 'children'),
+    [Input('gen-filter-line', 'n_clicks'),
+     Input('gen-filter-submit', 'n_clicks')],
+    [State('g2', 'figure')])
+def catch_data(dump1, dump2, figure):
+    pass
+    # for item in figure:
+    #     print item
+
+# # Populate graph with data
+# @app.callback(
+#     Output('g2', 'figure'),
+#     [Input('gen-filter-submit', 'n_clicks')],
+#     [State('g2', 'figure')])
+# def populate_graph(dump, fig):
+#     if fig is not None:
+#         for item in fig:
+#             print(item)
+#     return figure
+
+# @app.callback(
+#     Output('gen-test-store', 'children'),
+#     [Input('gen-params-store', 'children')],
+#     [State('g2', 'figure')])
+# def update_graph(value, fig):
+#     print(fig)
