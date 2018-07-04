@@ -5,37 +5,38 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from datetime import datetime as dt
+from controller.graph_components.regression import linear_regression, k_means
 
+import static.colors as color
 import plotly.plotly as py
 import plotly.graph_objs as go
 import pandas as pd
 
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
-    generate_graph
+    generate_graph, add_hidden_filters, generate_dropdown_filter
 from model.database import SQL
 from app import app
 
 # Init
 sql = SQL()
 options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
-n_filters = 1
+n_filters = 3
 dfs = {}
 
-figure = {
-    'data': [{'y': [1, 2, 3]}],
+default_figure = {
+    'data': [],
     'layout': go.Layout(
         xaxis={
-            'title': "Engine Power",
+            'title': "Select X Axis",
             'type': 'linear'
         },
         yaxis={
-            'title': "Engine Speed",
+            'title': "Select Y Axis",
             'type': 'linear'
         },
         margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
         hovermode='closest'
     )}
-
 
 # TODO: Load vessel options based on series
 # Populate Vessel field options
@@ -53,6 +54,7 @@ def load_vessel_field(series):
     [Input('gen-vessel-input-1', 'value')])
 def load_vessel_df(vessel):
     if vessel not in dfs:
+        print vessel
         dfs[vessel] = SQL().get_vessel(vessel=vessel)
 
 
@@ -62,7 +64,8 @@ for n in range(n_filters):
         Output('gen-filter-input-{}'.format(n + 1), 'options'),
         [Input('gen-filter-dump-{}'.format(n + 1), 'children')])
     def load_filter(dump):
-        return [{'label': i, 'value': i} for i in SQL().get_column_names()]
+        #return [{'label': i, 'value': i} for i in SQL().get_column_names()]
+        return [1,2,3]
 
 
 # Generates callbacks for filter options
@@ -73,6 +76,13 @@ def create_callback(filter_number):
     def update_filer(filter):
         return generate_filter_input(get_option_type(filter), filter_number)
 
+# @app.callback(
+#     Output('gen-filter-wrapper-{}'.format(filter_number),'children'),
+#     [Input('gen-filter-input-{}'.format(filter_number),'value')],
+#     [State('gen-filter-wrapper-{}'.format(filter_number),'children')])
+# def loadWrapper(gfInput,gfWrapper):
+#     gfWrapper = newWrapper
+#     return gfWrapper
 
 for n in range(n_filters):
     create_callback(n + 1)
@@ -80,7 +90,6 @@ for n in range(n_filters):
 filter_inputs = [State('gen-vessel-input-1', 'value')]
 for n in range(n_filters):
     filter_inputs.append(State('gen-filter-input-{}'.format(n + 1), 'value'))
-    print('gen-filter-input-{}'.format(n + 1))
     filter_inputs.append(State('gen-filter-value1-{}'.format(n + 1), 'value'))
     filter_inputs.append(State('gen-filter-value2-{}'.format(n + 1), 'value'))
 
@@ -95,7 +104,6 @@ def get_filtered_df(dump, *values):
     specifications = []
     for i in range(1, len(values), 3):
         specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
-
     # Cleanup and prepare conditions
     conditions = []
     for specification in specifications:
@@ -131,32 +139,68 @@ def get_params_input(mode, input_x, input_y, input_z):
     print(input_z)
     return [mode, input_x, input_y, input_z]
 
-
 @app.callback(
     Output('g2', 'figure'),
     [Input('gen-params-store', 'children')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')])
-def update_graph(value, fig, vessel):
-    if fig is not None:
+def update_graph(value, figure, vessel):
+    if figure is not None:
         # Update Axis Titles based on Axis Parameters
-        fig['layout']['xaxis']['title'] = value[1]
-        fig['layout']['yaxis']['title'] = value[2]
+        figure['layout']['xaxis']['title'] = value[1]
+        figure['layout']['yaxis']['title'] = value[2]
         if value[0] == '3D' and value[3] is not None:
-            fig['layout']['yaxis']['title'] = value[3]
+            figure['layout']['yaxis']['title'] = value[3]
 
-        # Populate with 2D Data TODO: Multiple lines/curves
+        # Populate with 2D Data when X and Y set TODO: Remove hardcode
         if value[1] is not None and value[2] is not None:
-            print("THIS IS VESSEL: {}".format(vessel))
+            if len(figure['data']) < 1:
+                figure['data'].append({})
+            # Add scatter from first data set
             df = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
-            fig['data'][0]['x'] = df[value[1]]
-            fig['data'][0]['y'] = df[value[2]]
+            figure['data'][0] = go.Scatter(
+                x=df[value[1]],
+                y=df[value[2]],
+                name='First DataSet',
+                mode='markers',
+                marker=go.Marker(color=color.red)
+            )
 
-        print(fig['data'])
+            # Add first Line TODO: Get modular 'fitting master' components
+            if len(figure['data']) < 2:
+                figure['data'].append({})
+            figure['data'][1] = go.Scatter(
+                x=df[value[1]],
+                y=linear_regression(df[value[1]], df[value[2]]),
+                name='First Regression',
+                mode='lines',
+                marker=go.Marker(color=color.red)
+            )
 
-        return fig
-    return figure
+            # TEST Add clean data set TODO: Use actual components
+            if len(figure['data']) < 3:
+                figure['data'].append({})
+            figure['data'][2] = go.Scatter(
+                x=[1, 2, 3, 4, 5],
+                y=[7, 5, 8, 6, 9],
+                name='Sample markers',
+                mode='markers',
+                marker=go.Marker(color=color.blue)
+            )
 
+            if len(figure['data']) < 4:
+                figure['data'].append({})
+            k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
+            figure['data'][3] = go.Scatter(
+                x=[1, 2, 3, 4, 5],
+                y=linear_regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
+                name='Sample line',
+                mode='lines',
+                marker=go.Marker(color=color.blue)
+            )
+
+        return figure
+    return default_figure
 
 # callback to generate parameter fields depending on mode selected
 @app.callback(
@@ -293,10 +337,32 @@ def get_condition(option, value1, value2):
 
 @app.callback(
     Output('gen-filter', 'children'),
-    [Input('gen-filter-add', 'n_clicks')])
-def add_filter(n_clicks):
-    return add_filters(n_clicks)
+    [Input('gen-filter-add', 'n_clicks'),
+    Input('gen-filter-dump','children')],
+    [State('gen-filter','children')])
+def add_filter(n_clicks,dump,container):
+    if (n_clicks is None):
+        print "Hello"
+        return add_hidden_filters(n_filters)
+    else:
+        #print container[0]['props']['children'][0]
+        print container[0]['props']['children'][n_clicks]
+        container[0]['props']['children'][n_clicks] = generate_dropdown_filter(n_clicks)
+        print "Hello"
+        print container[0]['props']['children'][n_clicks]
+        return container
+        #return add_filters(n_clicks)
 
+# @app.callback(
+#     Output('gen-filter-container','children'),
+#     [Input('gen-filter-add', 'n_clicks')],
+#     [State('gen-filter-container','children')])
+# def loadFilter(n_clicks,gfContainer):
+#     for i in n_filters:
+#         if i < n_clicks:
+#             return add_filters(n_clicks)
+#         else:
+#             #add_hidden_filter(n_clicks)
 
 # TEST Catch data in graph
 @app.callback(
