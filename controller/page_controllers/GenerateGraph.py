@@ -1,19 +1,11 @@
-from dash.dependencies import Input, Output, State, Event
-import pandas_datareader.data as web
-import datetime
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
-from datetime import datetime as dt
-from controller.graph_components.regression import linear_regression, k_means
+from dash.dependencies import Input, Output, State
 
 import static.colors as color
-import plotly.plotly as py
 import plotly.graph_objs as go
-import pandas as pd
 
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
     generate_graph, add_hidden_filters, generate_dropdown_filter
+from controller.graph_components.regression import GraphMode, regression, k_means
 from model.database import SQL
 from app import app
 
@@ -114,7 +106,7 @@ def get_filtered_df(dump, *values):
 
     # Obtain filtered df
     df = dfs[values[0]].get_filtered(conditions=conditions)
-    print(df)
+    #print(df)
     return
 
 
@@ -141,14 +133,81 @@ def get_params_input(mode, input_x, input_y, input_z):
     print(input_z)
     return [mode, input_x, input_y, input_z]
 
+#
+# @app.callback(
+#     Output('g2', 'figure'),
+#     [Input('gen-params-store', 'children')],
+#     [State('g2', 'figure'),
+#      State('gen-vessel-input-1', 'value')])
+# def update_graph(value, figure, vessel):
+#     if figure is not None:
+#         # Update Axis Titles based on Axis Parameters
+#         figure['layout']['xaxis']['title'] = value[1]
+#         figure['layout']['yaxis']['title'] = value[2]
+#         if value[0] == '3D' and value[3] is not None:
+#             figure['layout']['yaxis']['title'] = value[3]
+#
+#         # Populate with 2D Data when X and Y set TODO: Remove hardcode
+#         if value[1] is not None and value[2] is not None:
+#             if len(figure['data']) < 1:
+#                 figure['data'].append({})
+#             # Add scatter from first data set
+#             df = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
+#             figure['data'][0] = go.Scatter(
+#                 x=df[value[1]],
+#                 y=df[value[2]],
+#                 name='First DataSet',
+#                 mode='markers',
+#                 marker=go.Marker(color=color.red)
+#             )
+#
+#             # Add first Line TODO: Include graphmode from user input
+#             if len(figure['data']) < 2:
+#                 figure['data'].append({})
+#             line_data = regression(df[value[1]], df[value[2]])
+#             figure['data'][1] = go.Scatter(
+#                 x=line_data['x'],
+#                 y=line_data['y'],
+#                 name='First Regression',
+#                 mode='lines',
+#                 marker=go.Marker(color=color.red)
+#             )
+#
+#             # TEST Add clean data set TODO: Use actual components
+#             if len(figure['data']) < 3:
+#                 figure['data'].append({})
+#             figure['data'][2] = go.Scatter(
+#                 x=[1, 2, 3, 4, 5],
+#                 y=[7, 5, 8, 6, 9],
+#                 name='Sample markers',
+#                 mode='markers',
+#                 marker=go.Marker(color=color.blue)
+#             )
+#
+#             if len(figure['data']) < 4:
+#                 figure['data'].append({})
+#             k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
+#             figure['data'][3] = go.Scatter(
+#                 x=[1, 2, 3, 4, 5],
+#                 y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
+#                 name='Sample line',
+#                 mode='lines',
+#                 marker=go.Marker(color=color.blue)
+#             )
+#
+#         return figure
+#     return default_figure
 
 @app.callback(
     Output('g2', 'figure'),
-    [Input('gen-params-store', 'children')],
+    [Input('gen-params-store', 'children'),
+    Input('gen-filter-store','children')],
     [State('g2', 'figure'),
-     State('gen-vessel-input-1', 'value')])
-def update_graph(value, figure, vessel):
-    if figure is not None:
+     State('gen-vessel-input-1', 'value')],
+     )
+def update_graph(value,filteredData,figure, vessel):
+    print "Filter State: " + str(filteredData)
+    if figure is not None and filteredData is None:
         # Update Axis Titles based on Axis Parameters
         figure['layout']['xaxis']['title'] = value[1]
         figure['layout']['yaxis']['title'] = value[2]
@@ -169,12 +228,13 @@ def update_graph(value, figure, vessel):
                 marker=go.Marker(color=color.red)
             )
 
-            # Add first Line TODO: Get modular 'fitting master' components
+            # Add first Line TODO: Include graphmode from user input
             if len(figure['data']) < 2:
                 figure['data'].append({})
+            line_data = regression(df[value[1]], df[value[2]])
             figure['data'][1] = go.Scatter(
-                x=df[value[1]],
-                y=linear_regression(df[value[1]], df[value[2]]),
+                x=line_data['x'],
+                y=line_data['y'],
                 name='First Regression',
                 mode='lines',
                 marker=go.Marker(color=color.red)
@@ -196,7 +256,62 @@ def update_graph(value, figure, vessel):
             k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
             figure['data'][3] = go.Scatter(
                 x=[1, 2, 3, 4, 5],
-                y=linear_regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
+                y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
+                name='Sample line',
+                mode='lines',
+                marker=go.Marker(color=color.blue)
+            )
+        return figure
+    elif figure is not None and filterState is not None:
+        # Update Axis Titles based on Axis Parameters
+        figure['layout']['xaxis']['title'] = value[1]
+        figure['layout']['yaxis']['title'] = value[2]
+        if value[0] == '3D' and value[3] is not None:
+            figure['layout']['yaxis']['title'] = value[3]
+
+        # Populate with 2D Data when X and Y set TODO: Remove hardcode
+        if value[1] is not None and value[2] is not None:
+            if len(figure['data']) < 1:
+                figure['data'].append({})
+            # Add scatter from first data set
+            df = filteredData.get_2D_data(value[1], value[2], clean=True)
+            figure['data'][0] = go.Scatter(
+                x=df[value[1]],
+                y=df[value[2]],
+                name='First DataSet',
+                mode='markers',
+                marker=go.Marker(color=color.red)
+            )
+
+            # Add first Line TODO: Include graphmode from user input
+            if len(figure['data']) < 2:
+                figure['data'].append({})
+            line_data = regression(df[value[1]], df[value[2]])
+            figure['data'][1] = go.Scatter(
+                x=line_data['x'],
+                y=line_data['y'],
+                name='First Regression',
+                mode='lines',
+                marker=go.Marker(color=color.red)
+            )
+
+            # TEST Add clean data set TODO: Use actual components
+            if len(figure['data']) < 3:
+                figure['data'].append({})
+            figure['data'][2] = go.Scatter(
+                x=[1, 2, 3, 4, 5],
+                y=[7, 5, 8, 6, 9],
+                name='Sample markers',
+                mode='markers',
+                marker=go.Marker(color=color.blue)
+            )
+
+            if len(figure['data']) < 4:
+                figure['data'].append({})
+            k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
+            figure['data'][3] = go.Scatter(
+                x=[1, 2, 3, 4, 5],
+                y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
                 name='Sample line',
                 mode='lines',
                 marker=go.Marker(color=color.blue)
@@ -204,7 +319,6 @@ def update_graph(value, figure, vessel):
 
         return figure
     return default_figure
-
 
 # callback to generate parameter fields depending on mode selected
 @app.callback(
@@ -419,3 +533,10 @@ def catch_data(dump1, dump2, figure):
 #     [State('g2', 'figure')])
 # def update_graph(value, fig):
 #     print(fig)
+#
+# @app.callback(
+#     Output('gen-filtered-data','children'),
+#     [Input('gen-filter-store','value')])
+# def filtered_data(filterData):
+#     print "Im Here"
+#     print filterData

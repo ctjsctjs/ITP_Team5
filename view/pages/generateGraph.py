@@ -87,7 +87,7 @@ layout = html.Div([
                 #     ]) for i in range(n_clicks)]
                 # )
                 # Hidden Element
-                html.Div(id='gen-filter-store', style={'display': 'none'}),
+                #html.Div(id='gen-filter-store', style={'display': 'none'}),
                 html.Div(id='gen-filter-dump', style={'display': 'none'}),
 
                 html.Button(
@@ -276,13 +276,13 @@ def generate_axis_parameters(mode, options):
             id='gen-paramX-input-1',
             placeholder=label_x,
             options=options,
-            # className='item-element-margin'
+            className='item-element-margin'
         ),
         dcc.Dropdown(
             id='gen-paramY-input-1',
             placeholder=label_y,
             options=options,
-            # className='item-element-margin'
+            className='item-element-margin'
         ),
     ]
 
@@ -292,7 +292,7 @@ def generate_axis_parameters(mode, options):
                 id='gen-paramZ-input-1',
                 placeholder=label_z,
                 options=options,
-                # className='item-element-margin'
+                className='item-element-margin'
             )
         )
     else:
@@ -316,6 +316,7 @@ def generate_graph(mode, options):
         # Hidden Graph Store
         html.Div(id='g2-store', style={'display': 'none'}),
         html.Div(id='g2-param-store', style={'display': 'none'}),
+        html.Div(id='gen-filter-store', style={'display': 'none'}),
 
         # Information Panel
         html.Div([
@@ -345,30 +346,31 @@ def generate_graph(mode, options):
                     html.H5('Parameter options', className='item-element-margin'),
                     html.Div(
                         id="gen-params-wrapper",
-                        className='item-inline item-element-margin',
+                        className='custom-panel',
+                        # className='item-inline item-element-margin',
                         children=generate_axis_parameters(mode, options)
                     ),
-                    html.Div([
-                        html.H5('Settings options', className='item-element-margin'),
-                        # Graph name input
-                        dcc.Input(
-                            placeholder='Graph Name',
-                            type='text',
-                            value=''
-                        ),
-                        # X axis label input
-                        dcc.Input(
-                            placeholder='X axis label',
-                            type='text',
-                            value=''
-                        ),
-                        # Y axis label input
-                        dcc.Input(
-                            placeholder='Y axis label',
-                            type='text',
-                            value=''
-                        ),
-                    ], className='custom-panel'),
+                    # html.Div([
+                    #     html.H5('Settings options', className='item-element-margin'),
+                    #     # Graph name input
+                    #     dcc.Input(
+                    #         placeholder='Graph Name',
+                    #         type='text',
+                    #         value=''
+                    #     ),
+                    #     # X axis label input
+                    #     dcc.Input(
+                    #         placeholder='X axis label',
+                    #         type='text',
+                    #         value=''
+                    #     ),
+                    #     # Y axis label input
+                    #     dcc.Input(
+                    #         placeholder='Y axis label',
+                    #         type='text',
+                    #         value=''
+                    #     ),
+                    # ], className='custom-panel'),
 
                     html.Div([
                         # Settings checklist form
