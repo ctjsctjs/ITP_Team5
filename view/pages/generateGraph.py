@@ -117,7 +117,6 @@ layout = html.Div([
 
                 # generate_filter_id(),
 
-
             ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
             html.Div([], id="gen-right-panel-wrapper"),
 
@@ -277,12 +276,13 @@ def generate_axis_parameters(mode, options):
             id='gen-paramX-input-1',
             placeholder=label_x,
             options=options,
-            className='item-element-margin'
+            # className='item-element-margin'
         ),
         dcc.Dropdown(
             id='gen-paramY-input-1',
             placeholder=label_y,
-            options=options
+            options=options,
+            # className='item-element-margin'
         ),
     ]
 
@@ -291,8 +291,8 @@ def generate_axis_parameters(mode, options):
             dcc.Dropdown(
                 id='gen-paramZ-input-1',
                 placeholder=label_z,
-                className="item-element-margin-top",
                 options=options,
+                # className='item-element-margin'
             )
         )
     else:
@@ -342,12 +342,12 @@ def generate_graph(mode, options):
                 html.Div([
 
                     # DIV to populate paramater fields TODO: shift to left panel
-                    #html.H5('Parameter options', className='item-element-margin'),
-                    # html.Div(
-                    #     id="gen-params-wrapper",
-                    #     className='item-inline item-element-margin',
-                    #     children=generate_axis_parameters(mode, options)
-                    # ),
+                    html.H5('Parameter options', className='item-element-margin'),
+                    html.Div(
+                        id="gen-params-wrapper",
+                        className='item-inline item-element-margin',
+                        children=generate_axis_parameters(mode, options)
+                    ),
                     html.Div([
                         html.H5('Settings options', className='item-element-margin'),
                         # Graph name input
@@ -356,13 +356,13 @@ def generate_graph(mode, options):
                             type='text',
                             value=''
                         ),
-                        #X axis label input
+                        # X axis label input
                         dcc.Input(
                             placeholder='X axis label',
                             type='text',
                             value=''
                         ),
-                        #Y axis label input
+                        # Y axis label input
                         dcc.Input(
                             placeholder='Y axis label',
                             type='text',
@@ -386,7 +386,7 @@ def generate_graph(mode, options):
                     ], className='custom-panel'),
                     html.Div([
 
-                        #Regression type input
+                        # Regression type input
                         html.H5('Select the regression degree of the graph', className='item-element-margin'),
                         dcc.Dropdown(
                             id='gen-regression-input-1',
@@ -397,7 +397,7 @@ def generate_graph(mode, options):
                                 ]
                             ], className='item-element-margin'),
 
-                        #Clusters input
+                        # Clusters input
                         html.H5('Select the number of clusters of the graph', className='item-element-margin'),
                         dcc.Slider(
                             min=0,

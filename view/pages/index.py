@@ -7,5 +7,6 @@ layout = \
     html.Div([
         navbar,
         dcc.Location(id='url', refresh=False),
-        html.Div(id='page-content')
+        html.Div(id='page-content'),
+        html.Div(id='data-content')
     ])
