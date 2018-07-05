@@ -312,3 +312,13 @@ font-weight: 700;
 .margin-top-12{
   margin-top:12px;
 }
+
+.custom-panel{
+  width:calc((100% - 24px) / 3);
+  display:inline-block;
+  vertical-align: top;
+}
+
+.custom-panel:nth-child(-n+2){
+  margin-right:12px;
+}

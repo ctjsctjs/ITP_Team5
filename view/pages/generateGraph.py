@@ -102,7 +102,7 @@ layout = html.Div([
 
                 # call filter layout
                 html.Div(id='gen-filter'),
-                
+
                 html.Button(
                     id='gen-filter-submit',
                     className='button item-element-margin',
@@ -334,35 +334,82 @@ def generate_graph(mode, options):
                 html.Span([], className="settings-info", id='gen-paramY-output-1'),
                 html.Span([], className="settings-info", id='gen-paramZ-output-1'),
                 html.Span([], className="settings-info", id='gen-settings-output-1'),
-            ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
+            ], className='item-wrapper item-settings-panel item-row', id="item-wrapper"),
 
             # Customise Panel
             html.Div([
                 html.H2('Customize Panel', className='item-element-margin'),
                 html.Div([
-                    html.H5('Parameter options', className='item-element-margin'),
 
-                    # DIV to populate paramater fields
-                    html.Div(
-                        id="gen-params-wrapper",
-                        className='item-inline item-element-margin',
-                        children=generate_axis_parameters(mode, options)
-                    ),
+                    # DIV to populate paramater fields TODO: shift to left panel
+                    #html.H5('Parameter options', className='item-element-margin'),
+                    # html.Div(
+                    #     id="gen-params-wrapper",
+                    #     className='item-inline item-element-margin',
+                    #     children=generate_axis_parameters(mode, options)
+                    # ),
+                    html.Div([
+                        html.H5('Settings options', className='item-element-margin'),
+                        # Graph name input
+                        dcc.Input(
+                            placeholder='Graph Name',
+                            type='text',
+                            value=''
+                        ),
+                        #X axis label input
+                        dcc.Input(
+                            placeholder='X axis label',
+                            type='text',
+                            value=''
+                        ),
+                        #Y axis label input
+                        dcc.Input(
+                            placeholder='Y axis label',
+                            type='text',
+                            value=''
+                        ),
+                    ], className='custom-panel'),
 
-                    # Settings checklist form
-                    html.H5('Settings options', className='item-element-margin'),
-                    dcc.Checklist(
-                        id="gen-settings-input-1",
-                        options=[
-                            {'label': 'Clustering', 'value': 'clustering'},
-                            {'label': 'Regression', 'value': 'regression'},
-                            {'label': 'Color', 'value': 'color'}
-                        ],
-                        labelStyle={'display': 'block', 'margin-bottom': '6px'},
-                        values=[]
-                    )
-                ], className='item-row item-select-height item-inline'),
-            ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+                    html.Div([
+                        # Settings checklist form
+                        html.H5('Settings options', className='item-element-margin'),
+                        dcc.Checklist(
+                            id="gen-settings-input-1",
+                            options=[
+                                {'label': 'Toggle Regression', 'value': 'regression'},
+                                {'label': 'Toggle Clustering', 'value': 'clustering'},
+                                {'label': 'Toggle Datapoints', 'value': 'datapoints'}
+                            ],
+                            labelStyle={'display': 'block', 'margin-bottom': '6px'},
+                            values=[]
+                        ),
+                    ], className='custom-panel'),
+                    html.Div([
+
+                        #Regression type input
+                        html.H5('Select the regression degree of the graph', className='item-element-margin'),
+                        dcc.Dropdown(
+                            id='gen-regression-input-1',
+                            placeholder="Series",
+                            options=[
+                                {'label': k, 'value': k} for k in [
+                                    'Linear', 'Quadratic', 'Cubic', 'Quatric'
+                                ]
+                            ], className='item-element-margin'),
+
+                        #Clusters input
+                        html.H5('Select the number of clusters of the graph', className='item-element-margin'),
+                        dcc.Slider(
+                            min=0,
+                            max=9,
+                            marks={i: '{}'.format(i) for i in range(10)},
+                            value=0,
+                        )
+
+                    ], className='custom-panel'),
+
+                ], className='item-row item-select-height'),
+            ], className='item-wrapper item-settings-panel item-row', id="item-wrapper"),
         ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
     ])
 
