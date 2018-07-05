@@ -2,6 +2,7 @@ from dash.dependencies import Input, Output, State
 
 import static.colors as color
 import plotly.graph_objs as go
+import pandas as pd
 
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
     generate_graph, add_hidden_filters, generate_dropdown_filter
@@ -106,8 +107,8 @@ def get_filtered_df(dump, *values):
 
     # Obtain filtered df
     df = dfs[values[0]].get_filtered(conditions=conditions)
-    #print(df)
-    return
+    #print (df)
+    return df.to_json()
 
 
 # callback to generate parameter fields depending on mode selected
@@ -206,7 +207,6 @@ def get_params_input(mode, input_x, input_y, input_z):
      State('gen-vessel-input-1', 'value')],
      )
 def update_graph(value,filteredData,figure, vessel):
-    print "Filter State: " + str(filteredData)
     if figure is not None and filteredData is None:
         # Update Axis Titles based on Axis Parameters
         figure['layout']['xaxis']['title'] = value[1]
@@ -262,7 +262,8 @@ def update_graph(value,filteredData,figure, vessel):
                 marker=go.Marker(color=color.blue)
             )
         return figure
-    elif figure is not None and filterState is not None:
+    elif figure is not None and filteredData is not None:
+        dfToJson = pd.read_json(filteredData)
         # Update Axis Titles based on Axis Parameters
         figure['layout']['xaxis']['title'] = value[1]
         figure['layout']['yaxis']['title'] = value[2]
@@ -274,7 +275,10 @@ def update_graph(value,filteredData,figure, vessel):
             if len(figure['data']) < 1:
                 figure['data'].append({})
             # Add scatter from first data set
-            df = filteredData.get_2D_data(value[1], value[2], clean=True)
+            dfClean = dfToJson[[value[1],value[2]]]
+            df = dfClean.dropna()
+            print df
+            #df = dfToJson.get_2D_data(value[1], value[2], clean=True)
             figure['data'][0] = go.Scatter(
                 x=df[value[1]],
                 y=df[value[2]],
