@@ -11,8 +11,11 @@ class GraphMode(Enum):
 
 
 # TODO: Replace method content with modular 'fitting_master' component
-def regression(x, y, graph_mode=GraphMode.LINEAR):
-    z = np.polyfit(x, y, graph_mode.value)
+def regression(x, y, graph_mode=None):
+    if graph_mode is None:
+        z = np.polyfit(x, y, GraphMode.LINEAR.value)
+    else:
+        z = np.polyfit(x, y, graph_mode)
     f = np.poly1d(z)
 
     x_new = np.linspace(min(x), max(x), max(x))
@@ -22,11 +25,13 @@ def regression(x, y, graph_mode=GraphMode.LINEAR):
 
 
 # TODO: Check if function works as intended
-def k_means(x, y):
-    numClusters = len(x) / 3
+def k_means(x, y, clusters=None):
+    # Default cluster
+    if clusters is None:
+        clusters = len(x) / 3
 
     beforeCoords = np.c_[np.array(x), np.array(y)]
-    kmeans = KMeans(n_clusters=numClusters, random_state=0).fit(beforeCoords)
+    kmeans = KMeans(n_clusters=clusters, random_state=0).fit(beforeCoords)
     x = [xN for xN, yN in kmeans.cluster_centers_]
     y = [yN for xN, yN in kmeans.cluster_centers_]
 

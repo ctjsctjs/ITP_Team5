@@ -13,7 +13,7 @@ from app import app
 # Init
 sql = SQL()
 options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
-n_filters = 3
+n_filters = 10
 dfs = {}
 
 default_figure = {
@@ -50,6 +50,15 @@ def load_vessel_df(vessel):
     if vessel not in dfs:
         print vessel
         dfs[vessel] = SQL().get_vessel(vessel=vessel)
+
+
+# Load Axis Parameters selection
+# @app.callback(
+#     Output('gen-params-wrapper', 'children'),
+#     [Input('gen-params-dump', 'children'),
+#      Input('gen-mode-input-1', 'value')])
+# def load_axis_parameteers(dump, mode):
+#     return generate_axis_parameters(mode, options)
 
 
 # Populate 'gen-filter's
@@ -107,17 +116,25 @@ def get_filtered_df(dump, *values):
 
     # Obtain filtered df
     df = dfs[values[0]].get_filtered(conditions=conditions)
-    #print (df)
+    # print (df)
     return df.to_json()
 
 
-# callback to generate parameter fields depending on mode selected
+# Generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-params-wrapper', 'children'),
     [Input('gen-mode-input-1', 'value')])
 def update_filer(value):
     options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
     return generate_axis_parameters(value, options)
+
+
+# Populate Graph Mode Selection Dropdown
+@app.callback(
+    Output('gen-regression-input-1', 'options'),
+    [Input('gen-regression-input-dump', 'children')])
+def load_graphmode_selection(dump):
+    return [{'label': item.name, 'value': item.value} for item in GraphMode]
 
 
 # Obtain Axis Parameters Input
@@ -128,201 +145,114 @@ def update_filer(value):
      Input('gen-paramY-input-1', 'value'),
      Input('gen-paramZ-input-1', 'value')])
 def get_params_input(mode, input_x, input_y, input_z):
-    print(mode)
-    print(input_x)
-    print(input_y)
-    print(input_z)
     return [mode, input_x, input_y, input_z]
 
-#
-# @app.callback(
-#     Output('g2', 'figure'),
-#     [Input('gen-params-store', 'children')],
-#     [State('g2', 'figure'),
-#      State('gen-vessel-input-1', 'value')])
-# def update_graph(value, figure, vessel):
-#     if figure is not None:
-#         # Update Axis Titles based on Axis Parameters
-#         figure['layout']['xaxis']['title'] = value[1]
-#         figure['layout']['yaxis']['title'] = value[2]
-#         if value[0] == '3D' and value[3] is not None:
-#             figure['layout']['yaxis']['title'] = value[3]
-#
-#         # Populate with 2D Data when X and Y set TODO: Remove hardcode
-#         if value[1] is not None and value[2] is not None:
-#             if len(figure['data']) < 1:
-#                 figure['data'].append({})
-#             # Add scatter from first data set
-#             df = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
-#             figure['data'][0] = go.Scatter(
-#                 x=df[value[1]],
-#                 y=df[value[2]],
-#                 name='First DataSet',
-#                 mode='markers',
-#                 marker=go.Marker(color=color.red)
-#             )
-#
-#             # Add first Line TODO: Include graphmode from user input
-#             if len(figure['data']) < 2:
-#                 figure['data'].append({})
-#             line_data = regression(df[value[1]], df[value[2]])
-#             figure['data'][1] = go.Scatter(
-#                 x=line_data['x'],
-#                 y=line_data['y'],
-#                 name='First Regression',
-#                 mode='lines',
-#                 marker=go.Marker(color=color.red)
-#             )
-#
-#             # TEST Add clean data set TODO: Use actual components
-#             if len(figure['data']) < 3:
-#                 figure['data'].append({})
-#             figure['data'][2] = go.Scatter(
-#                 x=[1, 2, 3, 4, 5],
-#                 y=[7, 5, 8, 6, 9],
-#                 name='Sample markers',
-#                 mode='markers',
-#                 marker=go.Marker(color=color.blue)
-#             )
-#
-#             if len(figure['data']) < 4:
-#                 figure['data'].append({})
-#             k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
-#             figure['data'][3] = go.Scatter(
-#                 x=[1, 2, 3, 4, 5],
-#                 y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
-#                 name='Sample line',
-#                 mode='lines',
-#                 marker=go.Marker(color=color.blue)
-#             )
-#
-#         return figure
-#     return default_figure
 
 @app.callback(
     Output('g2', 'figure'),
     [Input('gen-params-store', 'children'),
-    Input('gen-filter-store','children')],
+     Input('gen-filter-store', 'children'),
+     Input('gen-settings-input-1', 'values'),
+     Input('gen-regression-input-1', 'value'),
+     Input('gen-kmeans-cluster', 'value')],
     [State('g2', 'figure'),
-     State('gen-vessel-input-1', 'value')],
-     )
-def update_graph(value,filteredData,figure, vessel):
-    if figure is not None and filteredData is None:
+     State('gen-vessel-input-1', 'value')])
+def update_graph(value, filteredData, settings, graph_mode, clusters, figure, vessel):
+    print("THIS IS CLUSTERS: {}".format(clusters))
+    if figure is not None:
         # Update Axis Titles based on Axis Parameters
-        figure['layout']['xaxis']['title'] = value[1]
-        figure['layout']['yaxis']['title'] = value[2]
-        if value[0] == '3D' and value[3] is not None:
-            figure['layout']['yaxis']['title'] = value[3]
+        # Set X Axis
+        if value[1] is None:
+            figure['layout']['xaxis']['title'] = default_figure['layout']['xaxis']['title']
+        else:
+            figure['layout']['xaxis']['title'] = value[1]
+        # Set Y Axis
+        if value[2] is None:
+            figure['layout']['yaxis']['title'] = default_figure['layout']['yaxis']['title']
+        else:
+            figure['layout']['yaxis']['title'] = value[2]
+        # Set Z Axis if 3D
+        if value[0] == '3D':
+            if value[3] is None:
+                figure['layout']['zaxis']['title'] = default_figure['layout']['zaxis']['title']
+            else:
+                figure['layout']['zaxis']['title'] = value[3]
 
-        # Populate with 2D Data when X and Y set TODO: Remove hardcode
-        if value[1] is not None and value[2] is not None:
+        # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
+        if value[1] is None or value[2] is None:
+            figure['data'] = []
+        else:
+            # Clean data
+            if filteredData is None:
+                dff = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
+            else:
+                dfToJson = pd.read_json(filteredData)
+                dfClean = dfToJson[[value[1], value[2]]]
+                dff = dfClean.dropna()
+
+            # K-means if 'clustering' toggled
+            if 'clustering' in settings:
+                df = k_means(dff[value[1]], dff[value[2]], clusters)
+            else:
+                df = {'x': dff[value[1]], 'y': dff[value[2]]}
+
+            # Add scatter from data set if 'datapoints' toggled
             if len(figure['data']) < 1:
                 figure['data'].append({})
-            # Add scatter from first data set
-            df = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
-            figure['data'][0] = go.Scatter(
-                x=df[value[1]],
-                y=df[value[2]],
-                name='First DataSet',
-                mode='markers',
-                marker=go.Marker(color=color.red)
-            )
+            if 'datapoints' in settings:
+                figure['data'][0] = go.Scatter(
+                    x=df['x'],
+                    y=df['y'],
+                    name='First DataSet',
+                    mode='markers',
+                    # marker=go.Marker(color=color.red)
+                )
+            else:
+                figure['data'][0] = None
 
-            # Add first Line TODO: Include graphmode from user input
+            # Add Line/Curve if 'regression' toggled
             if len(figure['data']) < 2:
                 figure['data'].append({})
-            line_data = regression(df[value[1]], df[value[2]])
-            figure['data'][1] = go.Scatter(
-                x=line_data['x'],
-                y=line_data['y'],
-                name='First Regression',
-                mode='lines',
-                marker=go.Marker(color=color.red)
-            )
+            if 'regression' in settings:
+                line_data = regression(df['x'], df['y'], graph_mode)
+                figure['data'][1] = go.Scatter(
+                    x=line_data['x'],
+                    y=line_data['y'],
+                    name='First Regression',
+                    mode='lines',
+                    # marker=go.Marker(color=color.red)
+                )
+            else:
+                figure['data'][1] = None
 
-            # TEST Add clean data set TODO: Use actual components
-            if len(figure['data']) < 3:
-                figure['data'].append({})
-            figure['data'][2] = go.Scatter(
-                x=[1, 2, 3, 4, 5],
-                y=[7, 5, 8, 6, 9],
-                name='Sample markers',
-                mode='markers',
-                marker=go.Marker(color=color.blue)
-            )
+            # # TEST Dummy Data TODO: Use actual components
+            # if len(figure['data']) < 3:
+            #     figure['data'].append({})
+            # figure['data'][2] = go.Scatter(
+            #     x=[1, 2, 3, 4, 5],
+            #     y=[7, 5, 8, 6, 9],
+            #     name='Sample markers',
+            #     mode='markers',
+            #     marker=go.Marker(color=color.blue)
+            # )
+            #
+            # if len(figure['data']) < 4:
+            #     figure['data'].append({})
+            # k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
+            # figure['data'][3] = go.Scatter(
+            #     x=[1, 2, 3, 4, 5],
+            #     y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
+            #     name='Sample line',
+            #     mode='lines',
+            #     marker=go.Marker(color=color.blue)
+            # )
 
-            if len(figure['data']) < 4:
-                figure['data'].append({})
-            k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
-            figure['data'][3] = go.Scatter(
-                x=[1, 2, 3, 4, 5],
-                y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
-                name='Sample line',
-                mode='lines',
-                marker=go.Marker(color=color.blue)
-            )
-        return figure
-    elif figure is not None and filteredData is not None:
-        dfToJson = pd.read_json(filteredData)
-        # Update Axis Titles based on Axis Parameters
-        figure['layout']['xaxis']['title'] = value[1]
-        figure['layout']['yaxis']['title'] = value[2]
-        if value[0] == '3D' and value[3] is not None:
-            figure['layout']['yaxis']['title'] = value[3]
-
-        # Populate with 2D Data when X and Y set TODO: Remove hardcode
-        if value[1] is not None and value[2] is not None:
-            if len(figure['data']) < 1:
-                figure['data'].append({})
-            # Add scatter from first data set
-            dfClean = dfToJson[[value[1],value[2]]]
-            df = dfClean.dropna()
-            print df
-            #df = dfToJson.get_2D_data(value[1], value[2], clean=True)
-            figure['data'][0] = go.Scatter(
-                x=df[value[1]],
-                y=df[value[2]],
-                name='First DataSet',
-                mode='markers',
-                marker=go.Marker(color=color.red)
-            )
-
-            # Add first Line TODO: Include graphmode from user input
-            if len(figure['data']) < 2:
-                figure['data'].append({})
-            line_data = regression(df[value[1]], df[value[2]])
-            figure['data'][1] = go.Scatter(
-                x=line_data['x'],
-                y=line_data['y'],
-                name='First Regression',
-                mode='lines',
-                marker=go.Marker(color=color.red)
-            )
-
-            # TEST Add clean data set TODO: Use actual components
-            if len(figure['data']) < 3:
-                figure['data'].append({})
-            figure['data'][2] = go.Scatter(
-                x=[1, 2, 3, 4, 5],
-                y=[7, 5, 8, 6, 9],
-                name='Sample markers',
-                mode='markers',
-                marker=go.Marker(color=color.blue)
-            )
-
-            if len(figure['data']) < 4:
-                figure['data'].append({})
-            k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
-            figure['data'][3] = go.Scatter(
-                x=[1, 2, 3, 4, 5],
-                y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
-                name='Sample line',
-                mode='lines',
-                marker=go.Marker(color=color.blue)
-            )
+        # Clean figure data
+        figure['data'] = [i for i in figure['data'] if i is not None]
 
         return figure
     return default_figure
+
 
 # callback to generate parameter fields depending on mode selected
 @app.callback(
@@ -423,7 +353,7 @@ def update_output(value):
     Output('gen-settings-output-1', 'children'),
     [Input('gen-settings-input-1', 'values')])
 def update_output(value):
-    return "Settings: " + str(value)
+    return "Settings: {}".format([item for item in value])
 
 
 # Identifies whether an option is text, numeric or date

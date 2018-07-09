@@ -6,11 +6,12 @@ class FileType(Enum):
     VLOG = 0
     VOMSII = 1
     V2PS = 2
+    OTHERS = 3
 
 
 class DataFrame:
     def __init__(self, data, file_type=FileType.VOMSII):
-        self.__fileType = file_type         # 0 - VLOG, 1 - VOMSII, 2 - V2PS
+        self.__fileType = file_type  # 0 - VLOG, 1 - VOMSII, 2 - V2PS
         if type(data) is pd.DataFrame:
             self.__dataFrame = data
         else:
@@ -20,27 +21,32 @@ class DataFrame:
     """
     Method to get DataFrame
     """
+
     def get_df(self):
         return self.__dataFrame
+
     """
     Method that returns a list containing column names
     """
+
     def get_columns(self):
         return self.__columns
 
     """
     Method to get the data type of each column
     """
+
     def get_column_datatypes(self):
         return self.__dataFrame.dtypes.astype(str).tolist()
 
     """
     Method to get data from a specific row based on index. Starts from 1
     """
+
     def get_row(self, row):
         # If row exists/is valid
         if 0 < row <= len(self.__dataFrame):
-            return self.__dataFrame.iloc[row-1]
+            return self.__dataFrame.iloc[row - 1]
 
         print("Invalid Row: No such row in DataFrame")
         return
@@ -48,12 +54,14 @@ class DataFrame:
     """
     Method to get number of rows
     """
+
     def len(self):
         return len(self.__dataFrame)
 
     """
     Methode to get filtered data
     """
+
     def get_filtered(self, conditions=[]):
         data_frame = self.__dataFrame
 
@@ -64,13 +72,14 @@ class DataFrame:
             con += ("(data_frame['%s'] %s %s)" % condition)
 
         print('data_frame = (data_frame.loc[%s])' % con)
-        exec('data_frame = (data_frame.loc[%s])' % con)
+        exec ('data_frame = (data_frame.loc[%s])' % con)
 
         return data_frame
 
     """
     Method to get data for a 2D Graph
     """
+
     def get_2D_data(self, x_axis, y_axis, conditions=None, clean=False):
         # If X-axis is not a column in DataFrame
         if not self.__does_column_exist(x_axis):
@@ -101,6 +110,7 @@ class DataFrame:
     """
     Method to get data for a 3D Graph
     """
+
     def get_3D_data(self, x_axis, y_axis, z_axis):
         # If X-axis is not a column in DataFrame
         if not self.__does_column_exist(x_axis):
@@ -126,6 +136,7 @@ class DataFrame:
     """
     Method to read file and store file data as a DataFrame
     """
+
     def __readfile__(self, file):
         # If file is empty. -- REDUNDANT ERROR HANDLING --
         if file is None:
@@ -142,6 +153,9 @@ class DataFrame:
         # Reads V2PS    -- FOR FUTURE SCALABILITY --
         elif self.__fileType is FileType.V2PS:
             return
+        # Reads Basic
+        elif self.__fileType is FileType.OTHERS:
+            return pd.read_excel(file)
         # Unknown FileType  TODO: Upgrade for better error handling
         else:
             print("Unknown FileType: File is not of VLOG, VOSMII or V2PS")
@@ -150,6 +164,7 @@ class DataFrame:
     """
     Method to read file and obtain column names
     """
+
     def __get_columns(self):
         # If DataFrame is empty. -- REDUNDANT ERROR HANDLING --
         if self.__dataFrame is None:
@@ -161,6 +176,7 @@ class DataFrame:
     """
     Method to check if a given column name exists
     """
+
     def __does_column_exist(self, column):
         if column in self.__columns:
             return True
@@ -170,6 +186,7 @@ class DataFrame:
     Method to remove 'Nan' data in DataFrame and convert data to appropriate file types. Returns cleaned DataFrame
     -- UPGRADE AND REEVALUATION REQUIRED --
     """
+
     def __clean_data(self, data_frame):
         # Remove rows containing 'Nan'
         df = data_frame.dropna()

@@ -2,7 +2,7 @@ import pandas as pd
 
 from model.database import SQL
 from model.dataframe import DataFrame
-
+from controller.graph_components.regression import GraphMode
 
 # result = SQL().get_filter_options()
 # df = pd.DataFrame(result)
@@ -39,5 +39,107 @@ from model.dataframe import DataFrame
 #
 # func(1,2,3)
 
-for i in range(3, 10, 3):
-    print i
+# for i in range(3, 10, 3):
+#     print i
+
+# for name in GraphMode:
+#     print name.name
+
+# print(GraphMode(1).name)
+# print(GraphMode(1).value)
+
+# sql = SQL()
+#
+# print(sql.get_column_names())
+# print(sql.get_vessels())
+#
+# print(sql.get_table_names())
+#
+
+# txt = "L3monade"
+#
+# print([unicode(txt), u'text'])
+
+name = "name.ext"
+
+print(name.split('.')[0])
+
+
+reading = [
+    {
+        u'namespace': u'dash_html_components',
+        u'type': u'Div',
+        u'props': {
+            u'className':
+                u'table-heading overflow-auto item-element-margin',
+            u'children': [
+                {
+                    u'namespace': u'dash_html_components',
+                    u'type': u'H4',
+                    u'props': {
+                        u'className': u'header-title panel-left',
+                        u'children': u'Database Tables'
+                    }
+                },
+                {
+                    u'namespace': u'dash_html_components',
+                    u'type': u'H4',
+                    u'props': {
+                        u'className': u'header-title panel-right',
+                        u'children': u'Status'
+                    }
+                }
+            ]
+        }
+    },
+    {
+        u'namespace': u'dash_html_components',
+        u'type': u'Div',
+        u'props': {
+            u'className': u'table-row overflow-auto item-element-margin',
+            u'children': [
+                {
+                    u'namespace': u'dash_html_components',
+                    u'type': u'H4',
+                    u'props': {
+                        u'className': u'header-title panel-left',
+                        u'children': u'25/08/2018, 15:34:00'
+                    }
+                },
+                {
+                    u'namespace': u'dash_html_components',
+                    u'type': u'H4',
+                    u'props': {
+                        u'className': u'header-title panel-right',
+                        u'children': u'Upload Success'
+                    }
+                }
+            ]
+        }
+    },
+    {
+        u'namespace': u'dash_html_components',
+        u'type': u'Div',
+        u'props': {
+            u'className': u'table-row overflow-auto item-element-margin',
+            u'children': [
+                {
+                    u'namespace': u'dash_html_components',
+                    u'type': u'H4',
+                    u'props': {
+                        u'className': u'header-title panel-left',
+                        u'children': u'27/08/2018, 16:35:40'
+                    }
+                },
+                {
+                    u'namespace': u'dash_html_components',
+                    u'type': u'H4',
+                    u'props': {
+                        u'className': u'header-title panel-right',
+                        u'children': u'Upload Success'
+                    }
+                }
+            ]
+        }
+    }
+]
