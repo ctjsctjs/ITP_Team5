@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import r2_score
 from enum import Enum
 
 
@@ -17,7 +18,8 @@ def regression(x, y, graph_mode=None):
     else:
         z = np.polyfit(x, y, graph_mode)
     f = np.poly1d(z)
-
+    r2value = r2_score(y, f(x)) # To return this value as well
+    
     x_new = np.linspace(min(x), max(x), max(x))
     y_new = f(x_new)
 
