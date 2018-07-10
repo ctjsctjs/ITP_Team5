@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import r2_score
 from enum import Enum
 
 
@@ -11,13 +12,20 @@ class GraphMode(Enum):
 
 
 # TODO: Replace method content with modular 'fitting_master' component
+'''
+res = sum of least squares
+f = formula of regression line
+r2value = R-Squared value
+'''
 def regression(x, y, graph_mode=GraphMode.LINEAR):
-    z = np.polyfit(x, y, graph_mode.value)
+    z, res, _, _, _ = np.polyfit(x, y, graph_mode.value, full=True)
     f = np.poly1d(z)
+    r2value = r2_score(y, f(x))
 
     x_new = np.linspace(min(x), max(x), max(x))
     y_new = f(x_new)
 
+    # return {'x': x_new, 'y': y_new}, res, r2value, f
     return {'x': x_new, 'y': y_new}
 
 
