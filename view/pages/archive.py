@@ -13,7 +13,9 @@ layout = \
                 type='text',
                 value='',
                 className='search-form item-element-margin header-button'
-            )
+            ),
+            html.P('Catalogue of all saved graph settings', className='title-desc'),
+
         ], className='wrapper-white header-wrapper page-width'),
 
         # body-wrapper

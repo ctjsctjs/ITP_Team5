@@ -18,6 +18,8 @@ layout = \
                 multiple=False
             ),
 
+            html.P('Database Upload and view upload status', className='title-desc'),
+
             # Hidden upload store
             html.Div(id='database-upload-store')
 
