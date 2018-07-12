@@ -19,7 +19,7 @@ class SQL:
         self.__encoding = encoding
         self.__filter_limit = 100
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-        self.__default_table = "vomsii_data"
+        self.__default_table = "vosmii_data"
 
     def __del__(self):
         self.__close()
@@ -143,7 +143,7 @@ class SQL:
             return
 
         self.__reconnect()
-        df = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
+        df = pd.read_sql(sql="SELECT * FROM vosmii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
         return DataFrame(df)
 
     """

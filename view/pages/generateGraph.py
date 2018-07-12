@@ -207,6 +207,10 @@ layout = html.Div([
 
                 # generate_filter_id(),
 
+                #hidden store
+                html.Div(id='save-setting', style={'display': 'none'}),
+                html.Div(id='save-test', style={'display': 'none'}),
+
             ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
 
             html.Div([
@@ -362,7 +366,12 @@ def generate_graph(mode, options):
             html.H2('Graph Panel', className='item-element-margin'),
             dcc.Graph(
                 id='g2'
-            )
+            ),
+            html.Button(
+            'Save Settings',
+            className='button item-element-margin',
+            id='save-settings-btn'),
+
         ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
 
         # Hidden Graph Store

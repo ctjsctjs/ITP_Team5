@@ -154,10 +154,16 @@ def get_params_input(mode, input_x, input_y, input_z):
      Input('gen-filter-store', 'children'),
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
-     Input('gen-kmeans-cluster', 'value')],
+     Input('gen-kmeans-cluster', 'value'),
+     Input('save-settings-btn','n_clicks')],
     [State('g2', 'figure'),
-     State('gen-vessel-input-1', 'value')])
-def update_graph(value, filteredData, settings, graph_mode, clusters, figure, vessel):
+     State('gen-vessel-input-1', 'value'),
+     State('gen-params-store', 'children'),
+      State('gen-filter-store', 'children'),
+      State('gen-settings-input-1', 'values'),
+      State('gen-regression-input-1', 'value'),
+      State('gen-kmeans-cluster', 'value')])
+def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick, figure, vessel,valueState,filteredDataState,settingsState,graph_modeState,clustersState):
     print("THIS IS CLUSTERS: {}".format(clusters))
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
@@ -182,76 +188,193 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, figure, ve
         if value[1] is None or value[2] is None:
             figure['data'] = []
         else:
-            # Clean data
-            if filteredData is None:
-                dff = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
-            else:
-                dfToJson = pd.read_json(filteredData)
-                dfClean = dfToJson[[value[1], value[2]]]
-                dff = dfClean.dropna()
+            if saveClick is None:
+                # Clean data
+                if filteredData is None:
+                    dff = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
+                else:
+                    dfToJson = pd.read_json(filteredData)
+                    dfClean = dfToJson[[value[1], value[2]]]
+                    dff = dfClean.dropna()
 
-            # K-means if 'clustering' toggled
-            if 'clustering' in settings:
-                df = k_means(dff[value[1]], dff[value[2]], clusters)
-            else:
-                df = {'x': dff[value[1]], 'y': dff[value[2]]}
+                # K-means if 'clustering' toggled
+                if 'clustering' in settings:
+                    df = k_means(dff[value[1]], dff[value[2]], clusters)
+                else:
+                    df = {'x': dff[value[1]], 'y': dff[value[2]]}
 
-            # Add scatter from data set if 'datapoints' toggled
-            if len(figure['data']) < 1:
-                figure['data'].append({})
-            if 'datapoints' in settings:
-                figure['data'][0] = go.Scatter(
-                    x=df['x'],
-                    y=df['y'],
-                    name='First DataSet',
-                    mode='markers',
-                    # marker=go.Marker(color=color.red)
-                )
-            else:
-                figure['data'][0] = None
+                # Add scatter from data set if 'datapoints' toggled
+                if len(figure['data']) < 1:
+                    figure['data'].append({})
+                if 'datapoints' in settings:
+                    figure['data'][0] = go.Scatter(
+                        x=df['x'],
+                        y=df['y'],
+                        name='First DataSet',
+                        mode='markers',
+                        # marker=go.Marker(color=color.red)
+                    )
+                else:
+                    figure['data'][0] = None
 
-            # Add Line/Curve if 'regression' toggled
-            if len(figure['data']) < 2:
-                figure['data'].append({})
-            if 'regression' in settings:
-                line_data = regression(df['x'], df['y'], graph_mode)
-                figure['data'][1] = go.Scatter(
-                    x=line_data['x'],
-                    y=line_data['y'],
-                    name='First Regression',
-                    mode='lines',
-                    # marker=go.Marker(color=color.red)
-                )
-            else:
-                figure['data'][1] = None
+                # Add Line/Curve if 'regression' toggled
+                if len(figure['data']) < 2:
+                    figure['data'].append({})
+                if 'regression' in settings:
+                    line_data = regression(df['x'], df['y'], graph_mode)
+                    figure['data'][1] = go.Scatter(
+                        x=line_data['x'],
+                        y=line_data['y'],
+                        name='First Regression',
+                        mode='lines',
+                        # marker=go.Marker(color=color.red)
+                    )
+                else:
+                    figure['data'][1] = None
 
-            # # TEST Dummy Data TODO: Use actual components
-            # if len(figure['data']) < 3:
-            #     figure['data'].append({})
-            # figure['data'][2] = go.Scatter(
-            #     x=[1, 2, 3, 4, 5],
-            #     y=[7, 5, 8, 6, 9],
-            #     name='Sample markers',
-            #     mode='markers',
-            #     marker=go.Marker(color=color.blue)
-            # )
-            #
-            # if len(figure['data']) < 4:
-            #     figure['data'].append({})
-            # k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
-            # figure['data'][3] = go.Scatter(
-            #     x=[1, 2, 3, 4, 5],
-            #     y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
-            #     name='Sample line',
-            #     mode='lines',
-            #     marker=go.Marker(color=color.blue)
-            # )
+                # # TEST Dummy Data TODO: Use actual components
+                # if len(figure['data']) < 3:
+                #     figure['data'].append({})
+                # figure['data'][2] = go.Scatter(
+                #     x=[1, 2, 3, 4, 5],
+                #     y=[7, 5, 8, 6, 9],
+                #     name='Sample markers',
+                #     mode='markers',
+                #     marker=go.Marker(color=color.blue)
+                # )
+                #
+                # if len(figure['data']) < 4:
+                #     figure['data'].append({})
+                # k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
+                # figure['data'][3] = go.Scatter(
+                #     x=[1, 2, 3, 4, 5],
+                #     y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
+                #     name='Sample line',
+                #     mode='lines',
+                #     marker=go.Marker(color=color.blue)
+                # )
+            elif saveClick > 0:
+                if filteredDataState is None:
+                    dff = dfs[vessel].get_2D_data(valueState[1], valueState[2], clean=True)
+                else:
+                    dfToJson = pd.read_json(filteredDataState)
+                    dfClean = dfToJson[[valueState[1], valueState[2]]]
+                    dff = dfClean.dropna()
 
+                # K-means if 'clustering' toggled
+                if 'clustering' in settingsState:
+                    df = k_means(dff[valueState[1]], dff[valueState[2]], clusters)
+                else:
+                    df = {'x': dff[valueState[1]], 'y': dff[valueState[2]]}
+
+                # Add scatter from data set if 'datapoints' toggled
+                if len(figure['data']) < 3:
+                    figure['data'].append({})
+                if 'datapoints' in settingsState:
+                    figure['data'][2] = go.Scatter(
+                        x=df['x'],
+                        y=df['y'],
+                        name='Saved DataSet',
+                        mode='markers',
+                        marker=go.Marker(color='rgb(44,180,177)')
+                    )
+                else:
+                    figure['data'][2] = None
+
+                # Add Line/Curve if 'regression' toggled
+                if len(figure['data']) < 4:
+                    figure['data'].append({})
+                if 'regression' in settingsState:
+                    line_data = regression(df['x'], df['y'], graph_modeState)
+                    figure['data'][3] = go.Scatter(
+                        x=line_data['x'],
+                        y=line_data['y'],
+                        name='Saved Regression',
+                        mode='lines',
+                        marker=go.Marker(color='rgb(232,12,194)')
+                    )
+                else:
+                    figure['data'][3] = None
+                saveClick = None
         # Clean figure data
         figure['data'] = [i for i in figure['data'] if i is not None]
-
         return figure
     return default_figure
+
+# settingsInput=[State('gen-mode-input-1', 'value'),
+#   State('gen-paramX-input-1', 'value'),
+#   State('gen-paramY-input-1', 'value'),
+#   State('gen-paramZ-input-1', 'value'),
+#   State('gen-settings-input-1', 'values'),
+#   State('gen-regression-input-1', 'value'),
+#   State('gen-kmeans-cluster', 'value'),
+#   State('gen-vessel-input-1', 'value'),
+#   State('gen-filter-store','children'),
+#   State('g2', 'figure')]
+#
+# @app.callback(
+#     Output('save-test','figure'),
+#     [Input('save-settings-btn','n_clicks')],
+#     settingsInput)
+# def update_save_graph(saveClick,*settingData):
+#     if saveClick > 0:
+#         # print (settingData)
+#         # print (settingData[0])
+#         # print (settingData[1])
+#         # print (settingData[2])
+#         # print (settingData[3])
+#         # print (settingData[4][1])
+#         # print (settingData[5])
+#         # print (settingData[6])
+#         # print (settingData[7])
+#         # print (settingData[8])
+#         # Clean data
+#         if settingData[8] is None:
+#             dff = dfs[settingData[7]].get_2D_data(settingData[1], settingData[2], clean=True)
+#         else:
+#             dfToJson = pd.read_json(settingData[8])
+#             dfClean = dfToJson[[settingData[1], settingData[2]]]
+#             dff = dfClean.dropna()
+#
+#         # K-means if 'clustering' toggled
+#         if 'clustering' in settingData[4]:
+#             df = k_means(dff[settingData[1]], dff[settingData[2]], clusters)
+#         else:
+#             df = {'x': dff[settingData[1]], 'y': dff[settingData[2]]}
+#
+#         # Add scatter from data set if 'datapoints' toggled
+#         if len(settingData[9]['data']) < 1:
+#             settingData[9]['data'].append({})
+#         if 'datapoints' in settingData[4]:
+#             settingData[9]['data'][0] = go.Scatter(
+#                 x=df['x'],
+#                 y=df['y'],
+#                 name='Saved DataSet',
+#                 mode='markers',
+#                 marker=go.Marker(color='rgb(44,180,177)')
+#             )
+#         else:
+#             settingData[9]['data'][0] = None
+#
+#         # Add Line/Curve if 'regression' toggled
+#         if len(settingData[9]['data']) < 2:
+#             settingData[9]['data'].append({})
+#         if 'regression' in settingData[4]:
+#             line_data = regression(df['x'], df['y'], settingData[5])
+#             settingData[9]['data'][1] = go.Scatter(
+#                 x=line_data['x'],
+#                 y=line_data['y'],
+#                 name='Saved Regression',
+#                 mode='lines',
+#                 marker=go.Marker(color='rgb(232,12,194)')
+#             )
+#         else:
+#             settingData[9]['data'][1] = None
+#
+#     # Clean figure data
+#     settingData[9]['data'] = [i for i in settingData[9]['data'] if i is not None]
+#
+#     return settingData[9]
 
 
 # callback to generate parameter fields depending on mode selected
