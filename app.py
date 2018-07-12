@@ -1,22 +1,16 @@
 import dash
 import os
 
-import dash_core_components as dcc
-import dash_html_components as html
-from dash.dependencies import Input, State, Output
-
-import plotly.plotly as py
-import plotly.graph_objs as go
-import pandas as pd
-
 from flask import send_from_directory
-
 
 app = dash.Dash()
 server = app.server
 app.config.supress_callback_exceptions = True
 
 external_css = [
+    # 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css'
+    'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css',
+    'https://use.fontawesome.com/releases/v5.1.0/css/all.css',
     '/static/css/base.css'
 ]
 
@@ -29,7 +23,6 @@ for css in external_css:
 
 for js in external_js:
     app.scripts.append_script({"external_url": js})
-
 
 @app.server.route('/static/<path:path>')
 def static_file(path):
