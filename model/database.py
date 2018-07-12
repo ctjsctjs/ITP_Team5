@@ -19,7 +19,7 @@ class SQL:
         self.__encoding = encoding
         self.__filter_limit = 100
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-        self.__default_table = "vosmii_data"
+        self.__default_table = "vomsii_data"
 
     def __del__(self):
         self.__close()
@@ -143,7 +143,7 @@ class SQL:
             return
 
         self.__reconnect()
-        df = pd.read_sql(sql="SELECT * FROM vosmii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
+        df = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
         return DataFrame(df)
 
     """
@@ -152,15 +152,15 @@ class SQL:
 
     # Obtain table names from database
     def get_table_names(self):
-        # SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='database'
-        self.__reconnect()
+        # Obtain table names
         table_names = self.__select(columns="TABLE_NAME", table="INFORMATION_SCHEMA.TABLES",
                                     condition="TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='database'")
 
-        return [table[0] for table in table_names]
+        return [table[0] for table in table_names if '__' not in table[0]]
 
     # Excel-to-SQL Function
-    def excel_to_sql(self, table_name, excel_file, filetype=FileType.OTHERS, ):
+    def excel_to_sql(self, table_name, excel_file, filetype=FileType.OTHERS):
+        # TODO: Get sheet number
         df = DataFrame(excel_file, filetype)
         columns = df.get_columns()
 

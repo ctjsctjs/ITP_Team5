@@ -138,6 +138,7 @@ class DataFrame:
     """
 
     def __readfile__(self, file):
+        # TODO: Include sheet number
         # If file is empty. -- REDUNDANT ERROR HANDLING --
         if file is None:
             print("Missing File: No file given")
@@ -149,10 +150,17 @@ class DataFrame:
         # Read VOSMII
         elif self.__fileType is FileType.VOMSII:
             # TODO: 'skiprows' should be customisable by user
-            return pd.read_excel(file, skiprows=[])
+            return pd.read_excel(
+                file,
+                skiprows=[]
+            )
         # Reads V2PS    -- FOR FUTURE SCALABILITY --
         elif self.__fileType is FileType.V2PS:
-            return
+            return pd.read_excel(
+                file,
+                sheet_name=2,
+                usecols=49
+            )
         # Reads Basic
         elif self.__fileType is FileType.OTHERS:
             return pd.read_excel(file)

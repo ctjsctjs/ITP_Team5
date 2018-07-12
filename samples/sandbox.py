@@ -1,7 +1,7 @@
 import pandas as pd
 
 from model.database import SQL
-from model.dataframe import DataFrame
+from model.dataframe import *
 from controller.graph_components.regression import GraphMode
 
 # result = SQL().get_filter_options()
@@ -48,21 +48,27 @@ from controller.graph_components.regression import GraphMode
 # print(GraphMode(1).name)
 # print(GraphMode(1).value)
 
-# sql = SQL()
+sql = SQL()
 #
 # print(sql.get_column_names())
 # print(sql.get_vessels())
 #
 # print(sql.get_table_names())
 #
-
+#
 # txt = "L3monade"
 #
 # print([unicode(txt), u'text'])
 
-name = "name.ext"
+# name = "name.ext"
+#
+# print(name.split('.')[0])
 
-print(name.split('.')[0])
+# names = sql.get_table_names()
+#
+# for name in names:
+#     # if '__' not in name:
+#         print(name)
 
 
 reading = [
