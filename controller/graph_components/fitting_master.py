@@ -34,50 +34,52 @@ from operator import mul
 
 # K Means
 from sklearn.cluster import KMeans
+
+
 # Possible extention to allow user to choose graph degree for each data set???
 def generateGraphTest(graphMode=1, xData=[], xData2=[], yData=[], yData2=[], zData=[], zData2=[], kmeansOn=False):
     # Test Comparison
-##    wb = load_workbook(filename='C:\\Users\\Sean\\Downloads\\DSME 10700_2018_Combined_A.xlsx', data_only=True)
-##    ws = wb['Before DD']
-##    ws2 = wb['After DD']
-##
-##    beforeSpeed = []
-##    beforeME = []
-##    count = 0
-##    for row in ws.rows:
-##        count += 1
-##        ##    if count == 12:
-##        ##        break
-##        if count <= 1:
-##            continue
-##        ##    if row[0].value == 'APL BARCELONA':
-##        if (row[9].value is not None) and (row[20].value is not None):
-##            beforeSpeed.append(float(row[9].value))
-##            beforeME.append(float(row[20].value))
-##        else:
-##            pass
-##
-##    x = beforeSpeed
-##    y = beforeME
-##
-##    afterSpeed = []
-##    afterME = []
-##    count = 0
-##    for row in ws2.rows:
-##        count += 1
-##        ##    if count == 12:
-##        ##        break
-##        if count <= 1:
-##            continue
-##        ##    if row[0].value == 'APL BARCELONA':
-##        if (row[9].value is not None) and (row[20].value is not None):
-##            afterSpeed.append(float(row[9].value))
-##            afterME.append(float(row[20].value))
-##        else:
-##            pass
-##
-##    x2 = afterSpeed
-##    y2 = afterME
+    ##    wb = load_workbook(filename='C:\\Users\\Sean\\Downloads\\DSME 10700_2018_Combined_A.xlsx', data_only=True)
+    ##    ws = wb['Before DD']
+    ##    ws2 = wb['After DD']
+    ##
+    ##    beforeSpeed = []
+    ##    beforeME = []
+    ##    count = 0
+    ##    for row in ws.rows:
+    ##        count += 1
+    ##        ##    if count == 12:
+    ##        ##        break
+    ##        if count <= 1:
+    ##            continue
+    ##        ##    if row[0].value == 'APL BARCELONA':
+    ##        if (row[9].value is not None) and (row[20].value is not None):
+    ##            beforeSpeed.append(float(row[9].value))
+    ##            beforeME.append(float(row[20].value))
+    ##        else:
+    ##            pass
+    ##
+    ##    x = beforeSpeed
+    ##    y = beforeME
+    ##
+    ##    afterSpeed = []
+    ##    afterME = []
+    ##    count = 0
+    ##    for row in ws2.rows:
+    ##        count += 1
+    ##        ##    if count == 12:
+    ##        ##        break
+    ##        if count <= 1:
+    ##            continue
+    ##        ##    if row[0].value == 'APL BARCELONA':
+    ##        if (row[9].value is not None) and (row[20].value is not None):
+    ##            afterSpeed.append(float(row[9].value))
+    ##            afterME.append(float(row[20].value))
+    ##        else:
+    ##            pass
+    ##
+    ##    x2 = afterSpeed
+    ##    y2 = afterME
     x = xData
     y = yData
     x2 = xData2
@@ -155,7 +157,8 @@ def generateGraphTest(graphMode=1, xData=[], xData2=[], yData=[], yData2=[], zDa
         title='FO Consumption & Speed Graph',
         plot_bgcolor='rgb(229, 229, 229)',
         xaxis=go.XAxis(title='Avg speed (knts)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-        yaxis=go.YAxis(title='FO cons. / 24 hrs (tons)', zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+        yaxis=go.YAxis(title='FO cons. / 24 hrs (tons)', zerolinecolor='rgb(255,255,255)',
+                       gridcolor='rgb(255,255,255)'),
         ##                  annotations=[annotation]
     )
 
@@ -163,6 +166,7 @@ def generateGraphTest(graphMode=1, xData=[], xData2=[], yData=[], yData2=[], zDa
     data = [trace1, trace2, trace3, trace4]
     fig = go.Figure(data=data, layout=layout)
     return fig
+
 
 def calculate_r(xList, yList):
     ##    Defective Cubic R**2
@@ -191,7 +195,6 @@ def calculate_r(xList, yList):
     print "R=" + str(rValue)
     print "R-Squared=" + str(rValue ** 2)
     return rValue
-
 
 # linregress method with R value
 ##slope, intercept, r_value, p_value, std_err = stats.linregress(x2,y2)

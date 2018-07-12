@@ -18,7 +18,6 @@ table_name = 'test-graph-table'
 def obtain_data(dummy):
     sql = SQL()
     dff = sql.get_table(table_name)
-
     return dff.to_json()
 
 
@@ -28,7 +27,6 @@ def obtain_data(dummy):
     [Input('graph-table-store', 'children')])
 def get_table(dff_json):
     dff = pd.read_json(dff_json)
-
     return generate_table(dff)
 
 

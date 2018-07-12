@@ -9,7 +9,8 @@ app.config.supress_callback_exceptions = True
 
 external_css = [
     # 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css'
-    # 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css',
+    'https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css',
+    'https://use.fontawesome.com/releases/v5.1.0/css/all.css',
     '/static/css/base.css'
 ]
 
@@ -22,7 +23,6 @@ for css in external_css:
 
 for js in external_js:
     app.scripts.append_script({"external_url": js})
-
 
 @app.server.route('/static/<path:path>')
 def static_file(path):

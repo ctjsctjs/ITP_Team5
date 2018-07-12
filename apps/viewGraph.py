@@ -1,42 +1,17 @@
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State, Event
 import pandas_datareader.data as web
 import datetime
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import controller.graph_components.fitting_master as fm
+from datetime import datetime as dt
+
 import plotly.plotly as py
 import plotly.graph_objs as go
 import pandas as pd
 from app import app
 
-# Read data from a csv and setup 3D graph data
-z_data = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/api_docs/mt_bruno_elevation.csv')
-data = [
-go.Surface(
-z=z_data.as_matrix()
-)
-]
-layout = go.Layout(
-title='Graph 1',
-autosize=False,
-width=500,
-height=500,
-margin=dict(
-l=65,
-r=50,
-b=65,
-t=90
-)
-)
-
-stock = 'TSLA'
-start = datetime.datetime(2015, 1, 1)
-end = datetime.datetime(2018, 2, 8)
-df = web.DataReader(stock, 'morningstar', start, end)
-df.reset_index(inplace=True)
-df.set_index("Date", inplace=True)
-df = df.drop("Symbol", axis=1)
+filterList = []
 
 layout = html.Div([
 
@@ -56,88 +31,97 @@ html.Div([
 
     #body-Content
     html.Div([
+        html.Details([
+        #item-wrapper
+            html.Div([
 
-#item-row
-html.Div([
+            #item-header
+            html.Div([
+                html.H2('Graph name', className='item-element-margin'),
+            ], className='item-row item-element-margin item-select-height item-border-bottom'),
 
-#panel-left
-html.Div([
-html.Div([
-    html.H2('Graph 1', className='item-element-margin'),
+            #item-row, settings
+            html.Div([
+            html.H5('Filters', className='item-element-margin'),
+            dcc.Dropdown(
+                id='add-filter-input',
+                className='item-dropdown item-element-margin',
+                placeholder="Filter",
+                options=[
+                    {'label': i, 'value': i} for i in [
+                        'Series', 'Name', 'Date'
+                    ]
+            ])
+            ], className='item-row item-element-margin item-select-height item-border-bottom'),
 
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-        placeholder="Series",
-        options=[
-            {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
-            ]
-    ]),
-    dcc.Dropdown(
-    id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-    placeholder="Name",
-    options=[
-        {'label': i, 'value': i} for i in [
-            'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
-        ]
-    ]),
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-        placeholder="Mode",
-        options=[
-            {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
-            ]
-    ]),
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-        placeholder="Parameter X",
-        options=[
-            {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
-            ]
-    ]),
-    dcc.Dropdown(
-        id='app-graph-dropdown',
-        className='panel-item-dropdown item-element-margin',
-        placeholder="Parameter Y",
-        options=[
-            {'label': i, 'value': i} for i in [
-                'Parameter A', 'Parameter B', 'Parameter C', 'Parameter D', 'Parameter E', 'Parameter F'
-            ]
+        #item-row, settings
+            html.Div([
+                html.H5('Filter', className='item-element-margin')
+            ], id="viewGraph-filter-field"),
+
+            #items added
+            html.Div([], id="filter-list"),
+
+            #item-button, add graph
+            html.Button('Add filter', className='button item-element-margin', id="add-filter-input")
+            ], className='item-wrapper', id="item-wrapper"),
         ])
-], className='item-wrapper'),
-], className='panel-left'),
-
-    #panel-right
-    html.Div([
-        html.Div([
-            html.Div(id='app-graph-display-value'),
-                html.Div([
-                html.Div([
-                        html.H3('Column 3'),
-                        dcc.Graph(id='g2', figure=fm.generateGraphTest(
-                        xData = [12.0,20.3,20.4,20.1,20.2,20.2,20.2,19.9,21.7,20.0,19.4,12.9,20.0],
-                        yData = [62.2,165.7,157.2,154.6,152.3,160.3,159.4,160.2,159.4,160.0,148.4,29.3,42.7],
-                        xData2 = [19.0,12.6,19.0,20.0,19.9,19.4,12.5,18.8,18.7,20.2,19.8,17.1,18.0],
-                        yData2=[132.4,43.2,129.1,139.4,139.8,144.6,115.8,160.8,119.9,139.7,139.2,134.5,135.2])
-                        )
-                    ], className="eight columns")
-            ], className="row"),
-        ], className='item-wrapper'),
-        ], className='panel-right'),
-        ], className='item-row item-element-margin overflow-auto'),
-        ], className='content-wrapper page-width')],
-    className='wrapper-grey')
+    ], className='content-wrapper page-width')
+    ], className='wrapper-grey')
 ])
 
 
+
+#callback for add button
 @app.callback(
-Output('app-2-display-value', 'children'),
-[Input('app-2-dropdown', 'value')])
+    Output('filter-list', 'children'),
+    [],
+    [State('filter-input1', 'value')],
+    [Event('add-filter', 'click')]
+    )
+def display_value(input1, input2):
+    newFilter = {"label": "Filter " + str(len(filterList)),"value": str(input1)}
+    filterList.append(newFilter)
+    print "New Graph settings: " + str(filterList) + "\n"
+
+    return html.Div([
+        html.H5('Filter List', className='item-element-margin'),
+        dcc.Checklist(
+        options=filterList,
+        values= [i for i in [filterList]],
+        labelStyle={'display': 'block'}
+    )
+], className='item-row item-element-margin item-select-height ', id="item-wrapper-2")
+
+
+@app.callback(
+    Output('viewGraph-filter-field', 'children'),
+    [Input('add-filter-input', 'value')])
 def display_value(value):
-    return 'You have selected "{}"'.format(value)
+    if (value=="Series" or value=="Name"):
+        return html.Div([
+        html.H5('Filters', className='item-element-margin'),
+        dcc.Dropdown(
+                id='filter-input1',
+                className='item-dropdown item-element-margin',
+                placeholder="Name",
+                options=[
+                    {'label': i, 'value': i} for i in [
+                        'APL GWANG YANG', 'APL CHONG QING', 'APL LE HAVRE', 'APL QINGDAO'
+                    ]
+                ])
+            ], className='item-row item-element-margin item-select-height item-border-bottom' )
+    elif (value=="Date"):
+            return html.Div([
+            html.H5('Filters', className='item-element-margin'),
+            dcc.DatePickerSingle(
+                clearable=True,
+                with_portal=True,
+                date=dt.now()
+                ),
+            dcc.DatePickerSingle(
+                clearable=True,
+                with_portal=True,
+                date=dt.now()
+                )
+        ], className='item-row item-element-margin item-select-height item-border-bottom' )

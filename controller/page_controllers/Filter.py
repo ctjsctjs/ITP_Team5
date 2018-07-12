@@ -14,4 +14,3 @@ def get_table(dummy):
     df = sql.get_table('testtable')
 
     return generate_table(df)
-

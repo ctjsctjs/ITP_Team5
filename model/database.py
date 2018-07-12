@@ -1,5 +1,6 @@
 from pymysql import connect, Error
 import pandas as pd
+
 import config.database_settings as dbconf
 from model.dataframe import *
 
@@ -16,21 +17,15 @@ class SQL:
         self.__connection = None
         self.__cursor = None
         self.__encoding = encoding
-
+        self.__filter_limit = 100
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-        self.__default_table = "table_1"
+        self.__default_table = "vomsii_data"
 
     def __del__(self):
         self.__close()
 
     def destroy(self):
         self.__del__()
-
-    # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-    def test(self):
-        self.__reconnect()
-        frame = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Code`='AJIAPL'", con=self.__connection)
-        return frame
 
     # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
     def connection(self):
@@ -45,6 +40,14 @@ class SQL:
         self.__reconnect()
         return pd.read_sql(sql=query, con=self.__connection)
 
+    # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
+    def query(self, statement, expect_result=False):
+        return self.__query(statement, expect_result)
+
+    """
+    'Graph Parameters' Methods
+    """
+
     # Method to obtain all column names in a table
     def get_column_names(self, table=None):
         # TODO: # TODO: Better 'default table' handling
@@ -53,7 +56,7 @@ class SQL:
 
         # Get Column Names from Database
         condition = "table_name = '" + table + "'"
-        result = self.select(columns="COLUMN_NAME", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
+        result = self.__select(columns="COLUMN_NAME", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
 
         # Clean Data before returning
         column_names = []
@@ -64,27 +67,139 @@ class SQL:
         return column_names
 
     # Method to obtain the datatype and size of each column in a table
-    def get_column_datatypes(self, table=None, distinct=False):
+    def get_column_datatypes(self, table=None, distinct=False, column=None, singular=False):
+        # TODO: Invalid argument handling
+        # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        if singular and column is not None:
+            # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
+            condition = ("table_name = '%s' AND column_name = '%s'" % (table, column))
+            result = self.__select(columns="DATA_TYPE", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
+
+            # Clean and Return Data
+            return result[0][0]
+        else:
+            # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
+            condition = ("table_name = '%s'" % table)
+            result = self.__select(columns="DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS",
+                                   condition=condition)
+
+            # Clean Data before returning
+            column_datatypes = []
+            for col_name, col_type in result:
+                column_datatypes.append([col_name, col_type])
+
+            # Return Data
+            if distinct:
+                return [list(x) for x in set(tuple(x) for x in column_datatypes)]
+            return column_datatypes
+
+    # Method to obtain filter options
+    def get_filter_options(self, table=None):
+        # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        # Get Column Info from Database TODO: Use SQL 'DISTINCT'
+        condition = "table_name = '" + table + "'"
+        info = self.__select(columns="COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH",
+                             table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
+
+        # Filter
+        filtered_info = []
+        for item in info:
+            if item[2] <= self.__filter_limit:
+                filtered_info.append(item)
+
+        return filtered_info
+
+    """
+    'Vessel' Methods
+    """
+
+    # Method to obtain distinct vessel codes/names TODO: Too reliant on hardcode. Possible redesign required
+    def get_vessels(self, table=None, column=None):
+        # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        # TODO: Better handle 'No column given' condition
+        if column is None:
+            column = 'DISTINCT `Vessel Name`'
+            # column = 'DISTINCT `Vessel Code`'
+
+        return [i[0] for i in (self.__select(columns=column))]
+
+    # Method to obtain data for a particular vessel
+    def get_vessel(self, table=None, vessel=None):
         # TODO: # TODO: Better 'default table' handling
         if table is None:
             table = self.__default_table
 
-        # Get Column datatypes from Database
-        condition = "table_name = '" + table + "'"
-        result = self.select(columns="DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
+        # TODO: Handle 'No vessel given' event
+        if vessel is None:
+            return
 
-        # Clean Data before returning
-        column_datatypes = []
-        for col_name, col_type in result:
-            column_datatypes.append([col_name, col_type])
+        self.__reconnect()
+        df = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
+        return DataFrame(df)
 
-        # Return Data
-        if distinct:
-            return [list(x) for x in set(tuple(x) for x in column_datatypes)]
-        return column_datatypes
+    """
+    'Database' Methods
+    """
+
+    # Obtain table names from database
+    def get_table_names(self):
+        # Obtain table names
+        table_names = self.__select(columns="TABLE_NAME", table="INFORMATION_SCHEMA.TABLES",
+                                    condition="TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='database'")
+
+        return [table[0] for table in table_names if '__' not in table[0]]
+
+    # Excel-to-SQL Function
+    def excel_to_sql(self, table_name, excel_file, filetype=FileType.OTHERS):
+        # TODO: Get sheet number
+        df = DataFrame(excel_file, filetype)
+        columns = df.get_columns()
+
+        # Create empty table in database
+        self.__create(table=table_name, columns=columns, datatype=df.get_column_datatypes())
+
+        # Populate table with xlsx data
+        for i in range(df.len()):
+            row = df.get_row(i + 1)
+
+            col = ""
+            val = ""
+            valid_rows = len(columns)
+
+            for j in range(len(columns) - 1, -1, -1):
+                if not pd.isnull(row[j]):
+                    break
+                valid_rows -= 1
+
+            for j in range(valid_rows):
+                if not pd.isnull(row[j]):
+                    col += "`" + columns[j] + "`"
+                    val += '"' + unicode(row[j]).replace('"', '\\"') + '"'
+
+                    if j is not (valid_rows - 1):
+                        col += ","
+                        val += ","
+
+            insert_query = "INSERT INTO `" + table_name + "` (" + col + ") VALUES (" + val + ")"
+            err = self.__query(insert_query)
+            if err is not None:
+                print(err)
+
+    """
+    Base Methods
+    """
 
     # SQL Select Method
-    def select(self, columns="*", table=None, condition=None):
+    def __select(self, columns="*", table=None, condition=None):
         # TODO: Handle 404
 
         # TODO: Better 'default table' handling
@@ -97,7 +212,6 @@ class SQL:
         # If condition given
         if condition is not None:
             sql += " WHERE " + condition
-            print(False)
 
         # Run Query
         return self.__query(sql, expect_result=True)
@@ -105,7 +219,7 @@ class SQL:
         # return pd.read_sql(sql=sql, con=self.__connection)
 
     # SQL Insert Method
-    def insert(self, columns=[], table=None, data=[]):
+    def __insert(self, columns=[], table=None, data=[]):
         # TODO: Handle error where 'columns' and 'data' do not match(i.e different number of elements)
         # TODO: Handle event where 'row' already exists in Database(i.e Replace or Combine?)
 
@@ -128,45 +242,6 @@ class SQL:
         # Run Query
         self.__query(statement=sql, expect_result=False)
 
-    # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-    def query(self, statement, expect_result=False):
-        return self.__query(statement, expect_result)
-
-    # Excel-to-SQL Function
-    def xlsx_to_sql(self, table_name, xlsx, filetype=FileType.VOMSII,):
-        df = DataFrame(xlsx, filetype)
-        columns = df.get_columns()
-
-        # Create empty table in database
-        self.__create(table=table_name, columns=columns, datatype=df.get_column_datatypes())
-
-        # Populate table with xlsx data
-        for i in range(df.len()):
-            row = df.get_row(i + 1)
-
-            col = ""
-            val = ""
-            valid_rows = len(columns)
-
-            for j in range(len(columns) - 1, -1, -1):
-                if not pandas.isnull(row[j]):
-                    break
-                valid_rows -= 1
-
-            for j in range(valid_rows):
-                if not pandas.isnull(row[j]):
-                    col += "`" + columns[j] + "`"
-                    val += '"' + unicode(row[j]).replace('"', '\\"') + '"'
-
-                    if j is not (valid_rows - 1):
-                        col += ","
-                        val += ","
-
-            insert_query = "INSERT INTO `" + table_name + "` (" + col + ") VALUES (" + val + ")"
-            err = self.__query(insert_query)
-            if err is not None:
-                print(err)
-
     # SQL Create Table Method
     def __create(self, table=None, columns=[], datatype=[]):
         # TODO: Handle invalid arguments(i.e 'id' in 'columns')
@@ -188,7 +263,7 @@ class SQL:
         for i in range(len(columns)):
             line = "`" + columns[i] + "`"
 
-            # Check data type of column and add accordingly
+            # Check data type of column and add accordingly TODO: Reconsider hardcoded data sizes
             if datatype[i] == 'datetime64[ns]':
                 line += " DATETIME"
             elif datatype[i] == 'object':
@@ -216,7 +291,6 @@ class SQL:
     # Basic Query Function
     def __query(self, statement, expect_result=False):
         self.__reconnect()
-
         result = None
         try:
             with self.__cursor as cursor:
