@@ -111,6 +111,26 @@ class SQL:
     'Vessel' Methods
     """
 
+    # Obtain all existing series
+    def get_all_series(self):
+        all_series = self.__select(
+            columns="Series",
+            table="__series",
+            distinct=True
+        )
+
+        return [series[0] for series in all_series]
+
+    # Obtain Vessel names within a given series
+    def get_series(self, series):
+        vessels = self.__select(
+            columns="Vessel",
+            table="__series",
+            condition="`Series`='{}'".format(series)
+        )
+
+        return [vessel[0] for vessel in vessels]
+
     # Method to obtain distinct vessel codes/names TODO: Too reliant on hardcode. Possible redesign required
     def get_vessels(self, table=None, column=None):
         # TODO: Better 'default table' handling
@@ -221,15 +241,18 @@ class SQL:
     """
 
     # SQL Select Method
-    def __select(self, columns="*", table=None, condition=None):
+    def __select(self, columns="*", table=None, condition=None, distinct=False):
         # TODO: Handle 404
         # TODO: Craft format for conditions
         # TODO: Better 'default table' handling
         if table is None:
             table = self.__default_table
 
+        if distinct:
+            sql = "SELECT DISTINCT {} FROM {}".format(columns, table)
         # Construct SELECT Query
-        sql = "SELECT " + columns + " FROM " + table
+        else:
+            sql = "SELECT {} FROM {}".format(columns, table)
 
         # If condition given
         if condition is not None:

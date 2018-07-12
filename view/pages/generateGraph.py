@@ -135,17 +135,16 @@ layout = html.Div([
                     dcc.Dropdown(
                         id='gen-series-input-1',
                         placeholder="Series",
-                        options=[
-                            {'label': k, 'value': k} for k in [
-                                'A', 'B', 'C'
-                            ]
-                        ], className='item-element-margin'),
+                        className='item-element-margin'),
                     # Vessel field
                     dcc.Dropdown(
                         id='gen-vessel-input-1',
                         placeholder="Vessel"
                     ),
-                    html.Div(id='gen-vessel-store')
+                    html.Div(id='gen-vessel-store'),
+
+                    # Hidden Series/Vessels Elements
+                    html.Div(id='gen-series-dump', style={'display': 'none'}),
                 ], className='item-row item-select-height item-inline'),
 
                 # # Filter section 3

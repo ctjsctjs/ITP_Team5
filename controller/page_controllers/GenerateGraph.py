@@ -32,14 +32,21 @@ default_figure = {
     )}
 
 
-# TODO: Load vessel options based on series
+# Populate Series field options
+@app.callback(
+    Output('gen-series-input-1', 'options'),
+    [Input('gen-series-dump', 'children')])
+def load_series_field(dump):
+    return [{'label': series, 'value': series} for series in sql.get_all_series()]
+
+
 # Populate Vessel field options
 @app.callback(
     Output('gen-vessel-input-1', 'options'),
     [Input('gen-series-input-1', 'value')])
 def load_vessel_field(series):
     print("THIS IS SERIES: {}".format(series))
-    return [{'label': i, 'value': i} for i in SQL().get_vessels()]
+    return [{'label': i, 'value': i} for i in SQL().get_series(series)]
 
 
 # Load Vessel Data
@@ -155,15 +162,16 @@ def get_params_input(mode, input_x, input_y, input_z):
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
      Input('gen-kmeans-cluster', 'value'),
-     Input('save-settings-btn','n_clicks')],
+     Input('save-settings-btn', 'n_clicks')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value'),
      State('gen-params-store', 'children'),
-      State('gen-filter-store', 'children'),
-      State('gen-settings-input-1', 'values'),
-      State('gen-regression-input-1', 'value'),
-      State('gen-kmeans-cluster', 'value')])
-def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick, figure, vessel,valueState,filteredDataState,settingsState,graph_modeState,clustersState):
+     State('gen-filter-store', 'children'),
+     State('gen-settings-input-1', 'values'),
+     State('gen-regression-input-1', 'value'),
+     State('gen-kmeans-cluster', 'value')])
+def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick, figure, vessel, valueState,
+                 filteredDataState, settingsState, graph_modeState, clustersState):
     print("THIS IS CLUSTERS: {}".format(clusters))
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
@@ -301,6 +309,7 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
         return figure
     return default_figure
 
+
 # settingsInput=[State('gen-mode-input-1', 'value'),
 #   State('gen-paramX-input-1', 'value'),
 #   State('gen-paramY-input-1', 'value'),
@@ -386,6 +395,7 @@ def update_filer(value, mode):
     if value > 0:
         return generate_graph(mode, options)
 
+
 # callback to hide generate graph button and show update button after graph generated
 @app.callback(
     Output('gen-button-1', 'style'),
@@ -394,6 +404,7 @@ def update_style(value):
     if value > 0:
         return {'display': 'none'}
 
+
 # callback to show submit graph button and show update button after graph generated
 @app.callback(
     Output('gen-filter-submit', 'style'),
@@ -401,6 +412,7 @@ def update_style(value):
 def update_style(value):
     if value > 0:
         return {'display': 'block'}
+
 
 # callback for retriving inputs
 @app.callback(
