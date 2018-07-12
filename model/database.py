@@ -19,7 +19,7 @@ class SQL:
         self.__encoding = encoding
         self.__filter_limit = 100
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-        self.__default_table = "test-graph-table"
+        self.__default_table = "dsme 10700_2018_combined_a_after_dd"
 
     def __del__(self):
         self.__close()
@@ -155,7 +155,9 @@ class SQL:
             return
 
         self.__reconnect()
-        df = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
+        # TODO: Stop using pd
+        # TODO: Remvoe hardcoded 'vessel' name
+        df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel`='{}'".format(table, vessel), con=self.__connection)
         return DataFrame(df)
 
     """
@@ -211,9 +213,9 @@ class SQL:
     """
 
     # Obtain existing attributes from a given table
-    def get_attribute(self, db_table):
+    def get_attributes(self, db_table):
         attributes = self.__select(
-            columns="column_name, attribute",
+            columns="attribute, column_name",
             table="__important_attributes",
             condition="`db_table`='{}'".format(db_table)
         )

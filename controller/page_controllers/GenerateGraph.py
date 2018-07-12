@@ -54,7 +54,6 @@ def load_vessel_field(series):
     [Input('gen-vessel-input-1', 'value')])
 def load_vessel_df(vessel):
     if vessel not in dfs:
-        print vessel
         dfs[vessel] = SQL().get_vessel(vessel=vessel)
 
 
@@ -131,7 +130,8 @@ def get_filtered_df(dump, *values):
     Output('gen-params-wrapper', 'children'),
     [Input('gen-mode-input-1', 'value')])
 def update_filer(value):
-    options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
+    # TODO: Remove hardcoded db table
+    options = [{'label': label, 'value': value} for label, value in SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
     return generate_axis_parameters(value, options)
 
 
@@ -543,11 +543,10 @@ def get_condition(option, value1, value2):
     [State('gen-filter', 'children')])
 def add_filter(n_clicks, dump, container):
     if n_clicks is None:
-        print "Hello"
         return add_hidden_filters(n_filters)
     elif n_clicks <= n_filters:
         container[0]['props']['children'][n_clicks - 1]['props']['style'] = {}
-        print container[0]['props']['children'][n_clicks - 1]['props']['style']
+        # print container[0]['props']['children'][n_clicks - 1]['props']['style']
     return container
 
     #     print container[0]['props']['children'][n_clicks]
