@@ -45,7 +45,6 @@ def load_series_field(dump):
     Output('gen-vessel-input-1', 'options'),
     [Input('gen-series-input-1', 'value')])
 def load_vessel_field(series):
-    print("THIS IS SERIES: {}".format(series))
     return [{'label': i, 'value': i} for i in SQL().get_series(series)]
 
 
