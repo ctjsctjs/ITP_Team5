@@ -7,3 +7,4 @@
 *.pyc
 config/database_settings.py
 samples/sandbox.py
+config/database_settings.py
