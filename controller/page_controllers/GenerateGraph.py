@@ -9,12 +9,22 @@ from view.pages.generateGraph import layout, generate_filter_input, add_filters,
 from controller.graph_components.regression import GraphMode, regression, k_means
 from model.database import SQL
 from app import app
+from config.important_attributes import full_attributes
+# import sympy as sp
+# from sympy.abc import x
 
 # Init
 sql = SQL()
 options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
 n_filters = 10
 dfs = {}
+# TEMPORARY Variables. TO replace if there is a better way
+gr_squared = 0.0
+gsols = 0.0
+gformula = ""
+global gr_squared
+global gsols
+global gformula
 
 default_figure = {
     'data': [],
@@ -153,6 +163,30 @@ def load_graphmode_selection(dump):
 def get_params_input(mode, input_x, input_y, input_z):
     return [mode, input_x, input_y, input_z]
 
+# Testing update for Graph Values
+@app.callback(
+    Output('gen-settings-rsquared-1', 'children'),
+    [Input('g2', 'figure')])
+def update_rsquared(temp):
+    print "UPDATES R SQUARED"
+    print gr_squared
+    return "R-Squared: " + str(round(gr_squared,4))
+
+@app.callback(
+    Output('gen-settings-sols-1', 'children'),
+    [Input('g2', 'figure')])
+def update_sols(temp):
+    print "UPDATES SOLS"
+    print gsols
+    return "Sum of Least Squares: " + str(round(gsols,4))
+
+@app.callback(
+    Output('gen-settings-formula-1', 'children'),
+    [Input('g2', 'figure')])
+def update_formula(temp):
+    print "UPDATES FORMULA"
+    print gformula
+    return str(gformula)
 
 @app.callback(
     Output('g2', 'figure'),
@@ -210,6 +244,24 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
                 else:
                     df = {'x': dff[value[1]], 'y': dff[value[2]]}
 
+                # Generate the Hover Data
+                hoverData = []
+                dfsDF = dfs.get(vessel).get_df()
+                # Iterate each row from db
+                for key, value in dfsDF.iterrows():
+                    placeholderText = ""
+                    # Iterate each column in the row
+                    for index, row in value.items():
+                        # Compare the value in important_attributes
+                        for col in full_attributes:
+                            if col == index:
+                                if isinstance(row, float):
+                                    placeholderText += "<b>" + index + "</b>: " + str(round(row,3)) + "<br>"
+                                else:
+                                    placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
+                                break
+                    hoverData.append(placeholderText)
+
                 # Add scatter from data set if 'datapoints' toggled
                 if len(figure['data']) < 1:
                     figure['data'].append({})
@@ -217,8 +269,9 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
                     figure['data'][0] = go.Scatter(
                         x=df['x'],
                         y=df['y'],
-                        name='First DataSet',
+                        name='Data Marker',
                         mode='markers',
+                        text=hoverData,
                         # marker=go.Marker(color=color.red)
                     )
                 else:
@@ -228,11 +281,20 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
                 if len(figure['data']) < 2:
                     figure['data'].append({})
                 if 'regression' in settings:
-                    line_data = regression(df['x'], df['y'], graph_mode)
+                    line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
+                    print "R-Squared: " + str(r_squared)
+                    print "Sum of Least Squares: " + str(sols)
+                    print "A Formula: "
+                    print formula
+                    global gr_squared, gsols, gformula
+                    gr_squared = r_squared
+                    gsols = sols
+                    gformula = formula
+
                     figure['data'][1] = go.Scatter(
                         x=line_data['x'],
                         y=line_data['y'],
-                        name='First Regression',
+                        name='Line',
                         mode='lines',
                         # marker=go.Marker(color=color.red)
                     )
@@ -292,7 +354,16 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
                 if len(figure['data']) < 4:
                     figure['data'].append({})
                 if 'regression' in settingsState:
-                    line_data = regression(df['x'], df['y'], graph_modeState)
+                    line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_modeState)
+                    print "R-Squared: " + str(r_squared)
+                    print "Sum of Least Squares: " + str(sols)
+                    print "B Formula:"
+                    print formula
+                    global gr_squared, gsols, gformula
+                    gr_squared = r_squared
+                    gsols = sols
+                    gformula = formula
+
                     figure['data'][3] = go.Scatter(
                         x=line_data['x'],
                         y=line_data['y'],
