@@ -10,6 +10,7 @@ from controller.graph_components.regression import GraphMode, regression, k_mean
 from model.database import SQL
 from app import app
 from config.important_attributes import full_attributes
+
 # import sympy as sp
 # from sympy.abc import x
 
@@ -62,9 +63,11 @@ def load_vessel_field(series):
 @app.callback(
     Output('gen-vessel-store', 'children'),
     [Input('gen-vessel-input-1', 'value')])
-def load_vessel_df(vessel):
-    if vessel not in dfs:
-        dfs[vessel] = SQL().get_vessel(vessel=vessel)
+def load_vessel_df(vessels):
+    if vessels is not None:
+        for vessel in vessels:
+            if vessel not in dfs:
+                dfs[vessel] = SQL().get_vessel(vessel=vessel)
 
 
 # Load Axis Parameters selection
@@ -83,7 +86,6 @@ for n in range(n_filters):
         [Input('gen-filter-dump-{}'.format(n + 1), 'children')])
     def load_filter(dump):
         return [{'label': i, 'value': i} for i in SQL().get_column_names()]
-        # return [{'label': i, 'value': i} for i in [1, 2, 3]]
 
 
 # Generates callbacks for filter options
@@ -95,30 +97,21 @@ def create_callback(filter_number):
         return generate_filter_input(get_option_type(filter), filter_number)
 
 
-# @app.callback(
-#     Output('gen-filter-wrapper-{}'.format(filter_number),'children'),
-#     [Input('gen-filter-input-{}'.format(filter_number),'value')],
-#     [State('gen-filter-wrapper-{}'.format(filter_number),'children')])
-# def loadWrapper(gfInput,gfWrapper):
-#     gfWrapper = newWrapper
-#     return gfWrapper
-
 for n in range(n_filters):
     create_callback(n + 1)
 
-filter_inputs = [State('gen-vessel-input-1', 'value')]
+filter_inputs = [Input('gen-vessel-input-1', 'value')]
 for n in range(n_filters):
-    filter_inputs.append(State('gen-filter-input-{}'.format(n + 1), 'value'))
-    filter_inputs.append(State('gen-filter-value1-{}'.format(n + 1), 'value'))
-    filter_inputs.append(State('gen-filter-value2-{}'.format(n + 1), 'value'))
+    filter_inputs.append(Input('gen-filter-input-{}'.format(n + 1), 'value'))
+    filter_inputs.append(Input('gen-filter-value1-{}'.format(n + 1), 'value'))
+    filter_inputs.append(Input('gen-filter-value2-{}'.format(n + 1), 'value'))
 
 
 # Actual callback for retrieving inputs
 @app.callback(
     Output('gen-filter-store', 'children'),
-    [Input('gen-filter-submit', 'n_clicks')],
     filter_inputs)
-def get_filtered_df(dump, *values):
+def get_filtered_df(*values):
     # Get specifications
     specifications = []
     for i in range(1, len(values), 3):
@@ -130,18 +123,21 @@ def get_filtered_df(dump, *values):
             conditions.append(value)
 
     # Obtain filtered df
-    df = dfs[values[0]].get_filtered(conditions=conditions)
-    # print (df)
-    return df.to_json()
+    df = []
+    for vessel in values[0]:
+        df.append(dfs[vessel].get_filtered(conditions=conditions))
+
+    return pd.concat(df)
 
 
 # Generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-params-wrapper', 'children'),
     [Input('gen-mode-input-1', 'value')])
-def update_filer(value):
+def update_filter(value):
     # TODO: Remove hardcoded db table
-    options = [{'label': label, 'value': value} for label, value in SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
+    options = [{'label': label, 'value': value} for label, value in
+               SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
     return generate_axis_parameters(value, options)
 
 
@@ -163,6 +159,7 @@ def load_graphmode_selection(dump):
 def get_params_input(mode, input_x, input_y, input_z):
     return [mode, input_x, input_y, input_z]
 
+
 # Testing update for Graph Values
 @app.callback(
     Output('gen-settings-rsquared-1', 'children'),
@@ -170,7 +167,8 @@ def get_params_input(mode, input_x, input_y, input_z):
 def update_rsquared(temp):
     print "UPDATES R SQUARED"
     print gr_squared
-    return "R-Squared: " + str(round(gr_squared,4))
+    return "R-Squared: " + str(round(gr_squared, 4))
+
 
 @app.callback(
     Output('gen-settings-sols-1', 'children'),
@@ -178,7 +176,8 @@ def update_rsquared(temp):
 def update_sols(temp):
     print "UPDATES SOLS"
     print gsols
-    return "Sum of Least Squares: " + str(round(gsols,4))
+    return "Sum of Least Squares: " + str(round(gsols, 4))
+
 
 @app.callback(
     Output('gen-settings-formula-1', 'children'),
@@ -188,10 +187,10 @@ def update_formula(temp):
     print gformula
     return str(gformula)
 
+
 @app.callback(
     Output('g2', 'figure'),
     [Input('gen-params-store', 'children'),
-     Input('gen-filter-store', 'children'),
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
      Input('gen-kmeans-cluster', 'value'),
@@ -199,13 +198,11 @@ def update_formula(temp):
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value'),
      State('gen-params-store', 'children'),
-     State('gen-filter-store', 'children'),
      State('gen-settings-input-1', 'values'),
      State('gen-regression-input-1', 'value'),
      State('gen-kmeans-cluster', 'value')])
-def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick, figure, vessel, valueState,
-                 filteredDataState, settingsState, graph_modeState, clustersState):
-    print("THIS IS CLUSTERS: {}".format(clusters))
+def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vessels, valueState, settingsState,
+                 graph_modeState, clustersState):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -230,13 +227,10 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
             figure['data'] = []
         else:
             if saveClick is None:
-                # Clean data
-                if filteredData is None:
-                    dff = dfs[vessel].get_2D_data(value[1], value[2], clean=True)
-                else:
-                    dfToJson = pd.read_json(filteredData)
-                    dfClean = dfToJson[[value[1], value[2]]]
-                    dff = dfClean.dropna()
+                dff = []
+                for vessel in vessels:
+                    dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
+                dff = pd.concat(dff)
 
                 # K-means if 'clustering' toggled
                 if 'clustering' in settings:
@@ -256,7 +250,7 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
                         for col in full_attributes:
                             if col == index:
                                 if isinstance(row, float):
-                                    placeholderText += "<b>" + index + "</b>: " + str(round(row,3)) + "<br>"
+                                    placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
                                 else:
                                     placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
                                 break
@@ -301,34 +295,11 @@ def update_graph(value, filteredData, settings, graph_mode, clusters, saveClick,
                 else:
                     figure['data'][1] = None
 
-                # # TEST Dummy Data TODO: Use actual components
-                # if len(figure['data']) < 3:
-                #     figure['data'].append({})
-                # figure['data'][2] = go.Scatter(
-                #     x=[1, 2, 3, 4, 5],
-                #     y=[7, 5, 8, 6, 9],
-                #     name='Sample markers',
-                #     mode='markers',
-                #     marker=go.Marker(color=color.blue)
-                # )
-                #
-                # if len(figure['data']) < 4:
-                #     figure['data'].append({})
-                # k_means([1, 2, 3, 4, 5], [7, 5, 8, 6, 9])
-                # figure['data'][3] = go.Scatter(
-                #     x=[1, 2, 3, 4, 5],
-                #     y=regression([1, 2, 3, 4, 5], [7, 5, 8, 6, 9]),
-                #     name='Sample line',
-                #     mode='lines',
-                #     marker=go.Marker(color=color.blue)
-                # )
             elif saveClick > 0:
-                if filteredDataState is None:
-                    dff = dfs[vessel].get_2D_data(valueState[1], valueState[2], clean=True)
-                else:
-                    dfToJson = pd.read_json(filteredDataState)
-                    dfClean = dfToJson[[valueState[1], valueState[2]]]
-                    dff = dfClean.dropna()
+                dff = []
+                for vessel in vessels:
+                    dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
+                dff = pd.concat(dff)
 
                 # K-means if 'clustering' toggled
                 if 'clustering' in settingsState:
