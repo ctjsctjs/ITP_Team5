@@ -19,17 +19,13 @@ class SQL:
         self.__encoding = encoding
         self.__filter_limit = 100
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-        self.__default_table = "vomsii_data"
+        self.__default_table = "dsme 10700_2018_combined_a_after_dd"
 
     def __del__(self):
         self.__close()
 
     def destroy(self):
         self.__del__()
-
-    # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-    def connection(self):
-        return self.__connection
 
     def get_table(self, table=None):
         if table is None:
@@ -39,10 +35,6 @@ class SQL:
 
         self.__reconnect()
         return pd.read_sql(sql=query, con=self.__connection)
-
-    # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-    def query(self, statement, expect_result=False):
-        return self.__query(statement, expect_result)
 
     """
     'Graph Parameters' Methods
@@ -119,6 +111,26 @@ class SQL:
     'Vessel' Methods
     """
 
+    # Obtain all existing series
+    def get_all_series(self):
+        all_series = self.__select(
+            columns="Series",
+            table="__series",
+            distinct=True
+        )
+
+        return [series[0] for series in all_series]
+
+    # Obtain Vessel names within a given series
+    def get_series(self, series):
+        vessels = self.__select(
+            columns="Vessel",
+            table="__series",
+            condition="`Series`='{}'".format(series)
+        )
+
+        return [vessel[0] for vessel in vessels]
+
     # Method to obtain distinct vessel codes/names TODO: Too reliant on hardcode. Possible redesign required
     def get_vessels(self, table=None, column=None):
         # TODO: Better 'default table' handling
@@ -143,7 +155,9 @@ class SQL:
             return
 
         self.__reconnect()
-        df = pd.read_sql(sql="SELECT * FROM vomsii_data WHERE `Vessel Name`='" + vessel + "'", con=self.__connection)
+        # TODO: Stop using pd
+        # TODO: Remvoe hardcoded 'vessel' name
+        df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel`='{}'".format(table, vessel), con=self.__connection)
         return DataFrame(df)
 
     """
@@ -195,19 +209,52 @@ class SQL:
                 print(err)
 
     """
+    'Important Attributes' Methods
+    """
+
+    # Obtain existing attributes from a given table
+    def get_attributes(self, db_table):
+        attributes = self.__select(
+            columns="attribute, column_name",
+            table="__important_attributes",
+            condition="`db_table`='{}'".format(db_table)
+        )
+
+        return {"{}".format(key): "{}".format(value) for key, value in attributes}
+
+    # Add/Update an attribute
+    def set_attribute(self, db_table, column_name, attribute):
+        # Check if attribute exists
+        if (len(self.__select(table="__important_attributes",
+                              condition="db_table='{}' AND attribute='{}'".format(db_table, attribute))) > 0):
+            self.__update(
+                table="__important_attributes",
+                changes={'column_name': column_name},
+                condition={'db_table': db_table, 'attribute': attribute})
+        else:
+            self.__insert(
+                columns=['db_table', 'column_name', 'attribute'],
+                table="__important_attributes",
+                data=[db_table, column_name, attribute]
+            )
+
+    """
     Base Methods
     """
 
     # SQL Select Method
-    def __select(self, columns="*", table=None, condition=None):
+    def __select(self, columns="*", table=None, condition=None, distinct=False):
         # TODO: Handle 404
-
+        # TODO: Craft format for conditions
         # TODO: Better 'default table' handling
         if table is None:
             table = self.__default_table
 
+        if distinct:
+            sql = "SELECT DISTINCT {} FROM {}".format(columns, table)
         # Construct SELECT Query
-        sql = "SELECT " + columns + " FROM " + table
+        else:
+            sql = "SELECT {} FROM {}".format(columns, table)
 
         # If condition given
         if condition is not None:
@@ -241,6 +288,24 @@ class SQL:
         sql = "INSERT INTO `" + table + "`(" + sql_columns + ") VALUES (" + sql_data + ")"
         # Run Query
         self.__query(statement=sql, expect_result=False)
+
+    # SQL Update Table Method
+    def __update(self, table, changes={}, condition={}):
+        # Craft 'SET' field
+        set_field = ""
+        for key, value in changes.items():
+            set_field += "`{}`='{}'".format(key, value)
+            if key is not changes.keys()[-1]:
+                set_field += ", "
+
+        # Craft condition
+        con_field = ""
+        for key, value in condition.items():
+            con_field += "`{}`='{}'".format(key, value)
+            if key is not condition.keys()[-1]:
+                con_field += " AND "
+
+        self.__query("UPDATE `{}` SET {} WHERE {}".format(table, set_field, con_field))
 
     # SQL Create Table Method
     def __create(self, table=None, columns=[], datatype=[]):
