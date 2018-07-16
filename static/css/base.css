@@ -60,17 +60,12 @@ font-family:Arial;
 h1{
 font-size: 24px;
 font-weight:700;
-<<<<<<< HEAD
-=======
 color:#525252;
->>>>>>> database
 }
 
 h2{
 font-size: 18px;
 font-weight:700;
-<<<<<<< HEAD
-=======
 color:#525252;
 }
 
@@ -79,9 +74,7 @@ margin-right:12px;
 }
 
 .font-awesome{
-font-family: FontAwesome !important;
->>>>>>> database
-}
+font-family: FontAwesome !important;}
 
 .wrapper-white{
 background-color:white;
@@ -89,8 +82,6 @@ background-color:white;
 
 .wrapper-grey{
 background-color:#fafafa;
-<<<<<<< HEAD
-=======
 }
 
 .wrapper-img{
@@ -104,7 +95,6 @@ background-color:#fafafa;
      background-position: center;
      background-repeat: no-repeat;
      background-size: cover;
->>>>>>> database
 }
 
 .main-padding{
@@ -118,11 +108,7 @@ background-color:#fafafa;
 
 
 .page-width{
-<<<<<<< HEAD
-max-width: 980px;
-=======
 max-width: 1200px;
->>>>>>> database
 margin: 0 auto;
 padding-left: 12px;
 padding-right: 12px;
@@ -132,10 +118,6 @@ padding-right: 12px;
 width:100%;
 padding-top: 48px;
 padding-bottom: 48px;
-<<<<<<< HEAD
-
-=======
->>>>>>> database
 }
 
 .content-wrapper {
@@ -146,10 +128,8 @@ overflow: auto;
 
 .nav-wrapper{
 width:100%;
-<<<<<<< HEAD
 background-color: #33bbb0;
 height:60px;
-=======
 height:56px;
 z-index:10;
 position: absolute;
@@ -163,7 +143,6 @@ top:0;
 
 .hidden{
 display:none;
->>>>>>> database
 }
 
 .nav-ul{
@@ -171,11 +150,12 @@ display:none;
 
 .nav-ul .nav-li{
 display: inline-block;
-<<<<<<< HEAD
 color:white;
 padding-top:24px;
 padding-bottom:24px;
 padding-right:24px;
+font-size:13px;
+cursor: pointer;
 }
 
 .button{
@@ -188,7 +168,6 @@ width: max-content;
 font-size:14px;
 cursor: pointer;
 min-width: 120px;
-=======
 color:#efefef;
 padding-top:24px;
 padding-bottom:24px;
@@ -201,7 +180,6 @@ font-weight: 700;
 .nav-ul .nav-li:hover{
 color:white;
 }
->>>>>>> database
 
 .button{
 padding: 12px 12px;
@@ -256,15 +234,12 @@ border-left: 2px solid #33bbb0;
 
 .Select-control{
 font-size:12px;
->>>>>>> database
 }
 
 .item-wrapper-transparent{
 padding:24px;
 width: 100%;
 margin-bottom:12px;
-<<<<<<< HEAD
-=======
 }
 
 .left-panel{
@@ -275,12 +250,10 @@ float:left;
 .right-panel{
 float:right;
 width: calc(70% - 12px);
->>>>>>> database
 }
 
 .item-element-margin{
 margin-bottom: 12px;
-<<<<<<< HEAD
 }
 
 
@@ -288,7 +261,6 @@ margin-bottom: 12px;
   width:25%;
   margin-right:12px;
   display:inline-block;
-=======
 }
 
 .item-element-margin-top{
@@ -316,7 +288,6 @@ line-height: 1.5;
 width:100%;
 margin-right:12px;
 display:inline-block;
->>>>>>> database
 }
 
 .panel-item-dropdown{
@@ -334,11 +305,7 @@ padding-bottom:16px;
 }
 
 .item-border-bottom{
-<<<<<<< HEAD
-border-bottom: 1px solid #efefef;
-=======
 border-bottom: 1px solid #e7e7e7;
->>>>>>> database
 }
 
 .header-button{
@@ -346,16 +313,11 @@ float:right;
 display:inline-block;
 margin-left:12px;
 min-width: 120px;
-<<<<<<< HEAD
-=======
 font-weight: 500;
->>>>>>> database
 }
 
 .header-title{
 display:inline-block;
-<<<<<<< HEAD
-=======
 }
 
 .title-desc{
@@ -407,11 +369,7 @@ background-color: white;
 color:black;
 width:100%;
 padding:12px;
-<<<<<<< HEAD
-border-left: 3px solid #33bbb0;
-=======
 border-left: 2px solid #33bbb0;
->>>>>>> database
 }
 
 h4{
@@ -420,11 +378,7 @@ font-size:14px;
 
 h5{
 font-size:12px;
-<<<<<<< HEAD
-color:#dedede;
-=======
 color: #33bbb0;
->>>>>>> database
 }
 
 .search-form{
@@ -452,9 +406,6 @@ float: left;
 
 .delete-button{
 color:  grey;
-<<<<<<< HEAD
-font-size: 14px;;
-=======
 font-size: 14px;
 font-weight: 700;
 
@@ -532,5 +483,4 @@ animation: action 1s infinite  alternate;
   max-width: 480px;
   border-radius: 8px;
   border: 1px solid #dfdfdf;
->>>>>>> database
 }
