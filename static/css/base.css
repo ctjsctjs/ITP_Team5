@@ -423,10 +423,8 @@ float: left;
 }
 
 .delete-button{
-color:  grey;
-font-size: 14px;
-font-weight: 700;
-
+  color: #33bbb0;
+  cursor: pointer;
 }
 
 .margin-top-12{

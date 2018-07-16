@@ -43,8 +43,10 @@ layout = \
 def generate_table_container(contents=[]):
     children = [
         html.Div([
-            html.H4('Database Tables', className='header-title panel-left'),
-            html.H4('Status', className='header-title panel-right'),
+            html.H4('Database Tables', className='header-title panel-left table-col-3'),
+            html.H4('Status', className='header-title panel-right table-col-3'),
+            html.H4('Details', className='header-title panel-left table-col-3'),
+            html.H4('Action', className='header-title panel-right table-col-1'),
         ], className='table-heading overflow-auto item-element-margin')
     ]
 
@@ -93,8 +95,17 @@ def generate_row(row_name, content=None, ucode=True):
     else:
         row = \
             html.Div([
-                html.H4(row_name, className='header-title panel-left'),
-                html.H4(content, className='header-title panel-right'),
+                html.H4(row_name, className='header-title table-col-3'),
+                html.H4(content, className='header-title table-col-3'),
+                html.H4('3208 Lines Uploaded. 25 lines removed from cleaning.', className='header-title table-col-3'),
+                dcc.Link([
+                    html.Button([
+                        html.I(className="fas fa-trash-alt icon"),
+                        'Delete',
+                    ], className='delete-button item-element-margin margin-right-12',
+                        id="gen-button-1",
+                    ),
+                ], href='#', className='header-title table-col-1'),
             ], className='table-row overflow-auto item-element-margin')
 
     return row

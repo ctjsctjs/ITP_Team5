@@ -143,7 +143,6 @@ layout = html.Div([
                     # Axis Parameters
                     html.Div(
                         id="gen-params-wrapper",
-                        className='item-row item-inline'
                         # className='custom-panel',
                         # className='item-inline item-element-margin',
                     ),
@@ -528,7 +527,7 @@ def generate_graph(mode, options):
                     html.Div(id='gen-regression-input-dump', style={'display': 'none'}),
 
                     # Clusters input
-                    html.H5('Select the number of clusters of the graph', className='item-element-margin'),                    
+                    html.H5('Select the number of clusters of the graph', className='item-element-margin'),
                     dcc.Input(
                         id='gen-kmeans-cluster',
                         type='number',
