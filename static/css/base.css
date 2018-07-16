@@ -69,8 +69,18 @@ font-weight:700;
 color:#525252;
 }
 
+h3{
+font-size: 14px;
+font-weight:700;
+color:#525252;
+}
+
 input[type="radio"], input[type="checkbox"]{
 margin-right:12px;
+}
+
+.logo{
+  height: 32px;
 }
 
 .font-awesome{
@@ -148,13 +158,23 @@ display:none;
 .nav-ul{
 }
 
-.nav-ul .nav-li{
+.nav-ul .nav-li:not(:first-child){
 display: inline-block;
 color:white;
 padding-top:24px;
 padding-bottom:24px;
 padding-right:24px;
 font-size:13px;
+cursor: pointer;
+vertical-align: top;
+}
+
+.nav-ul .nav-li:first-child{
+display: inline-block;
+color:white;
+padding-top:12px;
+padding-bottom:12px;
+padding-right:24px;
 cursor: pointer;
 }
 
@@ -168,7 +188,7 @@ width: max-content;
 font-size:14px;
 cursor: pointer;
 min-width: 120px;
-color:#efefef;
+color:white;
 padding-top:24px;
 padding-bottom:24px;
 padding-right:24px;
@@ -184,7 +204,7 @@ color:white;
 .button{
 padding: 12px 12px;
 background-color: #33bbb0;
-color:#efefef;
+color:white;
 border-radius: 4px;
 text-align: center;
 width: max-content;
@@ -220,9 +240,6 @@ padding:24px;
 width: 100%;
 margin-bottom:12px;
 border-radius: 4px;
-<<<<<<< HEAD
-border-left: 5px solid #33bbb0;
-=======
 border:1px solid #e7e7e7;
 position: relative;
 }
@@ -296,7 +313,8 @@ margin-bottom:12px;
 }
 
 .item-row{
-width:100%;
+  border-top:1px solid #e7e7e7;
+  width:100%;
 }
 
 .item-select-height{
@@ -436,7 +454,7 @@ margin-right:6px;
 }
 
 .helper-text{
-color:#ffae00;
+color:#33bbb0;
 font-weight:500;
 }
 
@@ -457,7 +475,7 @@ border: 1px solid #e7e7e7;
 
 .tutorial-tooltip {
 padding: 12px;
-background-color: #33bbb0;
+background-color: #ffae00;
 position: absolute;
 border-radius: 50px;
 font-size: 12px;

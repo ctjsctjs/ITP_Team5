@@ -88,6 +88,7 @@ layout = html.Div([
                     "Enter settings to begin"],
                     className='tutorial-tooltip',
                 ),
+                html.H2('Generate Panel', className='item-element-margin'),
                 html.Div([
                     # html.Button([
                     #     html.I(className="fas fa-caret-left icon"),
@@ -95,11 +96,29 @@ layout = html.Div([
                     #     className='button-round toggle-panel-button',
                     # ),
 
-                    html.H2('Generate Panel', className='item-element-margin'),
-                    # Mode field
+                    html.H3([
+                        'Database'
+                    ], className='input-label item-element-margin'),
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon"),
-                        'Select graph mode to determine number of parameters'
+                        '1. Select database of dataset'
+                    ], className='helper-text item-element-margin'),
+                    # Database field
+                    dcc.Dropdown(
+                        id='gen-database-input-1',
+                        placeholder="Database",
+                        multi=True,
+                        className='item-element-margin'),
+                    ], className='item-row item-select-height item-inline'),
+
+                # Mode field
+                html.Div([
+                    html.H3([
+                        'Mode'
+                    ], className='input-label item-element-margin'),
+                    html.H5([
+                        html.I(className="fas fa-exclamation-circle icon"),
+                        '2. Select graph mode to determine number of parameters'
                     ], className='helper-text item-element-margin'),
                     dcc.RadioItems(
                         id='gen-mode-input-1',
@@ -110,26 +129,36 @@ layout = html.Div([
                         ],
                         value="2D"
                     ),
-                ], className='item-row item-select-height item-inline'),
+                    ], className='item-row item-select-height item-inline'),
 
-                html.H5([
-                    html.I(className="fas fa-exclamation-circle icon"),
-                    'Select the parameters of the graph'
-                ], className='helper-text item-element-margin'),
-                # Axis Parameters
-                html.Div(
-                    id="gen-params-wrapper",
-                    className='item-row item-inline'
-                    # className='custom-panel',
-                    # className='item-inline item-element-margin',
-                ),
-                # Hidden Axis Parameters dump
-                html.Div(id='gen-params-dump', style={'display': 'none'}),
-
+                # Param field
                 html.Div([
+                    html.H3([
+                        'Parameters'
+                    ], className='input-label item-element-margin'),
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon"),
-                        'Select the vessel series and name to be filtered'
+                        '3. Select the parameters of the graph'
+                    ], className='helper-text item-element-margin'),
+                    # Axis Parameters
+                    html.Div(
+                        id="gen-params-wrapper",
+                        className='item-row item-inline'
+                        # className='custom-panel',
+                        # className='item-inline item-element-margin',
+                    ),
+                    # Hidden Axis Parameters dump
+                    html.Div(id='gen-params-dump', style={'display': 'none'}),
+                ], className='item-row item-select-height item-inline'),
+
+                #Vessel field
+                html.Div([
+                    html.H3([
+                        'Vessel'
+                    ], className='input-label item-element-margin'),
+                    html.H5([
+                        html.I(className="fas fa-exclamation-circle icon"),
+                        '4. Select the vessel series and name to be filtered'
                     ], className='helper-text item-element-margin'),
                     # Series field
                     dcc.Dropdown(
@@ -169,21 +198,26 @@ layout = html.Div([
                 # Hidden Element
                 # html.Div(id='gen-filter-store', style={'display': 'none'}),
 
-                html.H5([
+                #Filter field
+                html.Div([
+                    html.H3([
+                        'Filters'
+                    ], className='input-label item-element-margin'),
+                    html.H5([
                     html.I(className="fas fa-exclamation-circle icon"),
-                    'Add filters to scope down the data'
-                ], className='helper-text item-element-margin'),
+                        '5. Add filters to scope down the data'
+                    ], className='helper-text item-element-margin'),
 
-                html.Div(id='gen-filter-dump', style={'display': 'none'}),
+                    html.Div(id='gen-filter-dump', style={'display': 'none'}),
 
-                html.Button([
-                    html.I(className="fas fa-plus-circle icon"),
-                    'Add Filter',
-                ], className='button item-element-margin add-filter-btn',
-                    id='gen-filter-add'),
-
-                # call filter layout
-                html.Div(id='gen-filter'),
+                    html.Button([
+                        html.I(className="fas fa-plus-circle icon"),
+                        'Add Filter',
+                    ], className='button item-element-margin add-filter-btn',
+                        id='gen-filter-add'),
+                    # call filter layout
+                    html.Div(id='gen-filter'),
+                ], className='item-row item-select-height item-inline'),
 
                 html.Button([
                     html.I(className="fas fa-caret-right icon"),
@@ -494,13 +528,11 @@ def generate_graph(mode, options):
                     html.Div(id='gen-regression-input-dump', style={'display': 'none'}),
 
                     # Clusters input
-                    html.H5('Select the number of clusters of the graph', className='item-element-margin'),
-                    dcc.Slider(
+                    html.H5('Select the number of clusters of the graph', className='item-element-margin'),                    
+                    dcc.Input(
                         id='gen-kmeans-cluster',
-                        min=0,
-                        max=9,
-                        marks={i: '{}'.format(i) for i in range(10)},
-                        value=0,
+                        type='number',
+                        className='item-element-margin form-control form-control-sm',
                     )
 
                 ], className='custom-panel'),
