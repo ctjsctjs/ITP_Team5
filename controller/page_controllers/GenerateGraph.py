@@ -6,7 +6,7 @@ import pandas as pd
 
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
     generate_graph, add_hidden_filters, generate_dropdown_filter
-from controller.graph_components.regression import GraphMode, regression, k_means
+from controller.graph_components.regression import GraphMode, regression, k_means, test_3d
 from model.database import SQL
 from app import app
 from config.important_attributes import full_attributes
@@ -41,7 +41,6 @@ default_figure = {
         margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
         hovermode='closest'
     )}
-
 
 # Populate Series field options
 @app.callback(
@@ -136,7 +135,7 @@ def get_filtered_df(*values):
     [Input('gen-mode-input-1', 'value')])
 def update_filter(value):
     # TODO: Remove hardcoded db table
-    options = [{'label': label, 'value': value} for label, value in
+    options = [{'label': label2, 'value': value2} for label2, value2 in
                SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
     return generate_axis_parameters(value, options)
 
@@ -206,21 +205,21 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
-        if value[1] is None:
-            figure['layout']['xaxis']['title'] = default_figure['layout']['xaxis']['title']
-        else:
-            figure['layout']['xaxis']['title'] = value[1]
-        # Set Y Axis
-        if value[2] is None:
-            figure['layout']['yaxis']['title'] = default_figure['layout']['yaxis']['title']
-        else:
-            figure['layout']['yaxis']['title'] = value[2]
+        # if value[1] is None:
+        #     figure['layout']['xaxis']['title'] = default_figure['layout']['xaxis']['title']
+        # else:
+        #     figure['layout']['xaxis']['title'] = value[1]
+        # # Set Y Axis
+        # if value[2] is None:
+        #     figure['layout']['yaxis']['title'] = default_figure['layout']['yaxis']['title']
+        # else:
+        #     figure['layout']['yaxis']['title'] = value[2]
         # Set Z Axis if 3D
-        if value[0] == '3D':
-            if value[3] is None:
-                figure['layout']['zaxis']['title'] = default_figure['layout']['zaxis']['title']
-            else:
-                figure['layout']['zaxis']['title'] = value[3]
+        # if value[0] == '3D':
+        #     if value[3] is None:
+        #         figure['layout']['zaxis']['title'] = default_figure['layout']['zaxis']['title']
+        #     else:
+        #         figure['layout']['zaxis']['title'] = value[3]
 
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
@@ -228,24 +227,31 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
         else:
             if saveClick is None:
                 dff = []
-                for vessel in vessels:
-                    dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
+                if value[0] == "2D":
+                    for vessel in vessels:
+                        dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
+                else:
+                    for vessel in vessels:
+                        dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
                 dff = pd.concat(dff)
 
                 # K-means if 'clustering' toggled
                 if 'clustering' in settings:
                     df = k_means(dff[value[1]], dff[value[2]], clusters)
                 else:
-                    df = {'x': dff[value[1]], 'y': dff[value[2]]}
+                    if value[0] == "2D":
+                        df = {'x': dff[value[1]], 'y': dff[value[2]]}
+                    else:
+                        df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
                 # Generate the Hover Data
                 hoverData = []
                 dfsDF = dfs.get(vessel).get_df()
                 # Iterate each row from db
-                for key, value in dfsDF.iterrows():
+                for key, value1 in dfsDF.iterrows():
                     placeholderText = ""
                     # Iterate each column in the row
-                    for index, row in value.items():
+                    for index, row in value1.items():
                         # Compare the value in important_attributes
                         for col in full_attributes:
                             if col == index:
@@ -256,44 +262,93 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                                 break
                     hoverData.append(placeholderText)
 
-                # Add scatter from data set if 'datapoints' toggled
-                if len(figure['data']) < 1:
-                    figure['data'].append({})
-                if 'datapoints' in settings:
-                    figure['data'][0] = go.Scatter(
-                        x=df['x'],
-                        y=df['y'],
-                        name='Data Marker',
-                        mode='markers',
-                        text=hoverData,
-                        # marker=go.Marker(color=color.red)
-                    )
-                else:
-                    figure['data'][0] = None
+                if value[0] == "2D":
+                    # Add scatter from data set if 'datapoints' toggled
+                    if len(figure['data']) < 1:
+                        figure['data'].append({})
+                    if 'datapoints' in settings:
+                        figure['data'][0] = go.Scatter(
+                            x=df['x'],
+                            y=df['y'],
+                            name='Data Marker',
+                            mode='markers',
+                            text=hoverData,
+                            # marker=go.Marker(color=color.red)
+                        )
+                    else:
+                        figure['data'][0] = None
 
-                # Add Line/Curve if 'regression' toggled
-                if len(figure['data']) < 2:
-                    figure['data'].append({})
-                if 'regression' in settings:
-                    line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
-                    print "R-Squared: " + str(r_squared)
-                    print "Sum of Least Squares: " + str(sols)
-                    print "A Formula: "
-                    print formula
-                    global gr_squared, gsols, gformula
-                    gr_squared = r_squared
-                    gsols = sols
-                    gformula = formula
+                    # Add Line/Curve if 'regression' toggled
+                    if len(figure['data']) < 2:
+                        figure['data'].append({})
+                    if 'regression' in settings:
+                        line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
+                        print "R-Squared: " + str(r_squared)
+                        print "Sum of Least Squares: " + str(sols)
+                        print "A Formula: "
+                        print formula
+                        global gr_squared, gsols, gformula
+                        gr_squared = r_squared
+                        gsols = sols
+                        gformula = formula
 
-                    figure['data'][1] = go.Scatter(
-                        x=line_data['x'],
-                        y=line_data['y'],
-                        name='Line',
-                        mode='lines',
-                        # marker=go.Marker(color=color.red)
-                    )
+                        figure['data'][1] = go.Scatter(
+                            x=line_data['x'],
+                            y=line_data['y'],
+                            name='Line',
+                            mode='lines',
+                            # marker=go.Marker(color=color.red)
+                        )
+                    else:
+                        figure['data'][1] = None
                 else:
-                    figure['data'][1] = None
+                    # 3D
+                    # Add scatter from data set if 'datapoints' toggled
+                    if len(figure['data']) < 1:
+                        figure['data'].append({})
+                    if 'datapoints' in settings:
+                        print df['x'], df['y'], df['z']
+                        figure['data'][0] = go.Scatter3d(
+                            x=df['x'],
+                            y=df['y'],
+                            z=df['z'],
+                            name='Data Marker',
+                            mode='markers',
+                            text=hoverData,
+                            # marker=go.Marker(color=color.red)
+                        )
+                    else:
+                        figure['data'][0] = None
+
+                    # Add Line/Curve if 'regression' toggled
+                    if len(figure['data']) < 2:
+                        figure['data'].append({})
+                    if 'regression' in settings:
+                        print "DEBUGGER ME: "
+                        print value
+                        print value[1], value[2], value[3]
+                        surfacePlot, surfaceLayout = test_3d(df['x'], df['y'], df['z'], value[1], value[2], value[3])
+                        figure['data'][1] = surfacePlot
+                        figure['layout'] = surfaceLayout
+                        # line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
+                        # print "R-Squared: " + str(r_squared)
+                        # print "Sum of Least Squares: " + str(sols)
+                        # print "A Formula: "
+                        # print formula
+                        # global gr_squared, gsols, gformula
+                        # gr_squared = r_squared
+                        # gsols = sols
+                        # gformula = formula
+                        #
+                        # figure['data'][1] = go.Surface(
+                        #     x=line_data['x'],
+                        #     y=line_data['y'],
+                        #     name='Line',
+                        #     mode='lines',
+                        #     # marker=go.Marker(color=color.red)
+                        # )
+                    else:
+                        figure['data'][1] = None
 
             elif saveClick > 0:
                 dff = []

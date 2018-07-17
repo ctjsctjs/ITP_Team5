@@ -17,7 +17,7 @@ def generate_axis_parameters(mode, options):
     label_x = "Parameter X"
     label_y = "Parameter Y"
     label_z = "Parameter Z"
-
+    
     axis_parameters = [
         # Axis Parameters Input store
         html.Div(id='gen-params-store', style={'display': 'none'}),

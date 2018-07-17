@@ -4,15 +4,15 @@ import pandas as pd
 import config.database_settings as dbconf
 from model.dataframe import *
 
-
 class SQL:
-    def __init__(self, host=dbconf.host, user=dbconf.user, password=dbconf.password, db=dbconf.db,
+    def __init__(self, host=dbconf.host, user=dbconf.user, password=dbconf.password, db=dbconf.db, port=dbconf.port,
                  encoding=dbconf.encoding):
         # Connection Settings
         self.__host = host
         self.__user = user
         self.__password = password
         self.__db = db
+        self.__port = port
 
         self.__connection = None
         self.__cursor = None
@@ -168,7 +168,7 @@ class SQL:
     def get_table_names(self):
         # Obtain table names
         table_names = self.__select(columns="TABLE_NAME", table="INFORMATION_SCHEMA.TABLES",
-                                    condition="TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='database'")
+                                    condition="TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='itp_team5'")
 
         return [table[0] for table in table_names if '__' not in table[0]]
 
@@ -375,7 +375,7 @@ class SQL:
     def __reconnect(self):
         self.__close()
 
-        self.__connection = connect(host=self.__host, user=self.__user, password=self.__password, db=self.__db)
+        self.__connection = connect(host=self.__host, user=self.__user, password=self.__password, db=self.__db, port=self.__port)
         self.__cursor = self.__connection.cursor()
 
     # Close Connection Method
