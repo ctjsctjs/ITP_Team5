@@ -10,6 +10,7 @@ from controller.graph_components.regression import GraphMode, regression, k_mean
 from model.database import SQL
 from app import app
 from config.important_attributes import full_attributes
+import collections
 
 # import sympy as sp
 # from sympy.abc import x
@@ -226,27 +227,34 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
             figure['data'] = []
         else:
             if saveClick is None:
-                dff = []
-                if value[0] == "2D":
-                    for vessel in vessels:
-                        dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
-                else:
-                    for vessel in vessels:
-                        dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
-                dff = pd.concat(dff)
+                # dff = []
+                # if value[0] == "2D":
+                #     for vessel in vessels:
+                #         dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
+                # else:
+                #     for vessel in vessels:
+                #         dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
+                # dff = pd.concat(dff)
 
-                # K-means if 'clustering' toggled
-                if 'clustering' in settings:
-                    df = k_means(dff[value[1]], dff[value[2]], clusters)
-                else:
-                    if value[0] == "2D":
-                        df = {'x': dff[value[1]], 'y': dff[value[2]]}
-                    else:
-                        df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
+                # K-means if 'clustering' toggled NOTE: Update from df to dfs/dfsDF
+                # if 'clustering' in settings:
+                #     df = k_means(dff[value[1]], dff[value[2]], clusters)
+                # else:
+                #     if value[0] == "2D":
+                #         df = {'x': dff[value[1]], 'y': dff[value[2]]}
+                #     else:
+                #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
+                # TEmporary single target graph
+                vessel = vessels[0]
                 # Generate the Hover Data
                 hoverData = []
                 dfsDF = dfs.get(vessel).get_df()
+                if value[0] == "2D":
+                    dfsDF = dfsDF.dropna(subset=[value[1], value[2]])
+                else:
+                    dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
+
                 # Iterate each row from db
                 for key, value1 in dfsDF.iterrows():
                     placeholderText = ""
@@ -268,8 +276,8 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                         figure['data'].append({})
                     if 'datapoints' in settings:
                         figure['data'][0] = go.Scatter(
-                            x=df['x'],
-                            y=df['y'],
+                            x=dfsDF[value[1].encode('utf8')],
+                            y=dfsDF[value[2].encode('utf8')],
                             name='Data Marker',
                             mode='markers',
                             text=hoverData,
@@ -282,7 +290,7 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                     if len(figure['data']) < 2:
                         figure['data'].append({})
                     if 'regression' in settings:
-                        line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
+                        line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')], dfsDF[value[2].encode('utf8')], graph_mode)
                         print "R-Squared: " + str(r_squared)
                         print "Sum of Least Squares: " + str(sols)
                         print "A Formula: "
@@ -307,11 +315,10 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                     if len(figure['data']) < 1:
                         figure['data'].append({})
                     if 'datapoints' in settings:
-                        print df['x'], df['y'], df['z']
                         figure['data'][0] = go.Scatter3d(
-                            x=df['x'],
-                            y=df['y'],
-                            z=df['z'],
+                            x=dfsDF[value[1].encode('utf8')],
+                            y=dfsDF[value[2].encode('utf8')],
+                            z=dfsDF[value[3].encode('utf8')],
                             name='Data Marker',
                             mode='markers',
                             text=hoverData,
@@ -324,10 +331,7 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                     if len(figure['data']) < 2:
                         figure['data'].append({})
                     if 'regression' in settings:
-                        print "DEBUGGER ME: "
-                        print value
-                        print value[1], value[2], value[3]
-                        surfacePlot, surfaceLayout = test_3d(df['x'], df['y'], df['z'], value[1], value[2], value[3])
+                        surfacePlot, surfaceLayout = test_3d(dfsDF[value[1].encode('utf8')], dfsDF[value[2].encode('utf8')], dfsDF[value[3].encode('utf8')], value[1], value[2], value[3])
                         figure['data'][1] = surfacePlot
                         figure['layout'] = surfaceLayout
                         # line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
@@ -350,6 +354,7 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                     else:
                         figure['data'][1] = None
 
+            # NOTE: Severely outdated. Refer to above
             elif saveClick > 0:
                 dff = []
                 for vessel in vessels:
