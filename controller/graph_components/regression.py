@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+import plotly
 # import plotly.plotly as py
 import plotly.graph_objs as go
 from sklearn.cluster import KMeans
@@ -42,36 +43,6 @@ def k_means(x, y, clusters=None):
     return {'x': x, 'y': y}
 
 def test_3d(x,y,z, xAxis, yAxis, zAxis):
-    import plotly
-    plotly.tools.set_credentials_file(username='ITPTest', api_key='u4vlV6AnIkJaZssMpyFp')
-
-    import pandas as pd
-    import numpy as np
-    import scipy
-    print "Platinum: "
-    print xAxis, yAxis, zAxis
-    # Data Reading
-    # from openpyxl import load_workbook
-    #
-    # # Test Comparison
-    # wb = load_workbook(filename='C:\\Users\\Sean\\Downloads\\DSME 10700_2018_Combined_A.xlsx', data_only=True)
-    # ws = wb['Before DD']
-    # ws2 = wb['After DD']
-    #
-    # data3d = []
-    #
-    # count = 0
-    # for row in ws.rows:
-    #     count+=1
-    #     if count <= 1:
-    #         columns = row
-    #         continue
-    #     if row[29].value is not None and row[30].value is not None:
-    #         if (float(row[29].value) + float(row[30].value))/2 > 11.5 and (float(row[29].value) + float(row[30].value))/2 < 12.5:
-    #             if (row[33].value is not None) and (row[12].value is not None) and (row[13].value is not None):
-    #                 data3d.append([float(row[33].value), float(row[12].value), float(row[13].value)])
-
-    # data = np.array(data3d)
     dataset = np.c_[np.array(x), np.array(y), np.array(z)]
     data = np.array(dataset)
 
@@ -97,7 +68,6 @@ def test_3d(x,y,z, xAxis, yAxis, zAxis):
     # evaluate it on a grid
     Z = np.dot(np.c_[np.ones(XX.shape), XX, YY, XX*YY, XX**2, YY**2], C).reshape(X.shape)
 
-
     # plot points and fitted surface using Plotly
     trace3 = go.Surface(
         z=Z,
@@ -108,7 +78,7 @@ def test_3d(x,y,z, xAxis, yAxis, zAxis):
     )
 
     layout = go.Layout(
-        title='Avg Speed vs FO/Consumption vs RPM',
+        title=xAxis + " vs " + yAxis + " vs " + zAxis,
         width=500,
         height=500,
         scene=dict(
@@ -122,12 +92,4 @@ def test_3d(x,y,z, xAxis, yAxis, zAxis):
             t=90
         )
     )
-
     return trace3, layout
-
-    data_test2 = go.Data([trace1, trace3])
-
-
-
-    fig = go.Figure(data=data_test2, layout=layout)
-    return fig

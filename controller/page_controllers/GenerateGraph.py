@@ -245,16 +245,23 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                 #     else:
                 #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
-                # TEmporary single target graph
-                vessel = vessels[0]
-                # Generate the Hover Data
-                hoverData = []
-                dfsDF = dfs.get(vessel).get_df()
+
+                # Create the dataset for the vessels selected
+                count = 0
+                for vessel in vessels:
+                    if count == 0:
+                        dfsDF = dfs.get(vessel).get_df()
+                    else:
+                        dfsDF.append(dfs.get(vessel).get_df())
+
+                # Remove any NaN values
                 if value[0] == "2D":
                     dfsDF = dfsDF.dropna(subset=[value[1], value[2]])
                 else:
                     dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
 
+                # Generate the Hover Data
+                hoverData = []
                 # Iterate each row from db
                 for key, value1 in dfsDF.iterrows():
                     placeholderText = ""
@@ -353,58 +360,6 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                         # )
                     else:
                         figure['data'][1] = None
-
-            # NOTE: Severely outdated. Refer to above
-            elif saveClick > 0:
-                dff = []
-                for vessel in vessels:
-                    dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
-                dff = pd.concat(dff)
-
-                # K-means if 'clustering' toggled
-                if 'clustering' in settingsState:
-                    df = k_means(dff[valueState[1]], dff[valueState[2]], clusters)
-                else:
-                    df = {'x': dff[valueState[1]], 'y': dff[valueState[2]]}
-
-                # Add scatter from data set if 'datapoints' toggled
-                if len(figure['data']) < 3:
-                    figure['data'].append({})
-                if 'datapoints' in settingsState:
-                    figure['data'][2] = go.Scatter(
-                        x=df['x'],
-                        y=df['y'],
-                        name='Saved DataSet',
-                        mode='markers',
-                        marker=go.Marker(color='rgb(44,180,177)')
-                    )
-                else:
-                    figure['data'][2] = None
-
-                # Add Line/Curve if 'regression' toggled
-                if len(figure['data']) < 4:
-                    figure['data'].append({})
-                if 'regression' in settingsState:
-                    line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_modeState)
-                    print "R-Squared: " + str(r_squared)
-                    print "Sum of Least Squares: " + str(sols)
-                    print "B Formula:"
-                    print formula
-                    global gr_squared, gsols, gformula
-                    gr_squared = r_squared
-                    gsols = sols
-                    gformula = formula
-
-                    figure['data'][3] = go.Scatter(
-                        x=line_data['x'],
-                        y=line_data['y'],
-                        name='Saved Regression',
-                        mode='lines',
-                        marker=go.Marker(color='rgb(232,12,194)')
-                    )
-                else:
-                    figure['data'][3] = None
-                saveClick = None
         # Clean figure data
         figure['data'] = [i for i in figure['data'] if i is not None]
         return figure
