@@ -107,10 +107,10 @@ layout = html.Div([
                     dcc.Dropdown(
                         id='gen-database-input-1',
                         placeholder="Database",
-                        multi=True,
                         className='item-element-margin'),
+                    # Hidden Database field dump
+                    html.Div(id='gen-database-input-dump', style={'display': 'none'}),
                     ], className='item-row item-select-height item-inline'),
-
                 # Mode field
                 html.Div([
                     html.H3([

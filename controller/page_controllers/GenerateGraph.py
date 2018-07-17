@@ -16,7 +16,6 @@ import collections
 # from sympy.abc import x
 
 # Init
-sql = SQL()
 options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
 n_filters = 10
 dfs = {}
@@ -43,12 +42,21 @@ default_figure = {
         hovermode='closest'
     )}
 
+
+# Populate Database field options
+@app.callback(
+    Output('gen-database-input-1', 'options'),
+    [Input('gen-database-input-dump', 'children')])
+def load_series_field(dump):
+    return [{'label': table, 'value': table} for table in SQL().get_table_names()]
+
+
 # Populate Series field options
 @app.callback(
     Output('gen-series-input-1', 'options'),
     [Input('gen-series-dump', 'children')])
 def load_series_field(dump):
-    return [{'label': series, 'value': series} for series in sql.get_all_series()]
+    return [{'label': series, 'value': series} for series in SQL().get_all_series()]
 
 
 # Populate Vessel field options
@@ -245,7 +253,6 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                 #     else:
                 #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
-
                 # Create the dataset for the vessels selected
                 count = 0
                 for vessel in vessels:
@@ -297,7 +304,8 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                     if len(figure['data']) < 2:
                         figure['data'].append({})
                     if 'regression' in settings:
-                        line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')], dfsDF[value[2].encode('utf8')], graph_mode)
+                        line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
+                                                                         dfsDF[value[2].encode('utf8')], graph_mode)
                         print "R-Squared: " + str(r_squared)
                         print "Sum of Least Squares: " + str(sols)
                         print "A Formula: "
@@ -338,7 +346,10 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                     if len(figure['data']) < 2:
                         figure['data'].append({})
                     if 'regression' in settings:
-                        surfacePlot, surfaceLayout = test_3d(dfsDF[value[1].encode('utf8')], dfsDF[value[2].encode('utf8')], dfsDF[value[3].encode('utf8')], value[1], value[2], value[3])
+                        surfacePlot, surfaceLayout = test_3d(dfsDF[value[1].encode('utf8')],
+                                                             dfsDF[value[2].encode('utf8')],
+                                                             dfsDF[value[3].encode('utf8')], value[1], value[2],
+                                                             value[3])
                         figure['data'][1] = surfacePlot
                         figure['layout'] = surfaceLayout
                         # line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
@@ -566,7 +577,7 @@ def update_output(value):
 def get_option_type(option):
     if option is None:
         return None
-    return sql.get_column_datatypes(column=option, singular=True)
+    return SQL().get_column_datatypes(column=option, singular=True)
 
 
 # Craft condition
