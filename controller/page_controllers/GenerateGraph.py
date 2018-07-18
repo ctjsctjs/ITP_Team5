@@ -73,7 +73,6 @@ def load_series_field(dump):
 def load_vessel_field(series, db_table):
     if series is not None or series != u'None' or db_table is not None or db_table != u'None':
         vessels_in_series = SQL().get_vessel_from_series(series=series, db_table=db_table)
-        i
         return [{'label': i, 'value': i} for i in vessels_in_series]
     return
 

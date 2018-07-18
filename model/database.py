@@ -49,7 +49,7 @@ class SQL:
 
         # Get Column Names from Database
         result = self.__select(columns="COLUMN_NAME", table="INFORMATION_SCHEMA.COLUMNS",
-                               condition={'table_name': 'table'})
+                               condition={'table_name': table})
 
         # Clean Data before returning
         column_names = []
