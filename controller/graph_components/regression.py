@@ -6,6 +6,7 @@ import plotly.graph_objs as go
 from sklearn.cluster import KMeans
 from sklearn.metrics import r2_score
 from enum import Enum
+import pandas as pd
 
 class GraphMode(Enum):
     LINEAR = 1
@@ -30,17 +31,21 @@ def regression(x, y, graph_mode=None):
 
 
 # TODO: Check if function works as intended
-def k_means(x, y, clusters=None):
+def k_means(graphSettings, df, clusters=None):
     # Default cluster
     if clusters is None:
-        clusters = len(x) / 3
+        clusters = len(df.index) / 3
 
-    beforeCoords = np.c_[np.array(x), np.array(y)]
-    kmeans = KMeans(n_clusters=clusters, random_state=0).fit(beforeCoords)
-    x = [xN for xN, yN in kmeans.cluster_centers_]
-    y = [yN for xN, yN in kmeans.cluster_centers_]
+    if graphSettings[0] == "2D":
+        beforeCoords = np.c_[df[graphSettings[1]], df[graphSettings[2]]]
+        kmeans = KMeans(n_clusters=clusters, random_state=0).fit(beforeCoords)
+        newDf = pd.DataFrame({graphSettings[1]: [xN for xN, yN in kmeans.cluster_centers_], graphSettings[2]: [yN for xN, yN in kmeans.cluster_centers_]})
+    else:
+        beforeCoords = np.c_[df[graphSettings[1]], df[graphSettings[2]], df[graphSettings[3]]]
+        kmeans = KMeans(n_clusters=clusters, random_state=0).fit(beforeCoords)
+        newDf = pd.DataFrame({graphSettings[1]: [xN for xN, yN, zN in kmeans.cluster_centers_], graphSettings[2]: [yN for xN, yN, zN in kmeans.cluster_centers_], graphSettings[3]: [zN for xN, yN, zN in kmeans.cluster_centers_]})
 
-    return {'x': x, 'y': y}
+    return newDf
 
 def test_3d(x,y,z, xAxis, yAxis, zAxis):
     dataset = np.c_[np.array(x), np.array(y), np.array(z)]

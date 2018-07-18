@@ -261,6 +261,14 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
         if value[1] is None or value[2] is None:
             figure['data'] = []
         else:
+            # Create the dataset for the vessels selected
+            count = 0
+            for vessel in vessels:
+                if count == 0:
+                    dfsDF = dfs.get(vessel).get_df()
+                else:
+                    dfsDF.append(dfs.get(vessel).get_df())
+
             # dff = []
             # if value[0] == "2D":
             #     for vessel in vessels:
@@ -279,36 +287,49 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
             #     else:
             #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
-            # Create the dataset for the vessels selected
-            count = 0
-            for vessel in vessels:
-                if count == 0:
-                    dfsDF = dfs.get(vessel).get_df()
-                else:
-                    dfsDF.append(dfs.get(vessel).get_df())
-
             # Remove any NaN values
             if value[0] == "2D":
                 dfsDF = dfsDF.dropna(subset=[value[1], value[2]])
             else:
                 dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
 
-            # Generate the Hover Data
+            # Remove outliers
+            mean = np.mean(dfsDF[value[1]])
+            stdio = np.std(dfsDF[value[1]])
+            print "Mean: " + str(mean) + " Std: " + str(stdio)
+            dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (1*stdio)]
+
+            mean = np.mean(dfsDF[value[2]])
+            stdio = np.std(dfsDF[value[2]])
+            print "Mean: " + str(mean) + " Std: " + str(stdio)
+            dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (1*stdio)]
+
+            if value[0] == "3D":
+                mean = np.mean(dfsDF[value[3]])
+                stdio = np.std(dfsDF[value[3]])
+                print "Mean: " + str(mean) + " Std: " + str(stdio)
+                dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (1*stdio)]
+
             hoverData = []
-            # Iterate each row from db
-            for key, value1 in dfsDF.iterrows():
-                placeholderText = ""
-                # Iterate each column in the row
-                for index, row in value1.items():
-                    # Compare the value in important_attributes
-                    for col in full_attributes:
-                        if col == index:
-                            if isinstance(row, float):
-                                placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
-                            else:
-                                placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
-                            break
-                hoverData.append(placeholderText)
+            if 'clustering' in settings:
+                dfsDF = k_means(value, dfsDF, clusters)
+                hoverData = np.c_[dfsDF[value[1]], dfsDF[value[2]]]
+            else:
+                # Generate the Hover Data
+                # Iterate each row from db
+                for key, value1 in dfsDF.iterrows():
+                    placeholderText = ""
+                    # Iterate each column in the row
+                    for index, row in value1.items():
+                        # Compare the value in important_attributes
+                        for col in full_attributes:
+                            if col == index:
+                                if isinstance(row, float):
+                                    placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
+                                else:
+                                    placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
+                                break
+                    hoverData.append(placeholderText)
 
             if value[0] == "2D":
                 # Add scatter from data set if 'datapoints' toggled
