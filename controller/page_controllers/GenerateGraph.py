@@ -293,22 +293,23 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
             else:
                 dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
 
-            # Remove outliers
+            # Remove outliers NOTE: Adjust the threshold to modify how strictly filtered the data will be. So far tested 1, 1.5, 3. Strict ~ Lax
+            threshold = 1.5
             mean = np.mean(dfsDF[value[1]])
             stdio = np.std(dfsDF[value[1]])
             print "Mean: " + str(mean) + " Std: " + str(stdio)
-            dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (1*stdio)]
+            dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold*stdio)]
 
             mean = np.mean(dfsDF[value[2]])
             stdio = np.std(dfsDF[value[2]])
             print "Mean: " + str(mean) + " Std: " + str(stdio)
-            dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (1*stdio)]
+            dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold*stdio)]
 
             if value[0] == "3D":
                 mean = np.mean(dfsDF[value[3]])
                 stdio = np.std(dfsDF[value[3]])
                 print "Mean: " + str(mean) + " Std: " + str(stdio)
-                dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (1*stdio)]
+                dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold*stdio)]
 
             hoverData = []
             if 'clustering' in settings:
