@@ -3,7 +3,8 @@ from dash.dependencies import Input, Output, State
 import static.colors as color
 import plotly.graph_objs as go
 import pandas as pd
-
+import numpy as np
+from pandas.api.types import is_numeric_dtype
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
     generate_graph, add_hidden_filters, generate_dropdown_filter
 from controller.graph_components.regression import GraphMode, regression, k_means, test_3d
@@ -123,7 +124,8 @@ def get_filtered_df(*values):
     # Get specifications
     specifications = []
     for i in range(1, len(values), 3):
-        specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
+        if values[i] is not None:
+            specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
     # Cleanup and prepare conditions
     conditions = []
     for specification in specifications:
@@ -131,11 +133,16 @@ def get_filtered_df(*values):
             conditions.append(value)
 
     # Obtain filtered df
-    df = []
+    runOnce = True
     for vessel in values[0]:
-        df.append(dfs[vessel].get_filtered(conditions=conditions))
-
-    return pd.concat(df)
+        if runOnce:
+            df = dfs[vessel].get_filtered(conditions=conditions)
+            print df
+            runOnce = False
+        else:
+            df.append(dfs[vessel].get_filtered(conditions=conditions))
+    return df.to_json()
+    #return pd.concat(df)
 
 
 # Generate parameter fields depending on mode selected
@@ -202,15 +209,16 @@ def update_formula(temp):
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
      Input('gen-kmeans-cluster', 'value'),
-     Input('save-settings-btn', 'n_clicks')],
+     Input('save-settings-btn', 'n_clicks'),
+     Input('gen-filter-store', 'children')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value'),
      State('gen-params-store', 'children'),
      State('gen-settings-input-1', 'values'),
      State('gen-regression-input-1', 'value'),
      State('gen-kmeans-cluster', 'value')])
-def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vessels, valueState, settingsState,
-                 graph_modeState, clustersState):
+def update_graph(value, settings, graph_mode, clusters, saveClick, filteredData,
+ figure, vessels, valueState, settingsState, graph_modeState, clustersState):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -229,7 +237,8 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
         #         figure['layout']['zaxis']['title'] = default_figure['layout']['zaxis']['title']
         #     else:
         #         figure['layout']['zaxis']['title'] = value[3]
-
+        print "DEBUGGER MEEEEE: "
+        print filteredData
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
@@ -254,10 +263,11 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                 #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
                 # Create the dataset for the vessels selected
-                count = 0
+                firstIter = True
                 for vessel in vessels:
-                    if count == 0:
+                    if firstIter:
                         dfsDF = dfs.get(vessel).get_df()
+                        firstIter = False
                     else:
                         dfsDF.append(dfs.get(vessel).get_df())
 
@@ -267,6 +277,42 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, figure, vesse
                 else:
                     dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
 
+                # Remove Outliers
+                # def remove_outlier(df, graphInfo):
+                #     low = .05
+                #     high = .95
+                #     quant_df = df.quantile([low, high])
+                #     if graphInfo[0] == "2D":
+                #         if is_numeric_dtype(df[graphInfo[1]]):
+                #             df = df[(df[graphInfo[1]] > quant_df.loc[low, graphInfo[1]]) & (df[graphInfo[1]] < quant_df.loc[high, graphInfo[1]])]
+                #         if is_numeric_dtype(df[graphInfo[2]]):
+                #             df = df[(df[graphInfo[2]] > quant_df.loc[low, graphInfo[2]]) & (df[graphInfo[2]] < quant_df.loc[high, graphInfo[2]])]
+                #     return df
+
+                print "Before Cleaning: "
+                # print dfsDF
+                print "After Cleaning: "
+                print value[1]
+                mean = np.mean(dfsDF[value[1]])
+                stdio = np.std(dfsDF[value[1]])
+                print "Mean: " + str(mean) + " Std: " + str(stdio)
+                dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (1*stdio)]
+                # print dfsDF
+
+                # df = pd.DataFrame(np.random.randn(100, 3))
+                # print df
+                # from scipy import stats
+                # df=df[(np.abs(stats.zscore(df)) < 3).all(axis=1)]
+                # print "Send Help: "
+                # print df
+
+                # df = pd.DataFrame({'Data':np.random.normal(size=200)})
+                # # example dataset of normally distributed data.
+                # print df
+                # df = df[np.abs(df.Data-df.Data.mean()) <= (2*df.Data.std())]
+                # # keep only the ones that are within +3 to -3 standard deviations in the column 'Data'.
+                # print "Send Help: "
+                # print df
                 # Generate the Hover Data
                 hoverData = []
                 # Iterate each row from db
