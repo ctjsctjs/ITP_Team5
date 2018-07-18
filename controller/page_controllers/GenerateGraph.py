@@ -132,8 +132,6 @@ for n in range(n_filters):
     filter_state_inputs.append(State('gen-filter-value1-{}'.format(n + 1), 'value'))
     filter_state_inputs.append(State('gen-filter-value2-{}'.format(n + 1), 'value'))
 
-
-# Actual callback for retrieving inputs
 @app.callback(
     Output('gen-filter-store', 'children'),
     filter_inputs)
@@ -141,8 +139,7 @@ def get_filtered_df(*values):
     # Get specifications
     specifications = []
     for i in range(1, len(values), 3):
-        if values[i] is not None:
-            specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
+        specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
     # Cleanup and prepare conditions
     conditions = []
     for specification in specifications:
@@ -150,18 +147,11 @@ def get_filtered_df(*values):
             conditions.append(value)
 
     # Obtain filtered df
-    runOnce = True
+    df = []
     for vessel in values[0]:
-        if runOnce:
-            df = dfs[vessel].get_filtered(conditions=conditions)
-            print "hoolaa"
-            print df
-            runOnce = False
-        else:
-            df.append(dfs[vessel].get_filtered(conditions=conditions))
-    return df.to_json()
-    #return pd.concat(df)
+        df.append(dfs[vessel].get_filtered(conditions=conditions))
 
+    return pd.concat(df)
 
 # Generate parameter fields depending on mode selected
 @app.callback(
@@ -266,7 +256,7 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
         #         figure['layout']['zaxis']['title'] = default_figure['layout']['zaxis']['title']
         #     else:
         #         figure['layout']['zaxis']['title'] = value[3]
-        
+
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
