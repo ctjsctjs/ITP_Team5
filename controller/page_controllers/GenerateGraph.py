@@ -432,7 +432,6 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
         figure['data'] = [i for i in figure['data'] if i is not None]
         return figure
     return default_figure
-
 #save current state of
 @app.callback(
     Output('save-setting', 'children'),
@@ -489,14 +488,13 @@ def saveFilters(saveClick,*filtersInputs):
                 file.write(json.dumps([temp_store]))
                 file.close()
     return filtersInputs
-# Direct user to Archive
-# @app.callback(
-#     Output('url','pathname'),
-#     [Input('save-all-btn','n_clicks')])
-# def goArchive(savedClick):
-#     if savedClick > 0:
-#         return '/Archive'
 
+@app.callback(
+    Output('url','pathname'),
+    [Input('save-all-btn','n_clicks')])
+def goArchive(savedClick):
+    if savedClick > 0:
+        return '/Archive'
 # callback to generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-right-panel-wrapper', 'children'),

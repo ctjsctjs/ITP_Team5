@@ -111,8 +111,8 @@ def generate_files_container(fileList,date,mode):
                 html.H4(fileList[n], className='table-col-3'),
                 html.H4(date[n], className='table-col-3'),
                 html.H4(mode[n], className='table-col-3'),
-                html.Button('View', id = 'load-saved-btn-{}'.format(n), className='loadButton'),
-
+                html.Button('View', id = 'load-saved-btn-{}'.format(n), className='load-button item-element-margin margin-left-12"'),
+                #html.Button('Delete', id='delete-saved-btn-{}'.format(n), className='delete-button item-element-margin "'),
                 #store hidden text value to know which file is clicked
                 dcc.Input(value=fileList[n], id='hidden-text-{}'.format(n), type='text', style={'display': 'none'}),
                 html.Div(id='files-container-{}'.format(n),style={'display':'none'}),
