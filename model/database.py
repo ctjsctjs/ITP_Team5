@@ -48,8 +48,8 @@ class SQL:
             table = self.__default_table
 
         # Get Column Names from Database
-        condition = "table_name = '" + table + "'"
-        result = self.__select(columns="COLUMN_NAME", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
+        result = self.__select(columns="COLUMN_NAME", table="INFORMATION_SCHEMA.COLUMNS",
+                               condition={'table_name': table})
 
         # Clean Data before returning
         column_names = []
@@ -68,14 +68,14 @@ class SQL:
 
         if singular and column is not None:
             # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
-            condition = ("table_name = '%s' AND column_name = '%s'" % (table, column))
+            condition = {'table_name': '{}'.format(table), 'column_name': '{}'.format(column)}
             result = self.__select(columns="DATA_TYPE", table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
 
             # Clean and Return Data
             return result[0][0]
         else:
             # Get Column datatypes from Database TODO: Use SQL 'DISTINCT'
-            condition = ("table_name = '%s'" % table)
+            condition = {'table_name': '{}'.format(table)}
             result = self.__select(columns="DATA_TYPE, CHARACTER_MAXIMUM_LENGTH", table="INFORMATION_SCHEMA.COLUMNS",
                                    condition=condition)
 
@@ -96,7 +96,7 @@ class SQL:
             table = self.__default_table
 
         # Get Column Info from Database TODO: Use SQL 'DISTINCT'
-        condition = "table_name = '" + table + "'"
+        condition = {'table_name': '{}'.format(table)}
         info = self.__select(columns="COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH",
                              table="INFORMATION_SCHEMA.COLUMNS", condition=condition)
 
@@ -127,7 +127,7 @@ class SQL:
         vessels = self.__select(
             columns="Vessel",
             table="__series",
-            condition="`Series`='{}'".format(series)
+            condition={'Series': '{}'.format(series)}
         )
 
         return [vessel[0] for vessel in vessels]
@@ -140,10 +140,17 @@ class SQL:
 
         # TODO: Better handle 'No column given' condition
         if column is None:
-            column = 'DISTINCT `Vessel Name`'
+            column = 'Vessel'
             # column = 'DISTINCT `Vessel Code`'
 
-        return [i[0] for i in (self.__select(columns=column))]
+        result = self.__select(table=table, columns=column, distinct=True)
+        if result is not None:
+            clean_result = []
+            for i in result:
+                if i[0] is not None:
+                    clean_result.append(i[0])
+            return clean_result
+        return
 
     # Method to obtain data for a particular vessel
     def get_vessel(self, table=None, vessel=None):
@@ -161,6 +168,20 @@ class SQL:
         df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel`='{}'".format(table, vessel), con=self.__connection)
         return DataFrame(df)
 
+    # Method to obtain all distinct vessels in a given table from a given series
+    def get_vessel_from_series(self, series, db_table):
+        vessels_in_series = self.get_series('{}'.format(series))
+        vessels_in_table = self.get_vessels(table=db_table)
+
+        vessels = []
+        for vessel in vessels_in_table:
+            if vessel in vessels_in_series:
+                vessels.append(vessel)
+
+        if len(vessels) > 0:
+            return vessels
+        return
+
     """
     'Database' Methods
     """
@@ -169,7 +190,7 @@ class SQL:
     def get_table_names(self):
         # Obtain table names
         table_names = self.__select(columns="TABLE_NAME", table="INFORMATION_SCHEMA.TABLES",
-                                    condition="TABLE_TYPE = 'BASE TABLE' AND TABLE_SCHEMA='{}'".format(self.__db))
+                                    condition={'TABLE_TYPE': 'BASE TABLE', 'TABLE_SCHEMA': self.__db})
 
         return [table[0] for table in table_names if '__' not in table[0]]
 
@@ -218,7 +239,7 @@ class SQL:
         attributes = self.__select(
             columns="attribute, column_name",
             table="__important_attributes",
-            condition="`db_table`='{}'".format(db_table)
+            condition={'db_table': '{}'.format(db_table)}
         )
 
         return {"{}".format(key): "{}".format(value) for key, value in attributes}
@@ -227,7 +248,7 @@ class SQL:
     def set_attribute(self, db_table, column_name, attribute):
         # Check if attribute exists
         if (len(self.__select(table="__important_attributes",
-                              condition="db_table='{}' AND attribute='{}'".format(db_table, attribute))) > 0):
+                              condition={'db_table': '{}'.format(db_table), 'attribute': '{}'.format(attribute)})) > 0):
             self.__update(
                 table="__important_attributes",
                 changes={'column_name': column_name},
@@ -243,6 +264,16 @@ class SQL:
     Base Methods
     """
 
+    # Craft conditions for SQL Queries. Takes dictionaries eg. {'column': 'value'}
+    def __condition(self, condition):
+        con = ""
+        for key, value in condition.items():
+            con += "`{}`='{}'".format(key, value)
+            if key is not condition.keys()[-1]:
+                con += " AND "
+
+        return con
+
     # SQL Select Method
     def __select(self, columns="*", table=None, condition=None, distinct=False):
         # TODO: Handle 404
@@ -250,6 +281,8 @@ class SQL:
         # TODO: Better 'default table' handling
         if table is None:
             table = self.__default_table
+        elif not table.__contains__('INFORMATION_SCHEMA'):
+            table = '`{}`'.format(table)
 
         if distinct:
             sql = "SELECT DISTINCT {} FROM {}".format(columns, table)
@@ -259,7 +292,7 @@ class SQL:
 
         # If condition given
         if condition is not None:
-            sql += " WHERE " + condition
+            sql += " WHERE " + self.__condition(condition)
 
         # Run Query
         return self.__query(sql, expect_result=True)
@@ -299,14 +332,7 @@ class SQL:
             if key is not changes.keys()[-1]:
                 set_field += ", "
 
-        # Craft condition
-        con_field = ""
-        for key, value in condition.items():
-            con_field += "`{}`='{}'".format(key, value)
-            if key is not condition.keys()[-1]:
-                con_field += " AND "
-
-        self.__query("UPDATE `{}` SET {} WHERE {}".format(table, set_field, con_field))
+        self.__query("UPDATE `{}` SET {} WHERE {}".format(table, set_field, self.__condition(condition)))
 
     # SQL Create Table Method
     def __create(self, table=None, columns=[], datatype=[]):

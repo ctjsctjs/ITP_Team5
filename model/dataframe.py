@@ -18,6 +18,7 @@ class DataFrame:
             self.__dataFrame = self.__readfile__(data)
         self.__columns = self.__get_columns()
 
+
     """
     Method to get DataFrame
     """
@@ -71,7 +72,7 @@ class DataFrame:
                 con += " & "
             con += ("(data_frame['%s'] %s %s)" % condition)
 
-        print('data_frame = (data_frame.loc[%s])' % con)
+        print('data_frame = (data_frame.loc[{}])'.format(con))
         exec ('data_frame = (data_frame.loc[%s])' % con)
 
         return data_frame

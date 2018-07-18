@@ -63,7 +63,7 @@ layout = html.Div([
 
         # item-button, generate graph
         html.Button('Add Graph', className='button item-element-margin header-button'),
-        html.Button('Save Settings', className='button item-element-margin header-button'),
+        html.Button('Save Settings', className='button item-element-margin header-button', id = 'save-all-btn'),
 
         html.P('Graph generation tool that provides an insight to ship performance',
                className='title-desc'),
@@ -242,7 +242,7 @@ layout = html.Div([
 
                 # hidden store
                 html.Div(id='save-setting', style={'display': 'none'}),
-                html.Div(id='save-test', style={'display': 'none'}),
+                html.Div(id='save-setting-filter', style={'display': 'none'}),
 
             ], className='item-wrapper item-settings-panel left-panel', id="item-wrapper"),
 
@@ -400,10 +400,6 @@ def generate_graph(mode, options):
             dcc.Graph(
                 id='g2'
             ),
-            html.Button(
-                'Save Settings',
-                className='button item-element-margin',
-                id='save-settings-btn'),
 
         ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
 

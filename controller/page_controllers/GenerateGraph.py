@@ -3,6 +3,9 @@ from dash.dependencies import Input, Output, State
 import static.colors as color
 import plotly.graph_objs as go
 import pandas as pd
+import json
+import os
+import datetime
 import numpy as np
 from pandas.api.types import is_numeric_dtype
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
@@ -17,9 +20,12 @@ import collections
 # from sympy.abc import x
 
 # Init
-options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
+# options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
 n_filters = 10
 dfs = {}
+temp_store = {}
+#PATH of your Proj:TODO CHANGE PATH TO YOUR PROJ PATH
+path = 'C:/Users/YC/Documents/GitHub/ITP_Team5(UI)/'
 # TEMPORARY Variables. TO replace if there is a better way
 gr_squared = 0.0
 gsols = 0.0
@@ -63,20 +69,25 @@ def load_series_field(dump):
 # Populate Vessel field options
 @app.callback(
     Output('gen-vessel-input-1', 'options'),
-    [Input('gen-series-input-1', 'value')])
-def load_vessel_field(series):
-    return [{'label': i, 'value': i} for i in SQL().get_series(series)]
+    [Input('gen-series-input-1', 'value'),
+     Input('gen-database-input-1', 'value')])
+def load_vessel_field(series, db_table):
+    if series is not None or series != u'None' or db_table is not None or db_table != u'None':
+        vessels_in_series = SQL().get_vessel_from_series(series=series, db_table=db_table)
+        return [{'label': i, 'value': i} for i in vessels_in_series]
+    return
 
 
 # Load Vessel Data
 @app.callback(
     Output('gen-vessel-store', 'children'),
-    [Input('gen-vessel-input-1', 'value')])
-def load_vessel_df(vessels):
+    [Input('gen-vessel-input-1', 'value')],
+    [State('gen-database-input-1', 'value')])
+def load_vessel_df(vessels, table):
     if vessels is not None:
         for vessel in vessels:
             if vessel not in dfs:
-                dfs[vessel] = SQL().get_vessel(vessel=vessel)
+                dfs[vessel] = SQL().get_vessel(table=table, vessel=vessel)
 
 
 # Load Axis Parameters selection
@@ -115,6 +126,12 @@ for n in range(n_filters):
     filter_inputs.append(Input('gen-filter-value1-{}'.format(n + 1), 'value'))
     filter_inputs.append(Input('gen-filter-value2-{}'.format(n + 1), 'value'))
 
+filter_state_inputs = [State('gen-vessel-input-1', 'value')]
+for n in range(n_filters):
+    filter_state_inputs.append(State('gen-filter-input-{}'.format(n + 1), 'value'))
+    filter_state_inputs.append(State('gen-filter-value1-{}'.format(n + 1), 'value'))
+    filter_state_inputs.append(State('gen-filter-value2-{}'.format(n + 1), 'value'))
+
 
 # Actual callback for retrieving inputs
 @app.callback(
@@ -137,6 +154,7 @@ def get_filtered_df(*values):
     for vessel in values[0]:
         if runOnce:
             df = dfs[vessel].get_filtered(conditions=conditions)
+            print "hoolaa"
             print df
             runOnce = False
         else:
@@ -148,12 +166,30 @@ def get_filtered_df(*values):
 # Generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-params-wrapper', 'children'),
-    [Input('gen-mode-input-1', 'value')])
-def update_filter(value):
+    [Input('gen-mode-input-1', 'value'),
+     Input('gen-database-input-1', 'value')])
+def update_filter(value, db_table):
     # TODO: Remove hardcoded db table
+    print("THIS IS DBTABLE: {}".format(db_table))
     options = [{'label': label2, 'value': value2} for label2, value2 in
-               SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
+               SQL().get_attributes('{}'.format(db_table)).items()]
     return generate_axis_parameters(value, options)
+#
+# # Generate parameter fields depending on mode selected
+# @app.callback(
+#     Output('gen-params-wrapper', 'children'),
+#     [Input('gen-mode-input-1', 'value')])
+# def update_filer(value):
+#     # TODO: Remove hardcoded db table
+#     #check if dict is empty
+#     if len(temp_store.keys()) == 0:
+#         options = [{'label': label2, 'value': value2} for label2, value2 in
+#                    SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
+#         return generate_axis_parameters(value, options)
+#     else:
+#         options = [{'label': label2, 'value': value2} for label2, value2 in
+#                    SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
+#         return generate_existing_axis_parameters(value, options,temp_store)
 
 
 # Populate Graph Mode Selection Dropdown
@@ -208,17 +244,10 @@ def update_formula(temp):
     [Input('gen-params-store', 'children'),
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
-     Input('gen-kmeans-cluster', 'value'),
-     Input('save-settings-btn', 'n_clicks'),
-     Input('gen-filter-store', 'children')],
+     Input('gen-kmeans-cluster', 'value')],
     [State('g2', 'figure'),
-     State('gen-vessel-input-1', 'value'),
-     State('gen-params-store', 'children'),
-     State('gen-settings-input-1', 'values'),
-     State('gen-regression-input-1', 'value'),
-     State('gen-kmeans-cluster', 'value')])
-def update_graph(value, settings, graph_mode, clusters, saveClick, filteredData,
- figure, vessels, valueState, settingsState, graph_modeState, clustersState):
+     State('gen-vessel-input-1', 'value')])
+def update_graph(value, settings, graph_mode, clusters, figure, vessels):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -237,267 +266,215 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, filteredData,
         #         figure['layout']['zaxis']['title'] = default_figure['layout']['zaxis']['title']
         #     else:
         #         figure['layout']['zaxis']['title'] = value[3]
-        print "DEBUGGER MEEEEE: "
-        print filteredData
+        
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
         else:
-            if saveClick is None:
-                # dff = []
-                # if value[0] == "2D":
-                #     for vessel in vessels:
-                #         dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
-                # else:
-                #     for vessel in vessels:
-                #         dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
-                # dff = pd.concat(dff)
+            # dff = []
+            # if value[0] == "2D":
+            #     for vessel in vessels:
+            #         dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
+            # else:
+            #     for vessel in vessels:
+            #         dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
+            # dff = pd.concat(dff)
 
-                # K-means if 'clustering' toggled NOTE: Update from df to dfs/dfsDF
-                # if 'clustering' in settings:
-                #     df = k_means(dff[value[1]], dff[value[2]], clusters)
-                # else:
-                #     if value[0] == "2D":
-                #         df = {'x': dff[value[1]], 'y': dff[value[2]]}
-                #     else:
-                #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
+            # K-means if 'clustering' toggled NOTE: Update from df to dfs/dfsDF
+            # if 'clustering' in settings:
+            #     df = k_means(dff[value[1]], dff[value[2]], clusters)
+            # else:
+            #     if value[0] == "2D":
+            #         df = {'x': dff[value[1]], 'y': dff[value[2]]}
+            #     else:
+            #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
-                # Create the dataset for the vessels selected
-                firstIter = True
-                for vessel in vessels:
-                    if firstIter:
-                        dfsDF = dfs.get(vessel).get_df()
-                        firstIter = False
-                    else:
-                        dfsDF.append(dfs.get(vessel).get_df())
-
-                # Remove any NaN values
-                if value[0] == "2D":
-                    dfsDF = dfsDF.dropna(subset=[value[1], value[2]])
+            # Create the dataset for the vessels selected
+            count = 0
+            for vessel in vessels:
+                if count == 0:
+                    dfsDF = dfs.get(vessel).get_df()
                 else:
-                    dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
+                    dfsDF.append(dfs.get(vessel).get_df())
 
-                # Remove Outliers
-                # def remove_outlier(df, graphInfo):
-                #     low = .05
-                #     high = .95
-                #     quant_df = df.quantile([low, high])
-                #     if graphInfo[0] == "2D":
-                #         if is_numeric_dtype(df[graphInfo[1]]):
-                #             df = df[(df[graphInfo[1]] > quant_df.loc[low, graphInfo[1]]) & (df[graphInfo[1]] < quant_df.loc[high, graphInfo[1]])]
-                #         if is_numeric_dtype(df[graphInfo[2]]):
-                #             df = df[(df[graphInfo[2]] > quant_df.loc[low, graphInfo[2]]) & (df[graphInfo[2]] < quant_df.loc[high, graphInfo[2]])]
-                #     return df
+            # Remove any NaN values
+            if value[0] == "2D":
+                dfsDF = dfsDF.dropna(subset=[value[1], value[2]])
+            else:
+                dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
 
-                print "Before Cleaning: "
-                # print dfsDF
-                print "After Cleaning: "
-                print value[1]
-                mean = np.mean(dfsDF[value[1]])
-                stdio = np.std(dfsDF[value[1]])
-                print "Mean: " + str(mean) + " Std: " + str(stdio)
-                dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (1*stdio)]
-                # print dfsDF
+            # Generate the Hover Data
+            hoverData = []
+            # Iterate each row from db
+            for key, value1 in dfsDF.iterrows():
+                placeholderText = ""
+                # Iterate each column in the row
+                for index, row in value1.items():
+                    # Compare the value in important_attributes
+                    for col in full_attributes:
+                        if col == index:
+                            if isinstance(row, float):
+                                placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
+                            else:
+                                placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
+                            break
+                hoverData.append(placeholderText)
 
-                # df = pd.DataFrame(np.random.randn(100, 3))
-                # print df
-                # from scipy import stats
-                # df=df[(np.abs(stats.zscore(df)) < 3).all(axis=1)]
-                # print "Send Help: "
-                # print df
-
-                # df = pd.DataFrame({'Data':np.random.normal(size=200)})
-                # # example dataset of normally distributed data.
-                # print df
-                # df = df[np.abs(df.Data-df.Data.mean()) <= (2*df.Data.std())]
-                # # keep only the ones that are within +3 to -3 standard deviations in the column 'Data'.
-                # print "Send Help: "
-                # print df
-                # Generate the Hover Data
-                hoverData = []
-                # Iterate each row from db
-                for key, value1 in dfsDF.iterrows():
-                    placeholderText = ""
-                    # Iterate each column in the row
-                    for index, row in value1.items():
-                        # Compare the value in important_attributes
-                        for col in full_attributes:
-                            if col == index:
-                                if isinstance(row, float):
-                                    placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
-                                else:
-                                    placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
-                                break
-                    hoverData.append(placeholderText)
-
-                if value[0] == "2D":
-                    # Add scatter from data set if 'datapoints' toggled
-                    if len(figure['data']) < 1:
-                        figure['data'].append({})
-                    if 'datapoints' in settings:
-                        figure['data'][0] = go.Scatter(
-                            x=dfsDF[value[1].encode('utf8')],
-                            y=dfsDF[value[2].encode('utf8')],
-                            name='Data Marker',
-                            mode='markers',
-                            text=hoverData,
-                            # marker=go.Marker(color=color.red)
-                        )
-                    else:
-                        figure['data'][0] = None
-
-                    # Add Line/Curve if 'regression' toggled
-                    if len(figure['data']) < 2:
-                        figure['data'].append({})
-                    if 'regression' in settings:
-                        line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
-                                                                         dfsDF[value[2].encode('utf8')], graph_mode)
-                        print "R-Squared: " + str(r_squared)
-                        print "Sum of Least Squares: " + str(sols)
-                        print "A Formula: "
-                        print formula
-                        global gr_squared, gsols, gformula
-                        gr_squared = r_squared
-                        gsols = sols
-                        gformula = formula
-
-                        figure['data'][1] = go.Scatter(
-                            x=line_data['x'],
-                            y=line_data['y'],
-                            name='Line',
-                            mode='lines',
-                            # marker=go.Marker(color=color.red)
-                        )
-                    else:
-                        figure['data'][1] = None
+            if value[0] == "2D":
+                # Add scatter from data set if 'datapoints' toggled
+                if len(figure['data']) < 1:
+                    figure['data'].append({})
+                if 'datapoints' in settings:
+                    figure['data'][0] = go.Scatter(
+                        x=dfsDF[value[1].encode('utf8')],
+                        y=dfsDF[value[2].encode('utf8')],
+                        name='Data Marker',
+                        mode='markers',
+                        text=hoverData,
+                        # marker=go.Marker(color=color.red)
+                    )
                 else:
-                    # 3D
-                    # Add scatter from data set if 'datapoints' toggled
-                    if len(figure['data']) < 1:
-                        figure['data'].append({})
-                    if 'datapoints' in settings:
-                        figure['data'][0] = go.Scatter3d(
-                            x=dfsDF[value[1].encode('utf8')],
-                            y=dfsDF[value[2].encode('utf8')],
-                            z=dfsDF[value[3].encode('utf8')],
-                            name='Data Marker',
-                            mode='markers',
-                            text=hoverData,
-                            # marker=go.Marker(color=color.red)
-                        )
-                    else:
-                        figure['data'][0] = None
+                    figure['data'][0] = None
 
-                    # Add Line/Curve if 'regression' toggled
-                    if len(figure['data']) < 2:
-                        figure['data'].append({})
-                    if 'regression' in settings:
-                        surfacePlot, surfaceLayout = test_3d(dfsDF[value[1].encode('utf8')],
-                                                             dfsDF[value[2].encode('utf8')],
-                                                             dfsDF[value[3].encode('utf8')], value[1], value[2],
-                                                             value[3])
-                        figure['data'][1] = surfacePlot
-                        figure['layout'] = surfaceLayout
-                        # line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
-                        # print "R-Squared: " + str(r_squared)
-                        # print "Sum of Least Squares: " + str(sols)
-                        # print "A Formula: "
-                        # print formula
-                        # global gr_squared, gsols, gformula
-                        # gr_squared = r_squared
-                        # gsols = sols
-                        # gformula = formula
-                        #
-                        # figure['data'][1] = go.Surface(
-                        #     x=line_data['x'],
-                        #     y=line_data['y'],
-                        #     name='Line',
-                        #     mode='lines',
-                        #     # marker=go.Marker(color=color.red)
-                        # )
-                    else:
-                        figure['data'][1] = None
+                # Add Line/Curve if 'regression' toggled
+                if len(figure['data']) < 2:
+                    figure['data'].append({})
+                if 'regression' in settings:
+                    line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
+                                                                     dfsDF[value[2].encode('utf8')], graph_mode)
+                    print "R-Squared: " + str(r_squared)
+                    print "Sum of Least Squares: " + str(sols)
+                    print "A Formula: "
+                    print formula
+                    global gr_squared, gsols, gformula
+                    gr_squared = r_squared
+                    gsols = sols
+                    gformula = formula
+
+                    figure['data'][1] = go.Scatter(
+                        x=line_data['x'],
+                        y=line_data['y'],
+                        name='Line',
+                        mode='lines',
+                        # marker=go.Marker(color=color.red)
+                    )
+                else:
+                    figure['data'][1] = None
+            else:
+                # 3D
+                # Add scatter from data set if 'datapoints' toggled
+                if len(figure['data']) < 1:
+                    figure['data'].append({})
+                if 'datapoints' in settings:
+                    figure['data'][0] = go.Scatter3d(
+                        x=dfsDF[value[1].encode('utf8')],
+                        y=dfsDF[value[2].encode('utf8')],
+                        z=dfsDF[value[3].encode('utf8')],
+                        name='Data Marker',
+                        mode='markers',
+                        text=hoverData,
+                        # marker=go.Marker(color=color.red)
+                    )
+                else:
+                    figure['data'][0] = None
+
+                # Add Line/Curve if 'regression' toggled
+                if len(figure['data']) < 2:
+                    figure['data'].append({})
+                if 'regression' in settings:
+                    surfacePlot, surfaceLayout = test_3d(dfsDF[value[1].encode('utf8')],
+                                                         dfsDF[value[2].encode('utf8')],
+                                                         dfsDF[value[3].encode('utf8')], value[1], value[2],
+                                                         value[3])
+                    figure['data'][1] = surfacePlot
+                    figure['layout'] = surfaceLayout
+                    # line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
+                    # print "R-Squared: " + str(r_squared)
+                    # print "Sum of Least Squares: " + str(sols)
+                    # print "A Formula: "
+                    # print formula
+                    # global gr_squared, gsols, gformula
+                    # gr_squared = r_squared
+                    # gsols = sols
+                    # gformula = formula
+                    #
+                    # figure['data'][1] = go.Surface(
+                    #     x=line_data['x'],
+                    #     y=line_data['y'],
+                    #     name='Line',
+                    #     mode='lines',
+                    #     # marker=go.Marker(color=color.red)
+                    # )
+                else:
+                    figure['data'][1] = None
         # Clean figure data
         figure['data'] = [i for i in figure['data'] if i is not None]
         return figure
     return default_figure
 
+#save current state of
+@app.callback(
+    Output('save-setting', 'children'),
+    [Input('save-all-btn','n_clicks')],
+    [State('gen-params-store','children'),
+    State('gen-settings-input-1', 'values'),
+    State('gen-regression-input-1', 'value'),
+    State('gen-kmeans-cluster', 'value'),
+    State('gen-vessel-input-1', 'value'),
+    State('gen-series-input-1','value'),
+    State('gen-graph-name','value'),
+    State('gen-database-input-1','value')])
+def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,databaseState):
+    if saveClick > 0:
+        if paramState not in temp_store.values():
+            temp_store['param'] = paramState
+        if settingState not in temp_store.values():
+            temp_store['setting'] = settingState
+        if regState not in temp_store.values():
+            temp_store['regression'] =regState
+        if clusterState not in temp_store.values():
+            temp_store['cluster'] =clusterState
+        if vesselState not in temp_store.values():
+            temp_store['vessel'] = vesselState
+        if seriesState not in temp_store.values():
+            temp_store['series'] = seriesState
+        if databaseState not in temp_store.values():
+            temp_store['database']=vesselState
+        if graphState not in temp_store.values():
+            temp_store['graphName'] = graphState
+            temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
+            if os.path.isfile(path + "archive/" + temp_store.get('graphName') + '.txt') == True:
+                time = str(datetime.datetime.now().strftime('%H%M%S'))
+                temp_store.update({'graphName':graphState+"("+time+")"})
+            # if os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == False:
+            #     with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'),'w') as file:
+            #         file.write(json.dumps(temp_store))
+            # #If yes, write to graph name that consist of today date
+            # elif os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == True:
+            #     temp_store.update({'graphName':graphState+"("+str(datetime.datetime.now().date())+")"})
+            #     with open(os.path.join(path + 'archive', temp_store.get('graphName')+ '.txt'), 'w') as file:
+            #         file.write(json.dumps(temp_store))
 
-# settingsInput=[State('gen-mode-input-1', 'value'),
-#   State('gen-paramX-input-1', 'value'),
-#   State('gen-paramY-input-1', 'value'),
-#   State('gen-paramZ-input-1', 'value'),
-#   State('gen-settings-input-1', 'values'),
-#   State('gen-regression-input-1', 'value'),
-#   State('gen-kmeans-cluster', 'value'),
-#   State('gen-vessel-input-1', 'value'),
-#   State('gen-filter-store','children'),
-#   State('g2', 'figure')]
-#
+
+@app.callback(
+    Output('save-setting-filter', 'children'),
+    [Input('save-all-btn','n_clicks')],
+    filter_state_inputs)
+def saveFilters(saveClick,*filtersInputs):
+    if saveClick > 0:
+        if filtersInputs not in temp_store.values():
+            temp_store['filters']=filtersInputs
+            with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'), 'a') as file:
+                file.write(json.dumps([temp_store]))
+                file.close()
+    return filtersInputs
+# Direct user to Archive
 # @app.callback(
-#     Output('save-test','figure'),
-#     [Input('save-settings-btn','n_clicks')],
-#     settingsInput)
-# def update_save_graph(saveClick,*settingData):
-#     if saveClick > 0:
-#         # print (settingData)
-#         # print (settingData[0])
-#         # print (settingData[1])
-#         # print (settingData[2])
-#         # print (settingData[3])
-#         # print (settingData[4][1])
-#         # print (settingData[5])
-#         # print (settingData[6])
-#         # print (settingData[7])
-#         # print (settingData[8])
-#         # Clean data
-#         if settingData[8] is None:
-#             dff = dfs[settingData[7]].get_2D_data(settingData[1], settingData[2], clean=True)
-#         else:
-#             dfToJson = pd.read_json(settingData[8])
-#             dfClean = dfToJson[[settingData[1], settingData[2]]]
-#             dff = dfClean.dropna()
-#
-#         # K-means if 'clustering' toggled
-#         if 'clustering' in settingData[4]:
-#             df = k_means(dff[settingData[1]], dff[settingData[2]], clusters)
-#         else:
-#             df = {'x': dff[settingData[1]], 'y': dff[settingData[2]]}
-#
-#         # Add scatter from data set if 'datapoints' toggled
-#         if len(settingData[9]['data']) < 1:
-#             settingData[9]['data'].append({})
-#         if 'datapoints' in settingData[4]:
-#             settingData[9]['data'][0] = go.Scatter(
-#                 x=df['x'],
-#                 y=df['y'],
-#                 name='Saved DataSet',
-#                 mode='markers',
-#                 marker=go.Marker(color='rgb(44,180,177)')
-#             )
-#         else:
-#             settingData[9]['data'][0] = None
-#
-#         # Add Line/Curve if 'regression' toggled
-#         if len(settingData[9]['data']) < 2:
-#             settingData[9]['data'].append({})
-#         if 'regression' in settingData[4]:
-#             line_data = regression(df['x'], df['y'], settingData[5])
-#             settingData[9]['data'][1] = go.Scatter(
-#                 x=line_data['x'],
-#                 y=line_data['y'],
-#                 name='Saved Regression',
-#                 mode='lines',
-#                 marker=go.Marker(color='rgb(232,12,194)')
-#             )
-#         else:
-#             settingData[9]['data'][1] = None
-#
-#     # Clean figure data
-#     settingData[9]['data'] = [i for i in settingData[9]['data'] if i is not None]
-#
-#     return settingData[9]
-
+#     Output('url','pathname'),
+#     [Input('save-all-btn','n_clicks')])
+# def goArchive(savedClick):
+#     if savedClick > 0:
+#         return '/Archive'
 
 # callback to generate parameter fields depending on mode selected
 @app.callback(
@@ -506,6 +483,7 @@ def update_graph(value, settings, graph_mode, clusters, saveClick, filteredData,
     [State('gen-mode-input-1', 'value')])
 def update_filer(value, mode):
     if value > 0:
+        options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
         return generate_graph(mode, options)
 
 
@@ -612,12 +590,12 @@ def update_output(value):
     return "Parameter Z: " + str(value)
 
 
-@app.callback(
-    Output('gen-settings-output-1', 'children'),
-    [Input('gen-settings-input-1', 'values')])
-def update_output(value):
-    return "Settings: {}".format([item for item in value])
-
+# @app.callback(
+#     Output('gen-settings-output-1', 'children'),
+#     [Input('gen-settings-input-1', 'values')])
+# def update_output(value):
+#     return "Settings: {}".format([item for item in value])
+#
 
 # Identifies whether an option is text, numeric or date
 def get_option_type(option):
