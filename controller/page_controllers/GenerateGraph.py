@@ -370,6 +370,15 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
                         mode='lines',
                         # marker=go.Marker(color=color.red)
                     )
+
+                    layout2d = go.Layout(
+                        title=value[1] + " vs " + value[2],
+                        plot_bgcolor='rgb(229, 229, 229)',
+                        xaxis=go.XAxis(title=value[1], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                        yaxis=dict(title=value[2], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                        # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
+                    )
+                    figure['layout'] = layout2d
                 else:
                     figure['data'][1] = None
             else:
