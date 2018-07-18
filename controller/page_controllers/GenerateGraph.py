@@ -19,7 +19,7 @@ import collections
 # from sympy.abc import x
 
 # Init
-options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
+# options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
 n_filters = 10
 dfs = {}
 temp_store = {}
@@ -68,20 +68,26 @@ def load_series_field(dump):
 # Populate Vessel field options
 @app.callback(
     Output('gen-vessel-input-1', 'options'),
-    [Input('gen-series-input-1', 'value')])
-def load_vessel_field(series):
-    return [{'label': i, 'value': i} for i in SQL().get_series(series)]
+    [Input('gen-series-input-1', 'value'),
+     Input('gen-database-input-1', 'value')])
+def load_vessel_field(series, db_table):
+    if series is not None or series != u'None' or db_table is not None or db_table != u'None':
+        vessels_in_series = SQL().get_vessel_from_series(series=series, db_table=db_table)
+        i
+        return [{'label': i, 'value': i} for i in vessels_in_series]
+    return
 
 
 # Load Vessel Data
 @app.callback(
     Output('gen-vessel-store', 'children'),
-    [Input('gen-vessel-input-1', 'value')])
-def load_vessel_df(vessels):
+    [Input('gen-vessel-input-1', 'value')],
+    [State('gen-database-input-1', 'value')])
+def load_vessel_df(vessels, table):
     if vessels is not None:
         for vessel in vessels:
             if vessel not in dfs:
-                dfs[vessel] = SQL().get_vessel(vessel=vessel)
+                dfs[vessel] = SQL().get_vessel(table=table, vessel=vessel)
 
 
 # Load Axis Parameters selection
@@ -153,11 +159,13 @@ def get_filtered_df(*values):
 # Generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-params-wrapper', 'children'),
-    [Input('gen-mode-input-1', 'value')])
-def update_filter(value):
+    [Input('gen-mode-input-1', 'value'),
+     Input('gen-database-input-1', 'value')])
+def update_filter(value, db_table):
     # TODO: Remove hardcoded db table
+    print("THIS IS DBTABLE: {}".format(db_table))
     options = [{'label': label2, 'value': value2} for label2, value2 in
-               SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
+               SQL().get_attributes('{}'.format(db_table)).items()]
     return generate_axis_parameters(value, options)
 #
 # # Generate parameter fields depending on mode selected
@@ -468,6 +476,7 @@ def saveFilters(saveClick,*filtersInputs):
     [State('gen-mode-input-1', 'value')])
 def update_filer(value, mode):
     if value > 0:
+        options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
         return generate_graph(mode, options)
 
 
