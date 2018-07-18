@@ -522,13 +522,22 @@ def generate_graph(mode, options):
                         className='item-element-margin'),
                     html.Div(id='gen-regression-input-dump', style={'display': 'none'}),
 
+                    # Outliers  input
+                    html.H5('Select the outliers threshold level of the graph', className='item-element-margin'),
+                    dcc.Dropdown(
+                        id='gen-threshold-input-1',
+                        placeholder="Threshold",
+                        className='item-element-margin',
+                        value ='None'),
+                    html.Div(id='gen-threshold-input-dump', style={'display': 'none'}),
+
                     # Clusters input
                     html.H5('Select the number of clusters of the graph', className='item-element-margin'),
                     dcc.Input(
                         id='gen-kmeans-cluster',
                         type='number',
                         className='item-element-margin form-control form-control-sm',
-                    )
+                    ),
 
                 ], className='custom-panel'),
 
