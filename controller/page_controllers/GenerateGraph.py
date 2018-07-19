@@ -150,12 +150,16 @@ def get_filtered_df(*values):
         for value in specification:
             conditions.append(value)
 
+
+    print("THIS IS CONDITIONS: {}".format(conditions))
+
     # Obtain filtered df
     df = []
     for vessel in values[0]:
         df.append(dfs[vessel].get_filtered(conditions=conditions))
 
-    return pd.concat(df).to_json()
+    df = pd.concat(df)
+    return df.to_json()
 
 
 # Generate parameter fields depending on mode selected
@@ -164,8 +168,6 @@ def get_filtered_df(*values):
     [Input('gen-mode-input-1', 'value'),
      Input('gen-database-input-1', 'value')])
 def update_filter(value, db_table):
-    # TODO: Remove hardcoded db table
-    print("THIS IS DBTABLE: {}".format(db_table))
     options = [{'label': label2, 'value': value2} for label2, value2 in
                SQL().get_attributes('{}'.format(db_table)).items()]
     return generate_axis_parameters(value, options)
@@ -254,7 +256,7 @@ def update_formula(temp):
      Input('gen-threshold-input-1', 'value')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')])
-def update_graph(filtered_df, value, settings, graph_mode, clusters, threshold, figure, vessels):
+def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, figure, vessels):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -279,12 +281,17 @@ def update_graph(filtered_df, value, settings, graph_mode, clusters, threshold, 
             figure['data'] = []
         else:
             # Create the dataset for the vessels selected
-            count = 0
-            for vessel in vessels:
-                if count == 0:
-                    dfsDF = dfs.get(vessel).get_df()
-                else:
-                    dfsDF.append(dfs.get(vessel).get_df())
+            print("THIS IS UPDATE_GRAPH")
+            print(filtered_df_json)
+            dfsDF = pd.read_json(filtered_df_json)
+            print(dfsDF)
+
+            # count = 0
+            # for vessel in vessels:
+            #     if count == 0:
+            #         dfsDF = dfs.get(vessel).get_df()
+            #     else:
+            #         dfsDF.append(dfs.get(vessel).get_df())
 
             # dff = []
             # if value[0] == "2D":
