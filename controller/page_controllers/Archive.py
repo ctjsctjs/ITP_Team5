@@ -27,9 +27,8 @@ def display_value(value):
             dictionaryFile = json.loads(file.read())[0]
             savedMode.append(dictionaryFile.get('param')[0])
             savedDate.append(dictionaryFile.get('dateTime'))
-            print (dictionaryFile.get('graphName'))
             if dictionaryFile.get('graphName') == "":
-                savedName.append('(No file name given)')
+                savedName.append('(Empty File Name)')
             else:
                 savedName.append(dictionaryFile.get('graphName'))
         return generate_files_container(savedName, savedDate, savedMode)
@@ -41,7 +40,7 @@ def button_callback(noOfFiles):
     @app.callback(
         Output('files-container-{}'.format(noOfFiles), 'children'),
         [Input('load-saved-btn-{}'.format(noOfFiles), 'n_clicks'),
-         Input('delete-saved-btn-{}'.format(noOfFiles),'n_clicks'),
+         #Input('delete-saved-btn-{}'.format(noOfFiles),'n_clicks'),
          Input('hidden-text-{}'.format(noOfFiles), 'value')])
     def clicked_filename(loadBtn,deleteBtn, filename):
         if loadBtn > 0:

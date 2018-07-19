@@ -26,6 +26,7 @@ dfs = {}
 temp_store = {}
 #PATH of your Proj:TODO CHANGE PATH TO YOUR PROJ PATH
 path = 'C:/Users/YC/Documents/GitHub/ITP_Team5(UI)/'
+arr_txt = [x for x in os.listdir('archive') if x.endswith(".txt")]
 # TEMPORARY Variables. TO replace if there is a better way
 gr_squared = 0.0
 gsols = 0.0
@@ -48,17 +49,187 @@ default_figure = {
         margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
         hovermode='closest'
     )}
-
+#threshold value
 threshold = ['None', 1, 1.5, 2, 2.5, 3]
+
 # Populate Database field options
 @app.callback(
     Output('gen-database-input-1', 'options'),
     [Input('gen-database-input-dump', 'children')])
 def load_series_field(dump):
     return [{'label': table, 'value': table} for table in SQL().get_table_names()]
+#
+# # Populate Line field options
+# @app.callback(
+#     Output('gen-loadline-input-1', 'options'),
+#     [Input('gen-loadline-dump', 'children')])
+# def load_series_field(dump):
+#     fileNames = []
+#     if arr_txt != []:
+#         for item in arr_txt:
+#             file = open('archive/' + item, 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             if dictionaryFile.get('graphName') == "":
+#                 fileNames.append('(Empty File Name)')
+#             else:
+#                 fileNames.append(dictionaryFile.get('graphName'))
+#         return [{'label': files, 'value': files} for files in fileNames]
+#     # else:
+#         return None
+#
+# # Generates callbacks for filter options
+# def filter_input1_callback(filter_number):
+#     @app.callback(
+#         Output('gen-filter-input-{}'.format(filter_number + 1), 'value'),
+#         [Input('load-settings-btn','n_clicks'),
+#          Input('save-setting-filter','children')])
+#     def loadFilters(loadClick,filterData):
+#         if loadClick > 0:
+#             #print (filter_number*3+1)
+#             return '{}'.format(filterData[filter_number*3+1])
+#
+# # Generates callbacks for filter options
+# def filter_value1_callback(filter_number):
+#     @app.callback(
+#         Output('gen-filter-value1-{}'.format(filter_number + 1), 'value'),
+#         [Input('load-settings-btn','n_clicks'),
+#          Input('save-setting-filter','children')])
+#     def loadFilters(loadClick,filterData):
+#         if loadClick > 0:
+#             #print (filter_number*3+1)
+#             return '{}'.format(filterData[filter_number*3+2])
+#
+# # Generates callbacks for filter options
+# def filter_value2_callback(filter_number):
+#     @app.callback(
+#         Output('gen-filter-value2-{}'.format(filter_number + 1), 'value'),
+#         [Input('load-settings-btn', 'n_clicks'),
+#          Input('save-setting-filter', 'children')])
+#     def loadFilters(loadClick, filterData):
+#         if loadClick > 0:
+#             # print (filter_number*3+1)
+#             return '{}'.format(filterData[filter_number * 3 + 3])
+#
+# for k in range(n_filters):
+#     filter_input1_callback(k + 1)
+#     filter_value1_callback(k + 1)
+#     filter_value2_callback(k + 1)
+# #
 
+# # load saved mode input
+# @app.callback(
+#     Output('gen-mode-input-1','value'),
+#     [Input('gen-loadline-input-1','value')])
+# def load_settings(load):
+#     if load is not None:
+#         file = open('archive/' + load + ".txt", 'r')
+#         dictionaryFile = json.loads(file.read())[0]
+#         return '{}'.format(dictionaryFile.get('param')[0])
+#
+#
+# #load saved database input
+# @app.callback(
+#     Output('gen-database-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('database'))
+#
+# #load saved series input
+# @app.callback(
+#     Output('gen-series-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('series'))
+#
+#   #
+# #load saved vessel input
+# @app.callback(
+#     Output('gen-vessel-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             print(dictionaryFile.get('vessel')[0])
+#             return '{}'.format(dictionaryFile.get('vessel')[0])
+# #load saved paramX input
+# @app.callback(
+#     Output('gen-paramX-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             print(dictionaryFile.get('param')[1])
+#             return '{}'.format(dictionaryFile.get('param')[1])
+#
+# #load saved kmeans-cluster input
+# @app.callback(
+#     Output('gen-kmeans-cluster','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('cluster'))
+#
+# #load saved regression-degree input
+# @app.callback(
+#     Output('gen-regression-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('regression'))
+#
+# #load saved settings input
+# @app.callback(
+#     Output('gen-settings-input-1','values'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('setting'))
+#
+#
+#
+# #load saved paramY input
+# @app.callback(
+#     Output('gen-paramY-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('param')[2])
+#
+# #load saved paramZ input
+# @app.callback(
+#     Output('gen-paramZ-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('param')[3])
 
-# Populate Series field options
 @app.callback(
     Output('gen-series-input-1', 'options'),
     [Input('gen-series-dump', 'children')])
@@ -467,8 +638,9 @@ def update_graph(value, settings, graph_mode, clusters, threshold, figure, vesse
     State('gen-vessel-input-1', 'value'),
     State('gen-series-input-1','value'),
     State('gen-graph-name','value'),
-    State('gen-database-input-1','value')])
-def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,databaseState):
+    State('gen-database-input-1','value'),
+    State('gen-threshold-input-1','value')])
+def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,databaseState,thresholdState):
     if saveClick > 0:
         if paramState not in temp_store.values():
             temp_store['param'] = paramState
@@ -483,7 +655,9 @@ def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,
         if seriesState not in temp_store.values():
             temp_store['series'] = seriesState
         if databaseState not in temp_store.values():
-            temp_store['database']=vesselState
+            temp_store['database']=databaseState
+        if thresholdState not in temp_store.values():
+            temp_store['threshold']=thresholdState
         if graphState not in temp_store.values():
             temp_store['graphName'] = graphState
             temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
@@ -529,7 +703,7 @@ def update_filer(value, mode):
         options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
         return generate_graph(mode, options)
 
-
+#
 # callback to hide generate graph button and show update button after graph generated
 @app.callback(
     Output('gen-button-1', 'style'),

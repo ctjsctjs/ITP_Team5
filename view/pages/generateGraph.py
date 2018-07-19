@@ -217,6 +217,26 @@ layout = html.Div([
                     # call filter layout
                     html.Div(id='gen-filter'),
                 ], className='item-row item-select-height item-inline'),
+                #
+                # # Load File field
+                # html.Div([
+                #     html.H3([
+                #         'Load Line'
+                #     ], className='input-label item-element-margin'),
+                #     html.H5([
+                #         html.I(className="fas fa-exclamation-circle icon"),
+                #         '6. Select the file to load'
+                #     ], className='helper-text item-element-margin'),
+                #     # File field
+                #     dcc.Dropdown(
+                #         id='gen-loadline-input-1',
+                #         placeholder="File",
+                #         className='item-element-margin'
+                #     ),
+                #
+                #     # # Hidden Line Elements
+                #     html.Div(id='gen-loadline-dump', style={'display': 'none'}),
+                # ], className='item-row item-select-height item-inline'),
 
                 html.Button([
                     html.I(className="fas fa-caret-right icon"),
@@ -239,6 +259,7 @@ layout = html.Div([
                 # ),
 
                 # generate_filter_id(),
+
 
                 # hidden store
                 html.Div(id='save-setting', style={'display': 'none'}),
