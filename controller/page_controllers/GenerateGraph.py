@@ -136,32 +136,6 @@ for n in range(n_filters):
     filter_state_inputs.append(State('gen-filter-value2-{}'.format(n + 1), 'value'))
 
 
-@app.callback(
-    Output('gen-filter-store', 'children'),
-    filter_inputs)
-def get_filtered_df(*values):
-    # Get specifications
-    specifications = []
-    for i in range(1, len(values), 3):
-        specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
-    # Cleanup and prepare conditions
-    conditions = []
-    for specification in specifications:
-        for value in specification:
-            conditions.append(value)
-
-
-    print("THIS IS CONDITIONS: {}".format(conditions))
-
-    # Obtain filtered df
-    df = []
-    for vessel in values[0]:
-        df.append(dfs[vessel].get_filtered(conditions=conditions))
-
-    df = pd.concat(df)
-    return df.to_json()
-
-
 # Generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-params-wrapper', 'children'),
@@ -171,24 +145,6 @@ def update_filter(value, db_table):
     options = [{'label': label2, 'value': value2} for label2, value2 in
                SQL().get_attributes('{}'.format(db_table)).items()]
     return generate_axis_parameters(value, options)
-
-
-#
-# # Generate parameter fields depending on mode selected
-# @app.callback(
-#     Output('gen-params-wrapper', 'children'),
-#     [Input('gen-mode-input-1', 'value')])
-# def update_filer(value):
-#     # TODO: Remove hardcoded db table
-#     #check if dict is empty
-#     if len(temp_store.keys()) == 0:
-#         options = [{'label': label2, 'value': value2} for label2, value2 in
-#                    SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
-#         return generate_axis_parameters(value, options)
-#     else:
-#         options = [{'label': label2, 'value': value2} for label2, value2 in
-#                    SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
-#         return generate_existing_axis_parameters(value, options,temp_store)
 
 
 # Populate Graph Mode Selection Dropdown
@@ -247,6 +203,30 @@ def update_formula(temp):
 
 
 @app.callback(
+    Output('gen-filter-store', 'children'),
+    filter_inputs)
+def get_filtered_df(*values):
+    return None
+    # # Get specifications
+    # specifications = []
+    # for i in range(1, len(values), 3):
+    #     specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
+    # # Cleanup and prepare conditions
+    # conditions = []
+    # for specification in specifications:
+    #     for value in specification:
+    #         conditions.append(value)
+    #
+    # # Obtain filtered df
+    # df = []
+    # for vessel in values[0]:
+    #     df.append(dfs[vessel].get_filtered(conditions=conditions))
+    #
+    # df = pd.concat(df)
+    # return df.to_json()
+
+
+@app.callback(
     Output('g2', 'figure'),
     [Input('gen-filter-store', 'children'),
      Input('gen-params-store', 'children'),
@@ -255,8 +235,9 @@ def update_formula(temp):
      Input('gen-kmeans-cluster', 'value'),
      Input('gen-threshold-input-1', 'value')],
     [State('g2', 'figure'),
-     State('gen-vessel-input-1', 'value')])
-def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, figure, vessels):
+     State('gen-vessel-input-1', 'value')]
+    + filter_state_inputs)
+def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, figure, vessels, *filter_settings):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -281,10 +262,22 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             figure['data'] = []
         else:
             # Create the dataset for the vessels selected
-            print("THIS IS UPDATE_GRAPH")
-            print(filtered_df_json)
-            dfsDF = pd.read_json(filtered_df_json)
-            print(dfsDF)
+            # Get specifications
+            specifications = []
+            for i in range(1, len(filter_settings), 3):
+                specifications.append(get_condition(filter_settings[i], filter_settings[i + 1], filter_settings[i + 2]))
+            # Cleanup and prepare conditions
+            conditions = []
+            for specification in specifications:
+                for value in specification:
+                    conditions.append(value)
+
+            # Obtain filtered df
+            df = []
+            for vessel in filter_settings[0]:
+                df.append(dfs[vessel].get_filtered(conditions=conditions))
+
+            dfsDF = pd.concat(df)
 
             # count = 0
             # for vessel in vessels:
@@ -312,6 +305,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
             # Remove any NaN values
+            print("THIS IS VALUE: {}".format(value))
             if value[0] == "2D":
                 dfsDF = dfsDF.dropna(subset=[value[1], value[2]])
             else:
