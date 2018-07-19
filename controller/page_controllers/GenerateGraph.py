@@ -246,7 +246,7 @@ def update_formula(temp):
 
 @app.callback(
     Output('g2', 'figure'),
-    [Input('gen-filter-store', 'children')
+    [Input('gen-filter-store', 'children'),
      Input('gen-params-store', 'children'),
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
