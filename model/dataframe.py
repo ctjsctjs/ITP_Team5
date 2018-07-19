@@ -64,18 +64,20 @@ class DataFrame:
     """
 
     def get_filtered(self, conditions=[]):
-        data_frame = self.__dataFrame
+        if len(conditions) > 0:
+            data_frame = self.__dataFrame
 
-        con = ''
-        for condition in conditions:
-            if condition is not conditions[0]:
-                con += " & "
-            con += ("(data_frame['%s'] %s %s)" % condition)
+            con = ''
+            for condition in conditions:
+                if condition is not conditions[0]:
+                    con += " & "
+                con += ("(data_frame['%s'] %s %s)" % condition)
 
-        print('data_frame = (data_frame.loc[{}])'.format(con))
-        exec ('data_frame = (data_frame.loc[%s])' % con)
+            print('data_frame = (data_frame.loc[{}])'.format(con))
+            exec ('data_frame = (data_frame.loc[%s])' % con)
 
-        return data_frame
+            return data_frame
+        return self.__dataFrame
 
     """
     Method to get data for a 2D Graph
