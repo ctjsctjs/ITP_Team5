@@ -269,8 +269,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             # Cleanup and prepare conditions
             conditions = []
             for specification in specifications:
-                for value in specification:
-                    conditions.append(value)
+                for condition in specification:
+                    conditions.append(condition)
 
             # Obtain filtered df
             df = []
