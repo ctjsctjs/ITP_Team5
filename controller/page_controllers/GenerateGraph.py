@@ -24,7 +24,7 @@ import collections
 n_filters = 10
 dfs = {}
 temp_store = {}
-#PATH of your Proj:TODO CHANGE PATH TO YOUR PROJ PATH
+# PATH of your Proj:TODO CHANGE PATH TO YOUR PROJ PATH
 path = 'C:/Users/YC/Documents/GitHub/ITP_Team5(UI)/'
 # TEMPORARY Variables. TO replace if there is a better way
 gr_squared = 0.0
@@ -50,6 +50,8 @@ default_figure = {
     )}
 
 threshold = ['None', 1, 1.5, 2, 2.5, 3]
+
+
 # Populate Database field options
 @app.callback(
     Output('gen-database-input-1', 'options'),
@@ -74,7 +76,8 @@ def load_series_field(dump):
 def load_vessel_field(series, db_table):
     if series is not None or series != u'None' or db_table is not None or db_table != u'None':
         vessels_in_series = SQL().get_vessel_from_series(series=series, db_table=db_table)
-        return [{'label': i, 'value': i} for i in vessels_in_series]
+        if vessels_in_series is not None:
+            return [{'label': i, 'value': i} for i in vessels_in_series]
     return
 
 
@@ -132,6 +135,7 @@ for n in range(n_filters):
     filter_state_inputs.append(State('gen-filter-value1-{}'.format(n + 1), 'value'))
     filter_state_inputs.append(State('gen-filter-value2-{}'.format(n + 1), 'value'))
 
+
 @app.callback(
     Output('gen-filter-store', 'children'),
     filter_inputs)
@@ -151,7 +155,8 @@ def get_filtered_df(*values):
     for vessel in values[0]:
         df.append(dfs[vessel].get_filtered(conditions=conditions))
 
-    return pd.concat(df)
+    return pd.concat(df).to_json()
+
 
 # Generate parameter fields depending on mode selected
 @app.callback(
@@ -164,6 +169,8 @@ def update_filter(value, db_table):
     options = [{'label': label2, 'value': value2} for label2, value2 in
                SQL().get_attributes('{}'.format(db_table)).items()]
     return generate_axis_parameters(value, options)
+
+
 #
 # # Generate parameter fields depending on mode selected
 # @app.callback(
@@ -196,6 +203,7 @@ def load_graphmode_selection(dump):
     [Input('gen-threshold-input-dump', 'children')])
 def load_threshold_selection(dump):
     return [{'label': item, 'value': item} for item in threshold]
+
 
 # Obtain Axis Parameters Input
 @app.callback(
@@ -238,14 +246,15 @@ def update_formula(temp):
 
 @app.callback(
     Output('g2', 'figure'),
-    [Input('gen-params-store', 'children'),
+    [Input('gen-filter-store', 'children')
+     Input('gen-params-store', 'children'),
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
      Input('gen-kmeans-cluster', 'value'),
-     Input('gen-threshold-input-1','value')],
+     Input('gen-threshold-input-1', 'value')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')])
-def update_graph(value, settings, graph_mode, clusters, threshold, figure, vessels):
+def update_graph(filtered_df, value, settings, graph_mode, clusters, threshold, figure, vessels):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -302,23 +311,23 @@ def update_graph(value, settings, graph_mode, clusters, threshold, figure, vesse
                 dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
 
             if threshold != "None":
-            # Remove outliers NOTE: Adjust the threshold to modify how strictly filtered the data will be. So far tested 1, 1.5, 3. Strict ~ Lax
-            # threshold = 1.5
-            # mean = np.mean(dfsDF[value[1]])
-            # stdio = np.std(dfsDF[value[1]])
-            # print "Mean: " + str(mean) + " Std: " + str(stdio)
-            # dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold*stdio)]
-            #
-            # mean = np.mean(dfsDF[value[2]])
-            # stdio = np.std(dfsDF[value[2]])
-            # print "Mean: " + str(mean) + " Std: " + str(stdio)
-            # dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold*stdio)]
-            #
-            # if value[0] == "3D":
-            #     mean = np.mean(dfsDF[value[3]])
-            #     stdio = np.std(dfsDF[value[3]])
-            #     print "Mean: " + str(mean) + " Std: " + str(stdio)
-            #     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold*stdio)]
+                # Remove outliers NOTE: Adjust the threshold to modify how strictly filtered the data will be. So far tested 1, 1.5, 3. Strict ~ Lax
+                # threshold = 1.5
+                # mean = np.mean(dfsDF[value[1]])
+                # stdio = np.std(dfsDF[value[1]])
+                # print "Mean: " + str(mean) + " Std: " + str(stdio)
+                # dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold*stdio)]
+                #
+                # mean = np.mean(dfsDF[value[2]])
+                # stdio = np.std(dfsDF[value[2]])
+                # print "Mean: " + str(mean) + " Std: " + str(stdio)
+                # dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold*stdio)]
+                #
+                # if value[0] == "3D":
+                #     mean = np.mean(dfsDF[value[3]])
+                #     stdio = np.std(dfsDF[value[3]])
+                #     print "Mean: " + str(mean) + " Std: " + str(stdio)
+                #     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold*stdio)]
                 mean = np.mean(dfsDF[value[1]])
                 stdio = np.std(dfsDF[value[1]])
                 print "Mean: " + str(mean) + " Std: " + str(stdio)
@@ -456,40 +465,43 @@ def update_graph(value, settings, graph_mode, clusters, threshold, figure, vesse
         figure['data'] = [i for i in figure['data'] if i is not None]
         return figure
     return default_figure
-#save current state of
+
+
+# save current state of
 @app.callback(
     Output('save-setting', 'children'),
-    [Input('save-all-btn','n_clicks')],
-    [State('gen-params-store','children'),
-    State('gen-settings-input-1', 'values'),
-    State('gen-regression-input-1', 'value'),
-    State('gen-kmeans-cluster', 'value'),
-    State('gen-vessel-input-1', 'value'),
-    State('gen-series-input-1','value'),
-    State('gen-graph-name','value'),
-    State('gen-database-input-1','value')])
-def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,databaseState):
+    [Input('save-all-btn', 'n_clicks')],
+    [State('gen-params-store', 'children'),
+     State('gen-settings-input-1', 'values'),
+     State('gen-regression-input-1', 'value'),
+     State('gen-kmeans-cluster', 'value'),
+     State('gen-vessel-input-1', 'value'),
+     State('gen-series-input-1', 'value'),
+     State('gen-graph-name', 'value'),
+     State('gen-database-input-1', 'value')])
+def saveAll(saveClick, paramState, settingState, regState, clusterState, vesselState, seriesState, graphState,
+            databaseState):
     if saveClick > 0:
         if paramState not in temp_store.values():
             temp_store['param'] = paramState
         if settingState not in temp_store.values():
             temp_store['setting'] = settingState
         if regState not in temp_store.values():
-            temp_store['regression'] =regState
+            temp_store['regression'] = regState
         if clusterState not in temp_store.values():
-            temp_store['cluster'] =clusterState
+            temp_store['cluster'] = clusterState
         if vesselState not in temp_store.values():
             temp_store['vessel'] = vesselState
         if seriesState not in temp_store.values():
             temp_store['series'] = seriesState
         if databaseState not in temp_store.values():
-            temp_store['database']=vesselState
+            temp_store['database'] = vesselState
         if graphState not in temp_store.values():
             temp_store['graphName'] = graphState
             temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
             if os.path.isfile(path + "archive/" + temp_store.get('graphName') + '.txt') == True:
                 time = str(datetime.datetime.now().strftime('%H%M%S'))
-                temp_store.update({'graphName':graphState+"("+time+")"})
+                temp_store.update({'graphName': graphState + "(" + time + ")"})
             # if os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == False:
             #     with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'),'w') as file:
             #         file.write(json.dumps(temp_store))
@@ -502,23 +514,26 @@ def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,
 
 @app.callback(
     Output('save-setting-filter', 'children'),
-    [Input('save-all-btn','n_clicks')],
+    [Input('save-all-btn', 'n_clicks')],
     filter_state_inputs)
-def saveFilters(saveClick,*filtersInputs):
+def saveFilters(saveClick, *filtersInputs):
     if saveClick > 0:
         if filtersInputs not in temp_store.values():
-            temp_store['filters']=filtersInputs
-            with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'), 'a') as file:
+            temp_store['filters'] = filtersInputs
+            with open(os.path.join(path + 'archive', temp_store.get('graphName') + '.txt'), 'a') as file:
                 file.write(json.dumps([temp_store]))
                 file.close()
     return filtersInputs
 
+
 @app.callback(
-    Output('url','pathname'),
-    [Input('save-all-btn','n_clicks')])
+    Output('url', 'pathname'),
+    [Input('save-all-btn', 'n_clicks')])
 def goArchive(savedClick):
     if savedClick > 0:
         return '/Archive'
+
+
 # callback to generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-right-panel-wrapper', 'children'),
