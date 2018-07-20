@@ -11,6 +11,10 @@ attributes = [
 
 # Missing Sea State, Weather
 full_attributes = [
+    'Vessel',
+    'Daily time (Local)',
+    'Sea dir.',
+    'Sea height',
     'Mid Draft',
     'Avg speed (knts)',
     'RPM',

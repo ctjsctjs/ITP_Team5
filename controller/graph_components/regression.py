@@ -1,7 +1,6 @@
 import numpy as np
 import scipy
 import plotly
-# import plotly.plotly as py
 import plotly.graph_objs as go
 from sklearn.cluster import KMeans
 from sklearn.metrics import r2_score
@@ -15,7 +14,7 @@ class GraphMode(Enum):
     QUATRIC = 4
 
 
-# TODO: Replace method content with modular 'fitting_master' component
+# Calculate the best fit line, sum of least squares, equation, r-squared value
 def regression(x, y, graph_mode=None):
     if graph_mode is None:
         z, res, _, _, _ = np.polyfit(x, y, GraphMode.LINEAR.value, full=True)
@@ -30,11 +29,14 @@ def regression(x, y, graph_mode=None):
     return {'x': x_new, 'y': y_new}, r2value, res, f
 
 
-# TODO: Check if function works as intended
+# Generate the clustered dataset
 def k_means(graphSettings, df, clusters=None):
     # Default cluster
     if clusters is None:
         clusters = len(df.index) / 3
+
+    if int(clusters) > df.shape[0]:
+        clusters = df.shape[0]
 
     if graphSettings[0] == "2D":
         beforeCoords = np.c_[df[graphSettings[1]], df[graphSettings[2]]]
@@ -47,7 +49,8 @@ def k_means(graphSettings, df, clusters=None):
 
     return newDf
 
-def test_3d(x,y,z, xAxis, yAxis, zAxis):
+# 3D Graph function
+def plot_3d(x,y,z, xAxis, yAxis, zAxis):
     dataset = np.c_[np.array(x), np.array(y), np.array(z)]
     data = np.array(dataset)
 

@@ -10,7 +10,7 @@ import numpy as np
 from pandas.api.types import is_numeric_dtype
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
     generate_graph, add_hidden_filters, generate_dropdown_filter
-from controller.graph_components.regression import GraphMode, regression, k_means, test_3d
+from controller.graph_components.regression import GraphMode, regression, k_means, plot_3d
 from model.database import SQL
 from app import app
 from config.important_attributes import full_attributes
@@ -34,7 +34,14 @@ gformula = ""
 global gr_squared
 global gsols
 global gformula
-
+global xName
+global yName
+global zName
+global gName
+xName = ""
+yName = ""
+zName = ""
+gName = ""
 default_figure = {
     'data': [],
     'layout': go.Layout(
@@ -343,7 +350,7 @@ def get_params_input(mode, input_x, input_y, input_z):
     return [mode, input_x, input_y, input_z]
 
 
-# Testing update for Graph Values
+# Update for Graph Values
 @app.callback(
     Output('gen-settings-rsquared-1', 'children'),
     [Input('g2', 'figure')])
@@ -367,7 +374,7 @@ def update_formula(temp):
 
 # Generate the template string and the list of subscript values
 def generateEquationString(baseFormula):
-    fVariableList = list(gformula)
+    fVariableList = list(baseFormula)
     variableCount = len(fVariableList)
     displayString = u""
     tmpList = []
@@ -421,11 +428,15 @@ def get_filtered_df(*values):
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
      Input('gen-kmeans-cluster', 'value'),
-     Input('gen-threshold-input-1', 'value')],
+     Input('gen-threshold-input-1', 'value'),
+     Input('gen-graph-name','value'),
+     Input('x-axis-label','value'),
+     Input('y-axis-label','value'),
+     Input('z-axis-label', 'value')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')]
     + filter_state_inputs)
-def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, figure, vessels, *filter_settings):
+def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel,figure, vessels, *filter_settings):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -483,15 +494,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             #         dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
             # dff = pd.concat(dff)
 
-            # K-means if 'clustering' toggled NOTE: Update from df to dfs/dfsDF
-            # if 'clustering' in settings:
-            #     df = k_means(dff[value[1]], dff[value[2]], clusters)
-            # else:
-            #     if value[0] == "2D":
-            #         df = {'x': dff[value[1]], 'y': dff[value[2]]}
-            #     else:
-            #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
-
             # Remove any NaN values
             print("THIS IS VALUE: {}".format(value))
             if value[0] == "2D":
@@ -501,22 +503,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
 
             if threshold != "None":
                 # Remove outliers NOTE: Adjust the threshold to modify how strictly filtered the data will be. So far tested 1, 1.5, 3. Strict ~ Lax
-                # threshold = 1.5
-                # mean = np.mean(dfsDF[value[1]])
-                # stdio = np.std(dfsDF[value[1]])
-                # print "Mean: " + str(mean) + " Std: " + str(stdio)
-                # dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold*stdio)]
-                #
-                # mean = np.mean(dfsDF[value[2]])
-                # stdio = np.std(dfsDF[value[2]])
-                # print "Mean: " + str(mean) + " Std: " + str(stdio)
-                # dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold*stdio)]
-                #
-                # if value[0] == "3D":
-                #     mean = np.mean(dfsDF[value[3]])
-                #     stdio = np.std(dfsDF[value[3]])
-                #     print "Mean: " + str(mean) + " Std: " + str(stdio)
-                #     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold*stdio)]
                 mean = np.mean(dfsDF[value[1]])
                 stdio = np.std(dfsDF[value[1]])
                 print "Mean: " + str(mean) + " Std: " + str(stdio)
@@ -533,6 +519,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     print "Mean: " + str(mean) + " Std: " + str(stdio)
                     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold * stdio)]
 
+            # Clustering & Hover Data Generation
             hoverData = []
             if 'clustering' in settings:
                 dfsDF = k_means(value, dfsDF, clusters)
@@ -565,7 +552,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         name='Data Marker',
                         mode='markers',
                         text=hoverData,
-                        # marker=go.Marker(color=color.red)
                     )
                 else:
                     figure['data'][0] = None
@@ -592,7 +578,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         y=line_data['y'],
                         name='Line',
                         mode='lines',
-                        # marker=go.Marker(color=color.red)
                     )
                     annotation = go.Annotation(
                         x=min(line_data['x']),
@@ -600,11 +585,24 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         text="Formula: " + eqString.format(*supScript),
                         showarrow=False
                     )
+                    if xLabel == "":
+                        xName = value[1]
+                    else:
+                        xName = xLabel
+                    if yLabel == "":
+                        yName = value[2]
+                    else:
+                        yName = yLabel
+                    if graphName == "":
+                        gName = value[1] + " vs " + value[2]
+                    else:
+                        gName = graphName
+
                     layout2d = go.Layout(
-                        title=value[1] + " vs " + value[2],
+                        title=gName,
                         plot_bgcolor='rgb(229, 229, 229)',
-                        xaxis=go.XAxis(title=value[1], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-                        yaxis=dict(title=value[2], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                        xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                        yaxis=dict(title=yName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
                         annotations=[annotation],
                         # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
                     )
@@ -624,7 +622,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         name='Data Marker',
                         mode='markers',
                         text=hoverData,
-                        # marker=go.Marker(color=color.red)
                     )
                 else:
                     figure['data'][0] = None
@@ -633,31 +630,34 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 if len(figure['data']) < 2:
                     figure['data'].append({})
                 if 'regression' in settings:
-                    surfacePlot, surfaceLayout = test_3d(dfsDF[value[1].encode('utf8')],
+                    surfacePlot, surfaceLayout = plot_3d(dfsDF[value[1].encode('utf8')],
                                                          dfsDF[value[2].encode('utf8')],
                                                          dfsDF[value[3].encode('utf8')], value[1], value[2],
                                                          value[3])
                     figure['data'][1] = surfacePlot
                     figure['layout'] = surfaceLayout
-                    # line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
-                    # print "R-Squared: " + str(r_squared)
-                    # print "Sum of Least Squares: " + str(sols)
-                    # print "A Formula: "
-                    # print formula
-                    # global gr_squared, gsols, gformula
-                    # gr_squared = r_squared
-                    # gsols = sols
-                    # gformula = formula
-                    #
-                    # figure['data'][1] = go.Surface(
-                    #     x=line_data['x'],
-                    #     y=line_data['y'],
-                    #     name='Line',
-                    #     mode='lines',
-                    #     # marker=go.Marker(color=color.red)
-                    # )
                 else:
                     figure['data'][1] = None
+                if xLabel == "":
+                    xName = value[1]
+                else:
+                    xName = xLabel
+                if yLabel == "":
+                    yName = value[2]
+                else:
+                    yName = yLabel
+                if zLabel == "":
+                    zName = value[3]
+                else:
+                    zName = zLabel
+                if graphName == "":
+                    gName = value[1] + " vs " + value[2] + " vs " + value[3]
+                else:
+                    gName = graphName
+                figure['layout']['scene']['xaxis']['title'] = xName
+                figure['layout']['scene']['yaxis']['title'] = yName
+                figure['layout']['scene']['zaxis']['title'] = zName
+                figure['layout']['title'] = gName
         # Clean figure data
         figure['data'] = [i for i in figure['data'] if i is not None]
         return figure
@@ -675,40 +675,37 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
     State('gen-vessel-input-1', 'value'),
     State('gen-series-input-1','value'),
     State('gen-graph-name','value'),
+    State('x-axis-label','value'),
+    State('y-axis-label','value'),
+    State('z-axis-label','value'),
     State('gen-database-input-1','value'),
     State('gen-threshold-input-1','value')])
-def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,databaseState,thresholdState):
+def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,xState,yState,zState,databaseState,thresholdState):
     if saveClick > 0:
-        if paramState not in temp_store.values():
-            temp_store['param'] = paramState
-        if settingState not in temp_store.values():
-            temp_store['setting'] = settingState
-        if regState not in temp_store.values():
-            temp_store['regression'] = regState
-        if clusterState not in temp_store.values():
-            temp_store['cluster'] = clusterState
-        if vesselState not in temp_store.values():
-            temp_store['vessel'] = vesselState
-        if seriesState not in temp_store.values():
-            temp_store['series'] = seriesState
-        if databaseState not in temp_store.values():
-            temp_store['database']=databaseState
-        if thresholdState not in temp_store.values():
-            temp_store['threshold']=thresholdState
-        if graphState not in temp_store.values():
-            temp_store['graphName'] = graphState
-            temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
-            if os.path.isfile(path + "archive/" + temp_store.get('graphName') + '.txt') == True:
-                time = str(datetime.datetime.now().strftime('%H%M%S'))
-                temp_store.update({'graphName': graphState + "(" + time + ")"})
-            # if os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == False:
-            #     with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'),'w') as file:
-            #         file.write(json.dumps(temp_store))
-            # #If yes, write to graph name that consist of today date
-            # elif os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == True:
-            #     temp_store.update({'graphName':graphState+"("+str(datetime.datetime.now().date())+")"})
-            #     with open(os.path.join(path + 'archive', temp_store.get('graphName')+ '.txt'), 'w') as file:
-            #         file.write(json.dumps(temp_store))
+        temp_store['param'] = paramState
+        temp_store['setting'] = settingState
+        temp_store['regression'] = regState
+        temp_store['cluster'] = clusterState
+        temp_store['vessel'] = vesselState
+        temp_store['series'] = seriesState
+        temp_store['database']=databaseState
+        temp_store['threshold'] = thresholdState
+        temp_store['xLabel']=xState
+        temp_store['yLabel'] = yState
+        temp_store['zLabel'] = zState
+        temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
+        temp_store['graphName'] = graphState
+        if os.path.isfile(path + "archive/" + temp_store.get('graphName') + '.txt') == True:
+            time = str(datetime.datetime.now().strftime('%H%M%S'))
+            temp_store.update({'graphName': graphState + "(" + time + ")"})
+        # if os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == False:
+        #     with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'),'w') as file:
+        #         file.write(json.dumps(temp_store))
+        # #If yes, write to graph name that consist of today date
+        # elif os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == True:
+        #     temp_store.update({'graphName':graphState+"("+str(datetime.datetime.now().date())+")"})
+        #     with open(os.path.join(path + 'archive', temp_store.get('graphName')+ '.txt'), 'w') as file:
+        #         file.write(json.dumps(temp_store))
 
 
 @app.callback(
@@ -719,7 +716,7 @@ def saveFilters(saveClick, *filtersInputs):
     if saveClick > 0:
         if filtersInputs not in temp_store.values():
             temp_store['filters'] = filtersInputs
-            with open(os.path.join(path + 'archive', temp_store.get('graphName') + '.txt'), 'a') as file:
+            with open(os.path.join(path + 'archive', temp_store.get('graphName') + '.txt'), 'w') as file:
                 file.write(json.dumps([temp_store]))
                 file.close()
     return filtersInputs
@@ -902,6 +899,7 @@ def add_filter(n_clicks, dump, container):
         container[0]['props']['children'][n_clicks - 1]['props']['style'] = {}
         # print container[0]['props']['children'][n_clicks - 1]['props']['style']
     return container
+
 
     #     print container[0]['props']['children'][n_clicks]
     #     container[0]['props']['children'][n_clicks] = generate_dropdown_filter(n_clicks)

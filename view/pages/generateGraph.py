@@ -590,7 +590,6 @@ def generate_graph(mode, options):
                     html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
                     html.Span([], className="settings-info", id='gen-settings-sols-1'),
                     html.Span([], className="settings-info", id='gen-settings-formula-1'),
-                    # TODO: output regression, equation, etc
                 ], className='custom-panel'),
 
             ], className='item-row item-select-height'),
