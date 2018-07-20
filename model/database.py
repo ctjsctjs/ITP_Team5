@@ -203,6 +203,9 @@ class SQL:
         # Create empty table in database
         self.__create(table=table_name, columns=columns, datatype=df.get_column_datatypes())
 
+        # Instantiate results
+        result = {'pass': 0, 'fail': 0, 'failed_rows': []}
+
         # Populate table with xlsx data
         for i in range(df.len()):
             row = df.get_row(i + 1)
@@ -226,9 +229,29 @@ class SQL:
                         val += ","
 
             insert_query = "INSERT INTO `" + table_name + "` (" + col + ") VALUES (" + val + ")"
-            err = self.__query(insert_query)
-            if err is not None:
-                print(err)
+
+            # err = self.__query(insert_query)
+            # if err is not None:
+            #     print(err)
+
+            if self.__query(insert_query):
+                result['pass'] += 1
+            else:
+                result['fail'] += 1
+                result['failed_rows'].append(i)
+
+        return result
+
+    # Delete given db table
+    def delete_table(self, table):
+        if table is not None:
+            return self.__drop(table)
+
+    # Get number of rows in given table
+    def get_table_rows(self, table):
+        result = self.__select(columns="COUNT(*)", table=table)
+        if result is not None:
+            return result[0][0]
 
     """
     'Important Attributes' Methods
@@ -332,7 +355,7 @@ class SQL:
             if key is not changes.keys()[-1]:
                 set_field += ", "
 
-        self.__query("UPDATE `{}` SET {} WHERE {}".format(table, set_field, self.__condition(condition)))
+        return self.__query("UPDATE `{}` SET {} WHERE {}".format(table, set_field, self.__condition(condition)))
 
     # SQL Create Table Method
     def __create(self, table=None, columns=[], datatype=[]):
@@ -378,12 +401,16 @@ class SQL:
         sql += "PRIMARY KEY (`id`)) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_bin"
 
         # Run Query
-        self.__query(sql)
+        return self.__query(sql)
+
+    # SQL Drop Table Method
+    def __drop(self, table):
+        return self.__query(statement="DROP TABLE `{}`".format(table))
 
     # Basic Query Function
     def __query(self, statement, expect_result=False):
         self.__reconnect()
-        result = None
+        result = True
         try:
             with self.__cursor as cursor:
                 # Run SQL Query
@@ -393,10 +420,10 @@ class SQL:
                 # If result is expected
                 if expect_result:
                     result = cursor.fetchall()
-        except Error as e:
-            print("Error %d: %s" % (e.args[0], e.args[1]))
-        finally:
             return result
+        except Error as e:
+            # print("Error %d: %s" % (e.args[0], e.args[1]))
+            return False
 
     # Open Connection Method
     def __reconnect(self):

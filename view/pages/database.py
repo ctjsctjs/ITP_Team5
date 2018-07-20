@@ -1,6 +1,8 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
+from model.database import SQL
+
 layout = \
     html.Div([
         # Header
@@ -34,9 +36,16 @@ layout = \
                 className='content-wrapper page-width'),
 
             # Hidden Table Elements
-            html.Div(id='database-table-container-dump', style={'display': 'none'}),
-        ], className='wrapper-grey')
 
+            html.Div(id='database-upload-dump', style={'display': 'none'}),
+            html.Div(id='database-upload-store', style={'display': 'none'}),
+            html.Div(id='database-current-table-store', style={'display': 'none'}),
+
+        ], id='database-content-container', className='wrapper-grey'),
+        html.Div(id='database-table-container-dump', style={'display': 'none'}),
+
+        html.Div(id='gen-button-dump-store', style={'display': 'none'}),
+        html.Div(id='gen-button-dump', style={'display': 'none'})
     ])
 
 
@@ -50,8 +59,13 @@ def generate_table_container(contents=[]):
         ], className='table-heading overflow-auto item-element-margin')
     ]
 
+    status = "In Database"
     for item in contents:
-        children.append(generate_row(row_name='{}'.format(item), ucode=False))
+        detail = 'Rows: {}'.format(SQL().get_table_rows(item))
+        children.append(
+            generate_row(row_name='{}'.format(item), row_id='{}'.format(contents.index(item) + 1), status=status,
+                         details=detail,
+                         ucode=False))
 
     return \
         html.Div(
@@ -61,51 +75,74 @@ def generate_table_container(contents=[]):
         )
 
 
-def generate_row(row_name, content=None, ucode=True):
-    if content is None:
-        content = 'Upload Success'
-
+def generate_row(row_name, row_id, status, details, ucode=True):
     if ucode:
         row = {
-            u'namespace': u'dash_html_components',
             u'type': u'Div',
+            u'namespace': u'dash_html_components',
             u'props': {
                 u'className': u'table-row overflow-auto item-element-margin',
                 u'children': [
                     {
-                        u'namespace': u'dash_html_components',
                         u'type': u'H4',
+                        u'namespace': u'dash_html_components',
                         u'props': {
-                            u'className': u'header-title panel-left',
+                            u'className': u'header-title table-col-3',
                             u'children': unicode(row_name)
                         }
                     },
                     {
-                        u'namespace': u'dash_html_components',
                         u'type': u'H4',
+                        u'namespace': u'dash_html_components',
                         u'props': {
-                            u'className': u'header-title panel-right',
-                            u'children': unicode(content)
+                            u'className': u'header-title table-col-3',
+                            u'children': unicode(status)
+                        }
+                    },
+                    {
+                        u'type': u'H4',
+                        u'namespace': u'dash_html_components',
+                        u'props': {
+                            u'className': u'header-title table-col-3',
+                            u'children': unicode(details)
+                        }
+                    },
+                    {
+                        u'type': u'Button',
+                        u'namespace': u'dash_html_components',
+                        u'props': {
+                            u'className': u'delete-button item-element-margin margin-right-12',
+                            u'children': [
+                                {
+                                    u'type': u'I',
+                                    u'namespace': u'dash_html_components',
+                                    u'props': {
+                                        u'className': u'fas fa-trash-alt icon',
+                                        u'children': None
+                                    }
+                                },
+                                u'Delete'
+                            ],
+                            u'id': unicode('gen-button-{}'.format(row_id))
                         }
                     }
-                ]
+                ],
+                u'id': unicode('gen-row-{}'.format(row_id))
             }
         }
 
     else:
         row = \
             html.Div([
-                html.H4(row_name, className='header-title table-col-3'),
-                html.H4(content, className='header-title table-col-3'),
-                html.H4('3208 Lines Uploaded. 25 lines removed from cleaning.', className='header-title table-col-3'),
-                dcc.Link([
-                    html.Button([
-                        html.I(className="fas fa-trash-alt icon"),
-                        'Delete',
-                    ], className='delete-button item-element-margin margin-right-12',
-                        id="gen-button-1",
-                    ),
-                ], href='#', className='header-title table-col-1'),
-            ], className='table-row overflow-auto item-element-margin')
+                html.H4('{}'.format(row_name), className='header-title table-col-3'),
+                html.H4('{}'.format(status), className='header-title table-col-3'),
+                html.H4('{}'.format(details), className='header-title table-col-3'),
+                html.Button([
+                    html.I(className="fas fa-trash-alt icon"),
+                    'Delete',
+                ], className='delete-button item-element-margin margin-right-12',
+                    id="gen-button-{}".format(row_id),
+                ),
+            ], id='gen-row-{}'.format(row_id), className='table-row overflow-auto item-element-margin')
 
     return row
