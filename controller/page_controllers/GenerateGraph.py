@@ -206,8 +206,6 @@ def get_params_input(mode, input_x, input_y, input_z):
     Output('gen-settings-rsquared-1', 'children'),
     [Input('g2', 'figure')])
 def update_rsquared(temp):
-    print "UPDATES R SQUARED"
-    print gr_squared
     return "R-Squared: " + str(round(gr_squared, 4))
 
 
@@ -215,8 +213,6 @@ def update_rsquared(temp):
     Output('gen-settings-sols-1', 'children'),
     [Input('g2', 'figure')])
 def update_sols(temp):
-    print "UPDATES SOLS"
-    print gsols
     return "Sum of Least Squares: " + str(round(gsols, 4))
 
 
@@ -224,9 +220,28 @@ def update_sols(temp):
     Output('gen-settings-formula-1', 'children'),
     [Input('g2', 'figure')])
 def update_formula(temp):
-    print "UPDATES FORMULA"
-    print gformula
-    return str(gformula)
+    fVariableList = list(gformula)
+    variableCount = len(fVariableList)
+    displayString = u""
+    tmpList = []
+
+    for variable in fVariableList:
+        displayString += str(round(variable, 3))
+        if variableCount > 1:
+            supVal = variableCount - 1
+            displayString += "x"
+            if supVal == 2:
+                displayString += "{"+str(len(tmpList))+"}"
+                tmpList.append(u'\u00b2')
+            elif supVal == 3:
+                displayString += "{"+str(len(tmpList))+"}"
+                tmpList.append(u'\u00b3')
+            elif supVal == 4:
+                displayString += "{"+str(len(tmpList))+"}"
+                tmpList.append(u'\u2074')
+        variableCount -= 1
+        displayString += " "
+    return "Formula: " + displayString.format(*tmpList)
 
 
 @app.callback(
