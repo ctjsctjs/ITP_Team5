@@ -350,7 +350,7 @@ def get_params_input(mode, input_x, input_y, input_z):
     return [mode, input_x, input_y, input_z]
 
 
-# Testing update for Graph Values
+# Update for Graph Values
 @app.callback(
     Output('gen-settings-rsquared-1', 'children'),
     [Input('g2', 'figure')])
@@ -494,15 +494,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             #         dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
             # dff = pd.concat(dff)
 
-            # K-means if 'clustering' toggled NOTE: Update from df to dfs/dfsDF
-            # if 'clustering' in settings:
-            #     df = k_means(dff[value[1]], dff[value[2]], clusters)
-            # else:
-            #     if value[0] == "2D":
-            #         df = {'x': dff[value[1]], 'y': dff[value[2]]}
-            #     else:
-            #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
-
             # Remove any NaN values
             print("THIS IS VALUE: {}".format(value))
             if value[0] == "2D":
@@ -512,22 +503,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
 
             if threshold != "None":
                 # Remove outliers NOTE: Adjust the threshold to modify how strictly filtered the data will be. So far tested 1, 1.5, 3. Strict ~ Lax
-                # threshold = 1.5
-                # mean = np.mean(dfsDF[value[1]])
-                # stdio = np.std(dfsDF[value[1]])
-                # print "Mean: " + str(mean) + " Std: " + str(stdio)
-                # dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold*stdio)]
-                #
-                # mean = np.mean(dfsDF[value[2]])
-                # stdio = np.std(dfsDF[value[2]])
-                # print "Mean: " + str(mean) + " Std: " + str(stdio)
-                # dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold*stdio)]
-                #
-                # if value[0] == "3D":
-                #     mean = np.mean(dfsDF[value[3]])
-                #     stdio = np.std(dfsDF[value[3]])
-                #     print "Mean: " + str(mean) + " Std: " + str(stdio)
-                #     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold*stdio)]
                 mean = np.mean(dfsDF[value[1]])
                 stdio = np.std(dfsDF[value[1]])
                 print "Mean: " + str(mean) + " Std: " + str(stdio)
@@ -544,6 +519,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     print "Mean: " + str(mean) + " Std: " + str(stdio)
                     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold * stdio)]
 
+            # Clustering & Hover Data Generation
             hoverData = []
             if 'clustering' in settings:
                 dfsDF = k_means(value, dfsDF, clusters)
@@ -576,7 +552,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         name='Data Marker',
                         mode='markers',
                         text=hoverData,
-                        # marker=go.Marker(color=color.red)
                     )
                 else:
                     figure['data'][0] = None
@@ -603,7 +578,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         y=line_data['y'],
                         name='Line',
                         mode='lines',
-                        # marker=go.Marker(color=color.red)
                     )
                     annotation = go.Annotation(
                         x=min(line_data['x']),
@@ -632,14 +606,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         annotations=[annotation],
                         # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
                     )
-                    # layout2d = go.Layout(
-                    #     title=value[1] + ' vs ' + value[2],
-                    #     plot_bgcolor='rgb(229, 229, 229)',
-                    #     xaxis=go.XAxis(title=value[1], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-                    #     yaxis=dict(title=value[2], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-                    #     annotations=[annotation],
-                    #     # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
-                    # )
                     figure['layout'] = layout2d
                 else:
                     figure['data'][1] = None
@@ -656,7 +622,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         name='Data Marker',
                         mode='markers',
                         text=hoverData,
-                        # marker=go.Marker(color=color.red)
                     )
                 else:
                     figure['data'][0] = None
@@ -671,24 +636,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                                                          value[3])
                     figure['data'][1] = surfacePlot
                     figure['layout'] = surfaceLayout
-
-                    # line_data, r_squared, sols, formula = regression(df['x'], df['y'], graph_mode)
-                    # print "R-Squared: " + str(r_squared)
-                    # print "Sum of Least Squares: " + str(sols)
-                    # print "A Formula: "
-                    # print formula
-                    # global gr_squared, gsols, gformula
-                    # gr_squared = r_squared
-                    # gsols = sols
-                    # gformula = formula
-                    #
-                    # figure['data'][1] = go.Surface(
-                    #     x=line_data['x'],
-                    #     y=line_data['y'],
-                    #     name='Line',
-                    #     mode='lines',
-                    #     # marker=go.Marker(color=color.red)
-                    # )
                 else:
                     figure['data'][1] = None
                 if xLabel == "":
