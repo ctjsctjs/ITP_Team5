@@ -362,6 +362,11 @@ def update_sols(temp):
     Output('gen-settings-formula-1', 'children'),
     [Input('g2', 'figure')])
 def update_formula(temp):
+    eqString, supScript = generateEquationString(gformula)
+    return "Formula: " + eqString.format(*supScript)
+
+# Generate the template string and the list of subscript values
+def generateEquationString(baseFormula):
     fVariableList = list(gformula)
     variableCount = len(fVariableList)
     displayString = u""
@@ -383,8 +388,7 @@ def update_formula(temp):
                 tmpList.append(u'\u2074')
         variableCount -= 1
         displayString += " "
-    return "Formula: " + displayString.format(*tmpList)
-
+    return displayString, tmpList
 
 @app.callback(
     Output('gen-filter-store', 'children'),
@@ -581,6 +585,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     gsols = sols
                     gformula = formula
 
+                    eqString, supScript = generateEquationString(formula)
+
                     figure['data'][1] = go.Scatter(
                         x=line_data['x'],
                         y=line_data['y'],
@@ -588,12 +594,18 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         mode='lines',
                         # marker=go.Marker(color=color.red)
                     )
-
+                    annotation = go.Annotation(
+                        x=min(line_data['x']),
+                        y=max(line_data['y']),
+                        text="Formula: " + eqString.format(*supScript),
+                        showarrow=False
+                    )
                     layout2d = go.Layout(
                         title=value[1] + " vs " + value[2],
                         plot_bgcolor='rgb(229, 229, 229)',
                         xaxis=go.XAxis(title=value[1], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
                         yaxis=dict(title=value[2], zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                        annotations=[annotation],
                         # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
                     )
                     figure['layout'] = layout2d
