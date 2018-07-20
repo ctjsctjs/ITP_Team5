@@ -508,14 +508,24 @@ def generate_graph(mode, options):
                         className='item-element-margin form-control form-control-sm',
                         placeholder='X axis label',
                         type='text',
-                        value=''
+                        value='',
+                        id='x-axis-label'
                     ),
                     # Y axis label input
                     dcc.Input(
                         className='item-element-margin form-control form-control-sm',
                         placeholder='Y axis label',
                         type='text',
-                        value=''
+                        value='',
+                        id='y-axis-label'
+                    ),
+                    # Y axis label input
+                    dcc.Input(
+                        className='item-element-margin form-control form-control-sm',
+                        placeholder='Z axis label',
+                        type='text',
+                        value='',
+                        id='z-axis-label'
                     ),
                 ], className='custom-panel'),
 

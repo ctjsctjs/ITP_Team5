@@ -40,16 +40,12 @@ def button_callback(noOfFiles):
     @app.callback(
         Output('files-container-{}'.format(noOfFiles), 'children'),
         [Input('load-saved-btn-{}'.format(noOfFiles), 'n_clicks'),
-         #Input('delete-saved-btn-{}'.format(noOfFiles),'n_clicks'),
          Input('hidden-text-{}'.format(noOfFiles), 'value')])
-    def clicked_filename(loadBtn,deleteBtn, filename):
+    def clicked_filename(loadBtn, filename):
         if loadBtn > 0:
             print ("Hi")
             print filename
             return filename
-        if deleteBtn > 0:
-            os.remove('archive/'+filename+".txt")
-            print (filename + "file removed")
 
 
 for k in range(0, filesLength):
