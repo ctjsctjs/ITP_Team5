@@ -781,7 +781,12 @@ def update_output(value):
     Output('gen-settings-vessel-1', 'children'),
     [Input('gen-vessel-input-1', 'value')])
 def update_output(value):
-    return "Vessel: " + str(value)
+    vesselString = ""
+    for vesselName in value:
+        vesselString += str(vesselName).encode('ascii','ignore')
+        if vesselName != value[-1]:
+            vesselString += ", "
+    return "Vessels: " + vesselString
 
 
 @app.callback(
