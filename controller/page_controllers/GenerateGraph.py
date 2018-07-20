@@ -10,7 +10,7 @@ import numpy as np
 from pandas.api.types import is_numeric_dtype
 from view.pages.generateGraph import layout, generate_filter_input, add_filters, generate_axis_parameters, \
     generate_graph, add_hidden_filters, generate_dropdown_filter
-from controller.graph_components.regression import GraphMode, regression, k_means, test_3d
+from controller.graph_components.regression import GraphMode, regression, k_means, plot_3d
 from model.database import SQL
 from app import app
 from config.important_attributes import full_attributes
@@ -633,7 +633,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 if len(figure['data']) < 2:
                     figure['data'].append({})
                 if 'regression' in settings:
-                    surfacePlot, surfaceLayout = test_3d(dfsDF[value[1].encode('utf8')],
+                    surfacePlot, surfaceLayout = plot_3d(dfsDF[value[1].encode('utf8')],
                                                          dfsDF[value[2].encode('utf8')],
                                                          dfsDF[value[3].encode('utf8')], value[1], value[2],
                                                          value[3])
