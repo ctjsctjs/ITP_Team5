@@ -367,7 +367,7 @@ def update_formula(temp):
 
 # Generate the template string and the list of subscript values
 def generateEquationString(baseFormula):
-    fVariableList = list(gformula)
+    fVariableList = list(baseFormula)
     variableCount = len(fVariableList)
     displayString = u""
     tmpList = []
