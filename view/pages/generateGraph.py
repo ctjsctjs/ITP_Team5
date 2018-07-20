@@ -17,7 +17,7 @@ def generate_axis_parameters(mode, options):
     label_x = "Parameter X"
     label_y = "Parameter Y"
     label_z = "Parameter Z"
-    
+
     axis_parameters = [
         # Axis Parameters Input store
         html.Div(id='gen-params-store', style={'display': 'none'}),
@@ -63,7 +63,7 @@ layout = html.Div([
 
         # item-button, generate graph
         html.Button('Add Graph', className='button item-element-margin header-button'),
-        html.Button('Save Settings', className='button item-element-margin header-button', id = 'save-all-btn'),
+        html.Button('Save Settings', className='button item-element-margin header-button', id='save-all-btn'),
 
         html.P('Graph generation tool that provides an insight to ship performance',
                className='title-desc'),
@@ -110,7 +110,7 @@ layout = html.Div([
                         className='item-element-margin'),
                     # Hidden Database field dump
                     html.Div(id='gen-database-input-dump', style={'display': 'none'}),
-                    ], className='item-row item-select-height item-inline'),
+                ], className='item-row item-select-height item-inline'),
                 # Mode field
                 html.Div([
                     html.H3([
@@ -129,7 +129,7 @@ layout = html.Div([
                         ],
                         value="2D"
                     ),
-                    ], className='item-row item-select-height item-inline'),
+                ], className='item-row item-select-height item-inline'),
 
                 # Param field
                 html.Div([
@@ -150,7 +150,7 @@ layout = html.Div([
                     html.Div(id='gen-params-dump', style={'display': 'none'}),
                 ], className='item-row item-select-height item-inline'),
 
-                #Vessel field
+                # Vessel field
                 html.Div([
                     html.H3([
                         'Vessel'
@@ -197,13 +197,13 @@ layout = html.Div([
                 # Hidden Element
                 # html.Div(id='gen-filter-store', style={'display': 'none'}),
 
-                #Filter field
+                # Filter field
                 html.Div([
                     html.H3([
                         'Filters'
                     ], className='input-label item-element-margin'),
                     html.H5([
-                    html.I(className="fas fa-exclamation-circle icon"),
+                        html.I(className="fas fa-exclamation-circle icon"),
                         '5. Add filters to scope down the data'
                     ], className='helper-text item-element-margin'),
 
@@ -217,6 +217,26 @@ layout = html.Div([
                     # call filter layout
                     html.Div(id='gen-filter'),
                 ], className='item-row item-select-height item-inline'),
+                #
+                # # Load File field
+                # html.Div([
+                #     html.H3([
+                #         'Load Line'
+                #     ], className='input-label item-element-margin'),
+                #     html.H5([
+                #         html.I(className="fas fa-exclamation-circle icon"),
+                #         '6. Select the file to load'
+                #     ], className='helper-text item-element-margin'),
+                #     # File field
+                #     dcc.Dropdown(
+                #         id='gen-loadline-input-1',
+                #         placeholder="File",
+                #         className='item-element-margin'
+                #     ),
+                #
+                #     # # Hidden Line Elements
+                #     html.Div(id='gen-loadline-dump', style={'display': 'none'}),
+                # ], className='item-row item-select-height item-inline'),
 
                 html.Button([
                     html.I(className="fas fa-caret-right icon"),
@@ -239,6 +259,7 @@ layout = html.Div([
                 # ),
 
                 # generate_filter_id(),
+
 
                 # hidden store
                 html.Div(id='save-setting', style={'display': 'none'}),
@@ -522,13 +543,22 @@ def generate_graph(mode, options):
                         className='item-element-margin'),
                     html.Div(id='gen-regression-input-dump', style={'display': 'none'}),
 
+                    # Outliers  input
+                    html.H5('Select the outliers threshold level of the graph', className='item-element-margin'),
+                    dcc.Dropdown(
+                        id='gen-threshold-input-1',
+                        placeholder="Threshold",
+                        className='item-element-margin',
+                        value='None'),
+                    html.Div(id='gen-threshold-input-dump', style={'display': 'none'}),
+
                     # Clusters input
                     html.H5('Select the number of clusters of the graph', className='item-element-margin'),
                     dcc.Input(
                         id='gen-kmeans-cluster',
                         type='number',
                         className='item-element-margin form-control form-control-sm',
-                    )
+                    ),
 
                 ], className='custom-panel'),
 

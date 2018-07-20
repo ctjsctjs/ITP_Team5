@@ -24,8 +24,9 @@ import collections
 n_filters = 10
 dfs = {}
 temp_store = {}
-#PATH of your Proj:TODO CHANGE PATH TO YOUR PROJ PATH
+# PATH of your Proj:TODO CHANGE PATH TO YOUR PROJ PATH
 path = 'C:/Users/YC/Documents/GitHub/ITP_Team5(UI)/'
+arr_txt = [x for x in os.listdir('archive') if x.endswith(".txt")]
 # TEMPORARY Variables. TO replace if there is a better way
 gr_squared = 0.0
 gsols = 0.0
@@ -48,7 +49,8 @@ default_figure = {
         margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
         hovermode='closest'
     )}
-
+#threshold value
+threshold = ['None', 1, 1.5, 2, 2.5, 3]
 
 # Populate Database field options
 @app.callback(
@@ -56,9 +58,178 @@ default_figure = {
     [Input('gen-database-input-dump', 'children')])
 def load_series_field(dump):
     return [{'label': table, 'value': table} for table in SQL().get_table_names()]
+#
+# # Populate Line field options
+# @app.callback(
+#     Output('gen-loadline-input-1', 'options'),
+#     [Input('gen-loadline-dump', 'children')])
+# def load_series_field(dump):
+#     fileNames = []
+#     if arr_txt != []:
+#         for item in arr_txt:
+#             file = open('archive/' + item, 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             if dictionaryFile.get('graphName') == "":
+#                 fileNames.append('(Empty File Name)')
+#             else:
+#                 fileNames.append(dictionaryFile.get('graphName'))
+#         return [{'label': files, 'value': files} for files in fileNames]
+#     # else:
+#         return None
+#
+# # Generates callbacks for filter options
+# def filter_input1_callback(filter_number):
+#     @app.callback(
+#         Output('gen-filter-input-{}'.format(filter_number + 1), 'value'),
+#         [Input('load-settings-btn','n_clicks'),
+#          Input('save-setting-filter','children')])
+#     def loadFilters(loadClick,filterData):
+#         if loadClick > 0:
+#             #print (filter_number*3+1)
+#             return '{}'.format(filterData[filter_number*3+1])
+#
+# # Generates callbacks for filter options
+# def filter_value1_callback(filter_number):
+#     @app.callback(
+#         Output('gen-filter-value1-{}'.format(filter_number + 1), 'value'),
+#         [Input('load-settings-btn','n_clicks'),
+#          Input('save-setting-filter','children')])
+#     def loadFilters(loadClick,filterData):
+#         if loadClick > 0:
+#             #print (filter_number*3+1)
+#             return '{}'.format(filterData[filter_number*3+2])
+#
+# # Generates callbacks for filter options
+# def filter_value2_callback(filter_number):
+#     @app.callback(
+#         Output('gen-filter-value2-{}'.format(filter_number + 1), 'value'),
+#         [Input('load-settings-btn', 'n_clicks'),
+#          Input('save-setting-filter', 'children')])
+#     def loadFilters(loadClick, filterData):
+#         if loadClick > 0:
+#             # print (filter_number*3+1)
+#             return '{}'.format(filterData[filter_number * 3 + 3])
+#
+# for k in range(n_filters):
+#     filter_input1_callback(k + 1)
+#     filter_value1_callback(k + 1)
+#     filter_value2_callback(k + 1)
+# #
 
+# # load saved mode input
+# @app.callback(
+#     Output('gen-mode-input-1','value'),
+#     [Input('gen-loadline-input-1','value')])
+# def load_settings(load):
+#     if load is not None:
+#         file = open('archive/' + load + ".txt", 'r')
+#         dictionaryFile = json.loads(file.read())[0]
+#         return '{}'.format(dictionaryFile.get('param')[0])
+#
+#
+# #load saved database input
+# @app.callback(
+#     Output('gen-database-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('database'))
+#
+# #load saved series input
+# @app.callback(
+#     Output('gen-series-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('series'))
+#
+#   #
+# #load saved vessel input
+# @app.callback(
+#     Output('gen-vessel-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             print(dictionaryFile.get('vessel')[0])
+#             return '{}'.format(dictionaryFile.get('vessel')[0])
+# #load saved paramX input
+# @app.callback(
+#     Output('gen-paramX-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             print(dictionaryFile.get('param')[1])
+#             return '{}'.format(dictionaryFile.get('param')[1])
+#
+# #load saved kmeans-cluster input
+# @app.callback(
+#     Output('gen-kmeans-cluster','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('cluster'))
+#
+# #load saved regression-degree input
+# @app.callback(
+#     Output('gen-regression-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('regression'))
+#
+# #load saved settings input
+# @app.callback(
+#     Output('gen-settings-input-1','values'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('setting'))
+#
+#
+#
+# #load saved paramY input
+# @app.callback(
+#     Output('gen-paramY-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('param')[2])
+#
+# #load saved paramZ input
+# @app.callback(
+#     Output('gen-paramZ-input-1','value'),
+#     [Input('gen-loadline-input-1', 'value')])
+# def load_settings(load):
+#     if arr_txt != []:
+#         if load is not None:
+#             file = open('archive/' + load + ".txt", 'r')
+#             dictionaryFile = json.loads(file.read())[0]
+#             return '{}'.format(dictionaryFile.get('param')[3])
 
-# Populate Series field options
 @app.callback(
     Output('gen-series-input-1', 'options'),
     [Input('gen-series-dump', 'children')])
@@ -74,7 +245,8 @@ def load_series_field(dump):
 def load_vessel_field(series, db_table):
     if series is not None or series != u'None' or db_table is not None or db_table != u'None':
         vessels_in_series = SQL().get_vessel_from_series(series=series, db_table=db_table)
-        return [{'label': i, 'value': i} for i in vessels_in_series]
+        if vessels_in_series is not None:
+            return [{'label': i, 'value': i} for i in vessels_in_series]
     return
 
 
@@ -132,26 +304,6 @@ for n in range(n_filters):
     filter_state_inputs.append(State('gen-filter-value1-{}'.format(n + 1), 'value'))
     filter_state_inputs.append(State('gen-filter-value2-{}'.format(n + 1), 'value'))
 
-@app.callback(
-    Output('gen-filter-store', 'children'),
-    filter_inputs)
-def get_filtered_df(*values):
-    # Get specifications
-    specifications = []
-    for i in range(1, len(values), 3):
-        specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
-    # Cleanup and prepare conditions
-    conditions = []
-    for specification in specifications:
-        for value in specification:
-            conditions.append(value)
-
-    # Obtain filtered df
-    df = []
-    for vessel in values[0]:
-        df.append(dfs[vessel].get_filtered(conditions=conditions))
-
-    return pd.concat(df)
 
 # Generate parameter fields depending on mode selected
 @app.callback(
@@ -159,27 +311,9 @@ def get_filtered_df(*values):
     [Input('gen-mode-input-1', 'value'),
      Input('gen-database-input-1', 'value')])
 def update_filter(value, db_table):
-    # TODO: Remove hardcoded db table
-    print("THIS IS DBTABLE: {}".format(db_table))
     options = [{'label': label2, 'value': value2} for label2, value2 in
                SQL().get_attributes('{}'.format(db_table)).items()]
     return generate_axis_parameters(value, options)
-#
-# # Generate parameter fields depending on mode selected
-# @app.callback(
-#     Output('gen-params-wrapper', 'children'),
-#     [Input('gen-mode-input-1', 'value')])
-# def update_filer(value):
-#     # TODO: Remove hardcoded db table
-#     #check if dict is empty
-#     if len(temp_store.keys()) == 0:
-#         options = [{'label': label2, 'value': value2} for label2, value2 in
-#                    SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
-#         return generate_axis_parameters(value, options)
-#     else:
-#         options = [{'label': label2, 'value': value2} for label2, value2 in
-#                    SQL().get_attributes("dsme 10700_2018_combined_a_after_dd").items()]
-#         return generate_existing_axis_parameters(value, options,temp_store)
 
 
 # Populate Graph Mode Selection Dropdown
@@ -188,6 +322,14 @@ def update_filter(value, db_table):
     [Input('gen-regression-input-dump', 'children')])
 def load_graphmode_selection(dump):
     return [{'label': item.name, 'value': item.value} for item in GraphMode]
+
+
+# Populate Graph Mode Selection Dropdown
+@app.callback(
+    Output('gen-threshold-input-1', 'options'),
+    [Input('gen-threshold-input-dump', 'children')])
+def load_threshold_selection(dump):
+    return [{'label': item, 'value': item} for item in threshold]
 
 
 # Obtain Axis Parameters Input
@@ -245,14 +387,41 @@ def update_formula(temp):
 
 
 @app.callback(
+    Output('gen-filter-store', 'children'),
+    filter_inputs)
+def get_filtered_df(*values):
+    return None
+    # # Get specifications
+    # specifications = []
+    # for i in range(1, len(values), 3):
+    #     specifications.append(get_condition(values[i], values[i + 1], values[i + 2]))
+    # # Cleanup and prepare conditions
+    # conditions = []
+    # for specification in specifications:
+    #     for value in specification:
+    #         conditions.append(value)
+    #
+    # # Obtain filtered df
+    # df = []
+    # for vessel in values[0]:
+    #     df.append(dfs[vessel].get_filtered(conditions=conditions))
+    #
+    # df = pd.concat(df)
+    # return df.to_json()
+
+
+@app.callback(
     Output('g2', 'figure'),
-    [Input('gen-params-store', 'children'),
+    [Input('gen-filter-store', 'children'),
+     Input('gen-params-store', 'children'),
      Input('gen-settings-input-1', 'values'),
      Input('gen-regression-input-1', 'value'),
-     Input('gen-kmeans-cluster', 'value')],
+     Input('gen-kmeans-cluster', 'value'),
+     Input('gen-threshold-input-1', 'value')],
     [State('g2', 'figure'),
-     State('gen-vessel-input-1', 'value')])
-def update_graph(value, settings, graph_mode, clusters, figure, vessels):
+     State('gen-vessel-input-1', 'value')]
+    + filter_state_inputs)
+def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, figure, vessels, *filter_settings):
     if figure is not None:
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
@@ -277,12 +446,29 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
             figure['data'] = []
         else:
             # Create the dataset for the vessels selected
-            count = 0
-            for vessel in vessels:
-                if count == 0:
-                    dfsDF = dfs.get(vessel).get_df()
-                else:
-                    dfsDF.append(dfs.get(vessel).get_df())
+            # Get specifications
+            specifications = []
+            for i in range(1, len(filter_settings), 3):
+                specifications.append(get_condition(filter_settings[i], filter_settings[i + 1], filter_settings[i + 2]))
+            # Cleanup and prepare conditions
+            conditions = []
+            for specification in specifications:
+                for condition in specification:
+                    conditions.append(condition)
+
+            # Obtain filtered df
+            df = []
+            for vessel in filter_settings[0]:
+                df.append(dfs[vessel].get_filtered(conditions=conditions))
+
+            dfsDF = pd.concat(df)
+
+            # count = 0
+            # for vessel in vessels:
+            #     if count == 0:
+            #         dfsDF = dfs.get(vessel).get_df()
+            #     else:
+            #         dfsDF.append(dfs.get(vessel).get_df())
 
             # dff = []
             # if value[0] == "2D":
@@ -303,28 +489,45 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
             #         df = {'x': dff[value[1]], 'y': dff[value[2]], 'z': dff[value[3]]}
 
             # Remove any NaN values
+            print("THIS IS VALUE: {}".format(value))
             if value[0] == "2D":
                 dfsDF = dfsDF.dropna(subset=[value[1], value[2]])
             else:
                 dfsDF = dfsDF.dropna(subset=[value[1], value[2], value[3]])
 
-            # Remove outliers NOTE: Adjust the threshold to modify how strictly filtered the data will be. So far tested 1, 1.5, 3. Strict ~ Lax
-            threshold = 1.5
-            mean = np.mean(dfsDF[value[1]])
-            stdio = np.std(dfsDF[value[1]])
-            print "Mean: " + str(mean) + " Std: " + str(stdio)
-            dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold*stdio)]
-
-            mean = np.mean(dfsDF[value[2]])
-            stdio = np.std(dfsDF[value[2]])
-            print "Mean: " + str(mean) + " Std: " + str(stdio)
-            dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold*stdio)]
-
-            if value[0] == "3D":
-                mean = np.mean(dfsDF[value[3]])
-                stdio = np.std(dfsDF[value[3]])
+            if threshold != "None":
+                # Remove outliers NOTE: Adjust the threshold to modify how strictly filtered the data will be. So far tested 1, 1.5, 3. Strict ~ Lax
+                # threshold = 1.5
+                # mean = np.mean(dfsDF[value[1]])
+                # stdio = np.std(dfsDF[value[1]])
+                # print "Mean: " + str(mean) + " Std: " + str(stdio)
+                # dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold*stdio)]
+                #
+                # mean = np.mean(dfsDF[value[2]])
+                # stdio = np.std(dfsDF[value[2]])
+                # print "Mean: " + str(mean) + " Std: " + str(stdio)
+                # dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold*stdio)]
+                #
+                # if value[0] == "3D":
+                #     mean = np.mean(dfsDF[value[3]])
+                #     stdio = np.std(dfsDF[value[3]])
+                #     print "Mean: " + str(mean) + " Std: " + str(stdio)
+                #     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold*stdio)]
+                mean = np.mean(dfsDF[value[1]])
+                stdio = np.std(dfsDF[value[1]])
                 print "Mean: " + str(mean) + " Std: " + str(stdio)
-                dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold*stdio)]
+                dfsDF = dfsDF[np.abs(dfsDF[value[1]] - mean) <= (threshold * stdio)]
+
+                mean = np.mean(dfsDF[value[2]])
+                stdio = np.std(dfsDF[value[2]])
+                print "Mean: " + str(mean) + " Std: " + str(stdio)
+                dfsDF = dfsDF[np.abs(dfsDF[value[2]] - mean) <= (threshold * stdio)]
+
+                if value[0] == "3D":
+                    mean = np.mean(dfsDF[value[3]])
+                    stdio = np.std(dfsDF[value[3]])
+                    print "Mean: " + str(mean) + " Std: " + str(stdio)
+                    dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold * stdio)]
 
             hoverData = []
             if 'clustering' in settings:
@@ -447,7 +650,9 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
         figure['data'] = [i for i in figure['data'] if i is not None]
         return figure
     return default_figure
-#save current state of
+
+
+# save current state of
 @app.callback(
     Output('save-setting', 'children'),
     [Input('save-all-btn','n_clicks')],
@@ -458,29 +663,32 @@ def update_graph(value, settings, graph_mode, clusters, figure, vessels):
     State('gen-vessel-input-1', 'value'),
     State('gen-series-input-1','value'),
     State('gen-graph-name','value'),
-    State('gen-database-input-1','value')])
-def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,databaseState):
+    State('gen-database-input-1','value'),
+    State('gen-threshold-input-1','value')])
+def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,databaseState,thresholdState):
     if saveClick > 0:
         if paramState not in temp_store.values():
             temp_store['param'] = paramState
         if settingState not in temp_store.values():
             temp_store['setting'] = settingState
         if regState not in temp_store.values():
-            temp_store['regression'] =regState
+            temp_store['regression'] = regState
         if clusterState not in temp_store.values():
-            temp_store['cluster'] =clusterState
+            temp_store['cluster'] = clusterState
         if vesselState not in temp_store.values():
             temp_store['vessel'] = vesselState
         if seriesState not in temp_store.values():
             temp_store['series'] = seriesState
         if databaseState not in temp_store.values():
-            temp_store['database']=vesselState
+            temp_store['database']=databaseState
+        if thresholdState not in temp_store.values():
+            temp_store['threshold']=thresholdState
         if graphState not in temp_store.values():
             temp_store['graphName'] = graphState
             temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
             if os.path.isfile(path + "archive/" + temp_store.get('graphName') + '.txt') == True:
                 time = str(datetime.datetime.now().strftime('%H%M%S'))
-                temp_store.update({'graphName':graphState+"("+time+")"})
+                temp_store.update({'graphName': graphState + "(" + time + ")"})
             # if os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == False:
             #     with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'),'w') as file:
             #         file.write(json.dumps(temp_store))
@@ -493,23 +701,26 @@ def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,
 
 @app.callback(
     Output('save-setting-filter', 'children'),
-    [Input('save-all-btn','n_clicks')],
+    [Input('save-all-btn', 'n_clicks')],
     filter_state_inputs)
-def saveFilters(saveClick,*filtersInputs):
+def saveFilters(saveClick, *filtersInputs):
     if saveClick > 0:
         if filtersInputs not in temp_store.values():
-            temp_store['filters']=filtersInputs
-            with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'), 'a') as file:
+            temp_store['filters'] = filtersInputs
+            with open(os.path.join(path + 'archive', temp_store.get('graphName') + '.txt'), 'a') as file:
                 file.write(json.dumps([temp_store]))
                 file.close()
     return filtersInputs
 
+
 @app.callback(
-    Output('url','pathname'),
-    [Input('save-all-btn','n_clicks')])
+    Output('url', 'pathname'),
+    [Input('save-all-btn', 'n_clicks')])
 def goArchive(savedClick):
     if savedClick > 0:
         return '/Archive'
+
+
 # callback to generate parameter fields depending on mode selected
 @app.callback(
     Output('gen-right-panel-wrapper', 'children'),
@@ -520,7 +731,7 @@ def update_filer(value, mode):
         options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
         return generate_graph(mode, options)
 
-
+#
 # callback to hide generate graph button and show update button after graph generated
 @app.callback(
     Output('gen-button-1', 'style'),
