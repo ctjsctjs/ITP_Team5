@@ -704,7 +704,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 else:
                     zName = zLabel
                 if graphName == "":
-                    gName = value[1] + " vs " + value[2]
+                    gName = value[1] + " vs " + value[2] + " vs " + value[3]
                 else:
                     gName = graphName
                 figure['layout']['scene']['xaxis']['title'] = xName
