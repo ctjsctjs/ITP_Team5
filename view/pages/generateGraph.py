@@ -325,21 +325,24 @@ layout = html.Div([
                         className='item-element-margin form-control form-control-sm',
                         placeholder='X axis label',
                         type='text',
-                        value=''
+                        value='',
+                        id='x-axis-label'
                     ),
                     # Y axis label input
                     dcc.Input(
                         className='item-element-margin form-control form-control-sm',
                         placeholder='Y axis label',
                         type='text',
-                        value=''
+                        value='',
+                        id='y-axis-label'
                     ),
                     # Z axis label input
                     dcc.Input(
                         className='item-element-margin form-control form-control-sm',
                         placeholder='Z axis label',
                         type='text',
-                        value=''
+                        value='',
+                        id='z-axis-label'
                     ),
                     ], className='item-row item-select-height item-inline'),
 
