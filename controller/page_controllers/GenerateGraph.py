@@ -354,6 +354,23 @@ def get_params_input(mode, input_x, input_y, input_z):
 
 
 # Update for Graph Values
+# @app.callback(
+#     Output('gen-settings-graphInfo-1', 'children'),
+#     [Input('g2', 'figure')])
+# def update_graphInfo(temp):
+#     displayStr = ""
+#     for key, value in gformula.iteritems():
+#         displayStr += key + "- "
+#         displayStr += "R-Squared: " + str(round(value[0], 4))
+#         displayStr += " Sum of Least Squares: " + str(round(value[1], 4))
+#         eqString, supScript = generateEquationString(value[2])
+#         displayStr += " Formula: " + eqString.format(*supScript)
+        # displayStr += "<br>"
+    # return displayStr
+    # return html.Div([
+    #     html.Div(displayStr)
+    # ])
+
 @app.callback(
     Output('gen-settings-rsquared-1', 'children'),
     [Input('g2', 'figure')])
@@ -445,24 +462,6 @@ def get_filtered_df(*values):
 def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel,figure, vessels, *filter_settings):
     if figure is not None:
         figure['data'] = []
-        # Update Axis Titles based on Axis Parameters
-        # Set X Axis
-        # if value[1] is None:
-        #     figure['layout']['xaxis']['title'] = default_figure['layout']['xaxis']['title']
-        # else:
-        #     figure['layout']['xaxis']['title'] = value[1]
-        # # Set Y Axis
-        # if value[2] is None:
-        #     figure['layout']['yaxis']['title'] = default_figure['layout']['yaxis']['title']
-        # else:
-        #     figure['layout']['yaxis']['title'] = value[2]
-        # Set Z Axis if 3D
-        # if value[0] == '3D':
-        #     if value[3] is None:
-        #         figure['layout']['zaxis']['title'] = default_figure['layout']['zaxis']['title']
-        #     else:
-        #         figure['layout']['zaxis']['title'] = value[3]
-
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
@@ -482,24 +481,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             df = []
             for vessel in filter_settings[0]:
                 df.append(dfs[vessel].get_filtered(conditions=conditions))
-
             dfsDF = pd.concat(df)
-
-            # count = 0
-            # for vessel in vessels:
-            #     if count == 0:
-            #         dfsDF = dfs.get(vessel).get_df()
-            #     else:
-            #         dfsDF.append(dfs.get(vessel).get_df())
-
-            # dff = []
-            # if value[0] == "2D":
-            #     for vessel in vessels:
-            #         dff.append(dfs[vessel].get_2D_data(value[1], value[2], clean=True))
-            # else:
-            #     for vessel in vessels:
-            #         dff.append(dfs[vessel].get_3D_data(value[1], value[2], value[3]))
-            # dff = pd.concat(dff)
 
             # Remove any NaN values
             print("THIS IS VALUE: {}".format(value))
@@ -527,9 +509,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold * stdio)]
 
             unqVessels = dfsDF['Vessel'].unique().tolist()
-            # Add scatter from data set if 'datapoints' toggled
-            # if len(figure['data']) < 1:
-            #     figure['data'].append({})
 
             # Set axis labels if any
             if xLabel == "":
@@ -551,6 +530,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             # Multiline Logic
             if 'multiline' in settings:
                 counter = 0
+                benchmark = 0
+                annotation = []
                 for vessel in unqVessels:
                     print list(dfsDF)
                     vesselRow = dfsDF.loc[dfsDF['Vessel'] == vessel]
@@ -601,6 +582,13 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         if value[0] == "2D":
                             line_data, r_squared, sols, formula = regression(vesselRow[value[1].encode('utf8')],
                                                                              vesselRow[value[2].encode('utf8')], graph_mode)
+
+                            # tmpLst = []
+                            # tmpLst.append(r_squared)
+                            # tmpLst.append(sols)
+                            # tmpLst.append(formula)
+                            # gformula[vessel] = tmpLst
+                            # gformula[vessel] = [r_squared, sols, formula]
                             global gr_squared, gsols, gformula
                             gr_squared = r_squared
                             gsols = sols
@@ -611,24 +599,26 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                             bestFit = go.Scatter(
                                 x=line_data['x'],
                                 y=line_data['y'],
-                                name=vessel + 'Line',
+                                name=vessel + ' Line',
                                 mode='lines',
                                 marker=go.Marker(color=colorList[counter]),
                             )
                             figure['data'].append(bestFit)
 
-                            annotation = go.Annotation(
-                                x=min(line_data['x']),
-                                y=max(line_data['y']),
-                                text="Formula: " + eqString.format(*supScript),
+                            if benchmark == 0:
+                                benchmark = max(line_data['y'])
+                            annotation.append(go.Annotation(
+                                x=0,
+                                y=benchmark - counter * benchmark * 0.1,
+                                text=vessel + ": " + eqString.format(*supScript),
                                 showarrow=False
-                            )
+                            ))
                             layout2d = go.Layout(
                                 title=gName,
                                 plot_bgcolor='rgb(229, 229, 229)',
                                 xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
                                 yaxis=dict(title=yName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-                                annotations=[annotation],
+                                annotations=annotation,
                                 # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
                             )
                             figure['layout'] = layout2d
@@ -753,10 +743,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     figure['layout']['scene']['yaxis']['title'] = yName
                     figure['layout']['scene']['zaxis']['title'] = zName
                     figure['layout']['title'] = gName
-
-                # Add Line/Curve if 'regression' toggled
-                # if len(figure['data']) < 2:
-                #     figure['data'].append({})
 
         # Clean figure data
         figure['data'] = [i for i in figure['data'] if i is not None]
