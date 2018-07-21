@@ -84,6 +84,11 @@ font-size:12px;
 color:#525252;
 }
 
+h6{
+font-size:12px;
+color:#33bbb0;
+}
+
 input[type="radio"], input[type="checkbox"]{
 margin-right:12px;
 }
@@ -329,8 +334,9 @@ border:1px solid #e7e7e7;
 border-left: 2px solid #33bbb0;
 margin-bottom:12px;
 }
+
 .settings-info{
-font-size:14px;
+font-size:12px;
 line-height: 1.5;
 }
 
@@ -354,6 +360,7 @@ margin-bottom:12px;
 .item-select-height{
 padding-top:12px;
 padding-bottom:12px;
+position: relative;
 }
 
 .item-border-bottom{
@@ -505,7 +512,6 @@ font-size: 12px;
 color:white;
 font-weight: 700;
 
-
 top: -20px;
 -webkit-animation: action 1s infinite  alternate;
 animation: action 1s infinite  alternate;
@@ -524,4 +530,47 @@ animation: action 1s infinite  alternate;
   max-width: 480px;
   border-radius: 8px;
   border: 1px solid #dfdfdf;
+}
+
+.tooltip-icon{
+  position: absolute;
+  right:0px;
+  top:12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tooltip-container{
+  opacity: 0;
+  background-color: #33bbb0;
+  padding: 12px;
+  position: absolute;
+  top:24px;
+  right:0;
+  z-index: -1;
+  color:white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1), 0 3px 10px 0 rgba(0, 0, 0, 0.1);
+
+  transition: .25s ease-in-out;
+  -moz-transition: .25s ease-in-out;
+  -webkit-transition: .25s ease-in-out;
+
+}
+.tooltip-icon:hover ~ .tooltip-container {
+  opacity: 100;
+  transform: translateY(12px);
+  z-index:10;
+}
+
+.tooltip-triangle{
+  position: absolute;
+  top: -6px;
+  right: 6px;
+
+	width: 0;
+	height: 0;
+	border-left: 6px solid transparent;
+	border-right: 6px solid transparent;
+	border-bottom: 6px solid #33bbb0;
 }
