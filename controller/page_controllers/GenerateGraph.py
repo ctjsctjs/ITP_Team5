@@ -444,6 +444,7 @@ def get_filtered_df(*values):
     + filter_state_inputs)
 def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel,figure, vessels, *filter_settings):
     if figure is not None:
+        figure['data'] = []
         # Update Axis Titles based on Axis Parameters
         # Set X Axis
         # if value[1] is None:
@@ -525,145 +526,238 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     print "Mean: " + str(mean) + " Std: " + str(stdio)
                     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold * stdio)]
 
-            # Clustering & Hover Data Generation
-            hoverData = []
-            if 'clustering' in settings:
-                dfsDF = k_means(value, dfsDF, clusters)
-                hoverData = np.c_[dfsDF[value[1]], dfsDF[value[2]]]
+            unqVessels = dfsDF['Vessel'].unique().tolist()
+            # Add scatter from data set if 'datapoints' toggled
+            # if len(figure['data']) < 1:
+            #     figure['data'].append({})
+
+            # Set axis labels if any
+            if xLabel == "":
+                xName = value[1]
             else:
-                # Generate the Hover Data
-                # Iterate each row from db
-                for key, value1 in dfsDF.iterrows():
-                    placeholderText = ""
-                    # Iterate each column in the row
-                    for index, row in value1.items():
-                        # Compare the value in important_attributes
-                        for col in full_attributes:
-                            if col == index:
-                                if isinstance(row, float):
-                                    placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
-                                else:
-                                    placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
-                                break
-                    hoverData.append(placeholderText)
-
-            if value[0] == "2D":
-                # Add scatter from data set if 'datapoints' toggled
-                if len(figure['data']) < 1:
-                    figure['data'].append({})
-                if 'datapoints' in settings:
-                    figure['data'][0] = go.Scatter(
-                        x=dfsDF[value[1].encode('utf8')],
-                        y=dfsDF[value[2].encode('utf8')],
-                        name='Data Marker',
-                        mode='markers',
-                        text=hoverData,
-                    )
-                else:
-                    figure['data'][0] = None
-
-                # Add Line/Curve if 'regression' toggled
-                if len(figure['data']) < 2:
-                    figure['data'].append({})
-                if 'regression' in settings:
-                    line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
-                                                                     dfsDF[value[2].encode('utf8')], graph_mode)
-                    print "R-Squared: " + str(r_squared)
-                    print "Sum of Least Squares: " + str(sols)
-                    print "A Formula: "
-                    print formula
-                    global gr_squared, gsols, gformula
-                    gr_squared = r_squared
-                    gsols = sols
-                    gformula = formula
-
-                    eqString, supScript = generateEquationString(formula)
-
-                    figure['data'][1] = go.Scatter(
-                        x=line_data['x'],
-                        y=line_data['y'],
-                        name='Line',
-                        mode='lines',
-                    )
-                    annotation = go.Annotation(
-                        x=min(line_data['x']),
-                        y=max(line_data['y']),
-                        text="Formula: " + eqString.format(*supScript),
-                        showarrow=False
-                    )
-                    if xLabel == "":
-                        xName = value[1]
-                    else:
-                        xName = xLabel
-                    if yLabel == "":
-                        yName = value[2]
-                    else:
-                        yName = yLabel
-                    if graphName == "":
-                        gName = value[1] + " vs " + value[2]
-                    else:
-                        gName = graphName
-
-                    layout2d = go.Layout(
-                        title=gName,
-                        plot_bgcolor='rgb(229, 229, 229)',
-                        xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-                        yaxis=dict(title=yName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-                        annotations=[annotation],
-                        # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
-                    )
-                    figure['layout'] = layout2d
-                else:
-                    figure['data'][1] = None
+                xName = xLabel
+            if yLabel == "":
+                yName = value[2]
             else:
-                # 3D
-                # Add scatter from data set if 'datapoints' toggled
-                if len(figure['data']) < 1:
-                    figure['data'].append({})
-                if 'datapoints' in settings:
-                    figure['data'][0] = go.Scatter3d(
-                        x=dfsDF[value[1].encode('utf8')],
-                        y=dfsDF[value[2].encode('utf8')],
-                        z=dfsDF[value[3].encode('utf8')],
-                        name='Data Marker',
-                        mode='markers',
-                        text=hoverData,
-                    )
+                yName = yLabel
+            if graphName == "":
+                if value[0] == "2D":
+                    gName = value[1] + " vs " + value[2]
                 else:
-                    figure['data'][0] = None
-
-                # Add Line/Curve if 'regression' toggled
-                if len(figure['data']) < 2:
-                    figure['data'].append({})
-                if 'regression' in settings:
-                    surfacePlot, surfaceLayout = plot_3d(dfsDF[value[1].encode('utf8')],
-                                                         dfsDF[value[2].encode('utf8')],
-                                                         dfsDF[value[3].encode('utf8')], value[1], value[2],
-                                                         value[3])
-                    figure['data'][1] = surfacePlot
-                    figure['layout'] = surfaceLayout
-                else:
-                    figure['data'][1] = None
-                if xLabel == "":
-                    xName = value[1]
-                else:
-                    xName = xLabel
-                if yLabel == "":
-                    yName = value[2]
-                else:
-                    yName = yLabel
-                if zLabel == "":
-                    zName = value[3]
-                else:
-                    zName = zLabel
-                if graphName == "":
                     gName = value[1] + " vs " + value[2] + " vs " + value[3]
+            else:
+                gName = graphName
+
+            # Multiline Logic
+            if 'multiline' in settings:
+                counter = 0
+                for vessel in unqVessels:
+                    print list(dfsDF)
+                    vesselRow = dfsDF.loc[dfsDF['Vessel'] == vessel]
+                    # Clustering & Hover Data Generation
+                    hoverData = []
+                    if 'clustering' in settings:
+                        vesselRow = k_means(value, vesselRow, clusters)
+                        vesselRow['Vessel'] = pd.Series(vessel, index=vesselRow.index)
+                        hoverData = np.c_[vesselRow[value[1]], vesselRow[value[2]]]
+                    else:
+                        # Generate the Hover Data
+                        # Iterate each row from db
+                        for key, value1 in vesselRow.iterrows():
+                            placeholderText = ""
+                            # Iterate each column in the row
+                            for index, row in value1.items():
+                                # Compare the value in important_attributes
+                                for col in full_attributes:
+                                    if col == index:
+                                        if isinstance(row, float):
+                                            placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
+                                        else:
+                                            placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
+                                        break
+                            hoverData.append(placeholderText)
+                    if 'datapoints' in settings:
+                        if value[0] == "2D":
+                            scatterPoints = go.Scatter(
+                                x=vesselRow[value[1].encode('utf8')],
+                                y=vesselRow[value[2].encode('utf8')],
+                                name=vessel + " Marker",
+                                mode='markers',
+                                marker=go.Marker(color=colorList[counter]),
+                                text=hoverData,
+                            )
+                        else:
+                            scatterPoints = go.Scatter3d(
+                                x=vesselRow[value[1].encode('utf8')],
+                                y=vesselRow[value[2].encode('utf8')],
+                                z=vesselRow[value[3].encode('utf8')],
+                                name=vessel + " Marker",
+                                mode='markers',
+                                marker=go.Marker(color=colorList[counter]),
+                                text=hoverData,
+                            )
+                        figure['data'].append(scatterPoints)
+                    if 'regression' in settings:
+                        if value[0] == "2D":
+                            line_data, r_squared, sols, formula = regression(vesselRow[value[1].encode('utf8')],
+                                                                             vesselRow[value[2].encode('utf8')], graph_mode)
+                            global gr_squared, gsols, gformula
+                            gr_squared = r_squared
+                            gsols = sols
+                            gformula = formula
+
+                            eqString, supScript = generateEquationString(formula)
+
+                            bestFit = go.Scatter(
+                                x=line_data['x'],
+                                y=line_data['y'],
+                                name=vessel + 'Line',
+                                mode='lines',
+                                marker=go.Marker(color=colorList[counter]),
+                            )
+                            figure['data'].append(bestFit)
+
+                            annotation = go.Annotation(
+                                x=min(line_data['x']),
+                                y=max(line_data['y']),
+                                text="Formula: " + eqString.format(*supScript),
+                                showarrow=False
+                            )
+                            layout2d = go.Layout(
+                                title=gName,
+                                plot_bgcolor='rgb(229, 229, 229)',
+                                xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                                yaxis=dict(title=yName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                                annotations=[annotation],
+                                # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
+                            )
+                            figure['layout'] = layout2d
+                        else:
+                            surfacePlot, surfaceLayout = plot_3d(vesselRow[value[1].encode('utf8')],
+                                                         vesselRow[value[2].encode('utf8')],
+                                                         vesselRow[value[3].encode('utf8')], value[1], value[2],
+                                                         value[3])
+                            figure['data'].append(surfacePlot)
+                            figure['layout'] = surfaceLayout
+                    counter += 1
+            else: # If no multiline
+                # Clustering & Hover Data Generation
+                hoverData = []
+                if 'clustering' in settings:
+                    dfsDF = k_means(value, dfsDF, clusters)
+                    hoverData = np.c_[dfsDF[value[1]], dfsDF[value[2]]]
                 else:
-                    gName = graphName
-                figure['layout']['scene']['xaxis']['title'] = xName
-                figure['layout']['scene']['yaxis']['title'] = yName
-                figure['layout']['scene']['zaxis']['title'] = zName
-                figure['layout']['title'] = gName
+                    # Generate the Hover Data
+                    # Iterate each row from db
+                    for key, value1 in dfsDF.iterrows():
+                        placeholderText = ""
+                        # Iterate each column in the row
+                        for index, row in value1.items():
+                            # Compare the value in important_attributes
+                            for col in full_attributes:
+                                if col == index:
+                                    if isinstance(row, float):
+                                        placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
+                                    else:
+                                        placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
+                                    break
+                        hoverData.append(placeholderText)
+
+                if value[0] == "2D":
+                    # Add scatter from data set if 'datapoints' toggled
+                    if len(figure['data']) < 1:
+                        figure['data'].append({})
+                    if 'datapoints' in settings:
+                        figure['data'][0] = go.Scatter(
+                            x=dfsDF[value[1].encode('utf8')],
+                            y=dfsDF[value[2].encode('utf8')],
+                            name='Data Marker',
+                            mode='markers',
+                            text=hoverData,
+                        )
+                    else:
+                        figure['data'][0] = None
+
+                    # Add Line/Curve if 'regression' toggled
+                    if len(figure['data']) < 2:
+                        figure['data'].append({})
+                    if 'regression' in settings:
+                        line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
+                                                                         dfsDF[value[2].encode('utf8')], graph_mode)
+                        print "R-Squared: " + str(r_squared)
+                        print "Sum of Least Squares: " + str(sols)
+                        print "A Formula: "
+                        print formula
+                        global gr_squared, gsols, gformula
+                        gr_squared = r_squared
+                        gsols = sols
+                        gformula = formula
+
+                        eqString, supScript = generateEquationString(formula)
+
+                        figure['data'][1] = go.Scatter(
+                            x=line_data['x'],
+                            y=line_data['y'],
+                            name='Line',
+                            mode='lines',
+                        )
+                        annotation = go.Annotation(
+                            x=min(line_data['x']),
+                            y=max(line_data['y']),
+                            text="Formula: " + eqString.format(*supScript),
+                            showarrow=False
+                        )
+
+                        layout2d = go.Layout(
+                            title=gName,
+                            plot_bgcolor='rgb(229, 229, 229)',
+                            xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                            yaxis=dict(title=yName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                            annotations=[annotation],
+                            # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
+                        )
+                        figure['layout'] = layout2d
+                    else:
+                        figure['data'][1] = None
+                else:
+                    # 3D
+                    # Add scatter from data set if 'datapoints' toggled
+                    if len(figure['data']) < 1:
+                        figure['data'].append({})
+                    if 'datapoints' in settings:
+                        figure['data'][0] = go.Scatter3d(
+                            x=dfsDF[value[1].encode('utf8')],
+                            y=dfsDF[value[2].encode('utf8')],
+                            z=dfsDF[value[3].encode('utf8')],
+                            name='Data Marker',
+                            mode='markers',
+                            text=hoverData,
+                        )
+                    else:
+                        figure['data'][0] = None
+
+                    # Add Line/Curve if 'regression' toggled
+                    if len(figure['data']) < 2:
+                        figure['data'].append({})
+                    if 'regression' in settings:
+                        surfacePlot, surfaceLayout = plot_3d(dfsDF[value[1].encode('utf8')],
+                                                             dfsDF[value[2].encode('utf8')],
+                                                             dfsDF[value[3].encode('utf8')], value[1], value[2],
+                                                             value[3])
+                        figure['data'][1] = surfacePlot
+                        figure['layout'] = surfaceLayout
+                    else:
+                        figure['data'][1] = None
+
+                    figure['layout']['scene']['xaxis']['title'] = xName
+                    figure['layout']['scene']['yaxis']['title'] = yName
+                    figure['layout']['scene']['zaxis']['title'] = zName
+                    figure['layout']['title'] = gName
+
+                # Add Line/Curve if 'regression' toggled
+                # if len(figure['data']) < 2:
+                #     figure['data'].append({})
+
         # Clean figure data
         figure['data'] = [i for i in figure['data'] if i is not None]
         return figure

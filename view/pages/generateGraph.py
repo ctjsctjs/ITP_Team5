@@ -255,7 +255,8 @@ layout = html.Div([
                         options=[
                             {'label': 'Toggle Regression', 'value': 'regression'},
                             {'label': 'Toggle Clustering', 'value': 'clustering'},
-                            {'label': 'Toggle Datapoints', 'value': 'datapoints'}
+                            {'label': 'Toggle Datapoints', 'value': 'datapoints'},
+                            {'label': 'Toggle Individual Lines', 'value': 'multiline'}
                         ],
                         labelStyle={'display': 'block', 'margin-bottom': '6px'},
                         values=[]
