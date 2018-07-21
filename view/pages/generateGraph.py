@@ -591,6 +591,7 @@ def generate_graph(mode, options):
 
                 html.Div([
                     html.H5('Graph Information', className='item-element-margin'),
+                    # html.Span([], className="settings-info", id='gen-settings-graphInfo-1'),
                     html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
                     html.Span([], className="settings-info", id='gen-settings-sols-1'),
                     html.Span([], className="settings-info", id='gen-settings-formula-1'),
