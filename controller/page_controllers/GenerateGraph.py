@@ -42,6 +42,9 @@ xName = ""
 yName = ""
 zName = ""
 gName = ""
+
+colorList = ['blue', 'red', 'green', 'orange', 'brown', 'purple', 'cyan']
+
 default_figure = {
     'data': [],
     'layout': go.Layout(
@@ -380,7 +383,10 @@ def generateEquationString(baseFormula):
     tmpList = []
 
     for variable in fVariableList:
-        displayString += str(round(variable, 3))
+        stringCoeff = str(round(variable, 3))
+        if stringCoeff[0] != "-" and displayString != u"":
+            displayString += "+ "
+        displayString += stringCoeff
         if variableCount > 1:
             supVal = variableCount - 1
             displayString += "x"
