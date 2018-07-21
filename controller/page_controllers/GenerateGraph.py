@@ -742,21 +742,21 @@ def update_filer(value, mode):
 
 #
 # callback to hide generate graph button and show update button after graph generated
-@app.callback(
-    Output('gen-button-1', 'style'),
-    [Input('gen-button-1', 'n_clicks')])
-def update_style(value):
-    if value > 0:
-        return {'display': 'none'}
+# @app.callback(
+#     Output('gen-button-1', 'style'),
+#     [Input('gen-button-1', 'n_clicks')])
+# def update_style(value):
+#     if value > 0:
+#         return {'display': 'none'}
 
 
 # callback to show submit graph button and show update button after graph generated
-@app.callback(
-    Output('gen-filter-submit', 'style'),
-    [Input('gen-button-1', 'n_clicks')])
-def update_style(value):
-    if value > 0:
-        return {'display': 'block'}
+# @app.callback(
+#     Output('gen-filter-submit', 'style'),
+#     [Input('gen-button-1', 'n_clicks')])
+# def update_style(value):
+#     if value > 0:
+#         return {'display': 'block'}
 
 
 # callback for retriving inputs
