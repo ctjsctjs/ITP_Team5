@@ -482,17 +482,21 @@ def get_filtered_df(*values):
      Input('gen-graph-name','value'),
      Input('x-axis-label','value'),
      Input('y-axis-label','value'),
-     Input('z-axis-label', 'value')],
+     Input('z-axis-label', 'value'),
+     Input('gen-extra-min', 'value'),
+     Input('gen-extra-max', 'value')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')]
     + filter_state_inputs)
-def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel,figure, vessels, *filter_settings):
+def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel, extraMin, extraMax, figure, vessels, *filter_settings):
     if figure is not None:
         figure['data'] = []
         minSet = []
         gformula = ""
         gsols = 0.0
         gr_squared = 0.0
+        print "Extras:"
+        print extraMin, extraMax
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
@@ -612,7 +616,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     if 'regression' in settings:
                         if value[0] == "2D":
                             line_data, r_squared, sols, formula = regression(vesselRow[value[1].encode('utf8')],
-                                                                             vesselRow[value[2].encode('utf8')], graph_mode)
+                                                                             vesselRow[value[2].encode('utf8')], graph_mode, extraMin, extraMax)
 
                             # tmpLst = []
                             # tmpLst.append(r_squared)
@@ -704,7 +708,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         figure['data'].append({})
                     if 'regression' in settings:
                         line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
-                                                                         dfsDF[value[2].encode('utf8')], graph_mode)
+                                                                         dfsDF[value[2].encode('utf8')], graph_mode, extraMin, extraMax)
                         print "R-Squared: " + str(r_squared)
                         print "Sum of Least Squares: " + str(sols)
                         print "A Formula: "

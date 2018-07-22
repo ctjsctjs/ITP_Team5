@@ -335,7 +335,8 @@ layout = html.Div([
                             'Advanced settings to tweak the graph.' +
                             'Graph Mode selects the regression degree.' +
                             'Threshold selects the outliers threshold level of the graph. ' +
-                            'Clusters select the number of clusters of the graph',
+                            'Clusters select the number of clusters of the graph. ' +
+                            'Extrapolation Min Max sets the range of values for the X axis. ', 
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
                     ], className='helper-text'),
@@ -360,6 +361,22 @@ layout = html.Div([
                         dcc.Input(
                             id='gen-kmeans-cluster',
                             placeholder="Cluster",
+                            type='number',
+                            className='item-element-margin form-control form-control-sm',
+                        ),
+
+                        # Extrapolation Min input
+                        dcc.Input(
+                            id='gen-extra-min',
+                            placeholder="Extrapolation Min Value",
+                            type='number',
+                            className='item-element-margin form-control form-control-sm',
+                        ),
+
+                        # Extrapolation Max input
+                        dcc.Input(
+                            id='gen-extra-max',
+                            placeholder="Extrapolation Max Value",
                             type='number',
                             className='item-element-margin form-control form-control-sm',
                         ),

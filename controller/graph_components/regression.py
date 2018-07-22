@@ -15,16 +15,26 @@ class GraphMode(Enum):
 
 
 # Calculate the best fit line, sum of least squares, equation, r-squared value
-def regression(x, y, graph_mode=None):
+def regression(x, y, graph_mode=None, extra_min=None, extra_max=None):
     if graph_mode is None:
         z, res, _, _, _ = np.polyfit(x, y, GraphMode.QUADRATIC.value, full=True)
     else:
         z, res, _, _, _ = np.polyfit(x, y, graph_mode, full=True)
     f = np.poly1d(z)
-    r2value = r2_score(y, f(x)) # To return this value as well
+    r2value = r2_score(y, f(x))
 
-    x_new = np.linspace(0, max(x) + max(x)*0.25, max(x))
-    # x_new = np.linspace(0, max(x), max(x))
+    originValue = 0
+    peakValue = max(x) + max(x)*0.25
+    if extra_min is not None and extra_max is not None:
+        if int(extra_min) < int(extra_max):
+            originValue = int(extra_min)
+            peakValue = int(extra_max)
+    elif extra_min is not None and int(extra_min) < peakValue:
+        originValue = int(extra_min)
+    elif extra_max is not None and int(extra_max) > originValue:
+        peakValue = int(extra_max)
+
+    x_new = np.linspace(originValue, peakValue, max(x))
     y_new = f(x_new)
 
     return {'x': x_new, 'y': y_new}, r2value, res, f
