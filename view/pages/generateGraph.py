@@ -98,107 +98,120 @@ layout = html.Div([
 
                     html.H3([
                         'Database'
-                    ], className='input-label item-element-margin'),
+                    ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-database'),
                         html.Div([
                             'Select database of dataset',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
-                    ], className='helper-text item-element-margin'),
+                    ], className='helper-text'),
 
                     # Database field
-                    dcc.Dropdown(
-                        id='gen-database-input-1',
-                        placeholder="Database",
-                        className='item-element-margin'),
-                    # Hidden Database field dump
-                    html.Div(id='gen-database-input-dump', style={'display': 'none'}),
+                    html.Div([
+                        dcc.Dropdown(
+                            id='gen-database-input-1',
+                            placeholder="Database",
+                            className='item-element-margin-top'),
+                        # Hidden Database field dump
+                        html.Div(id='gen-database-input-dump', style={'display': 'none'}),
+                    ], className='toggle-container', id='toggle-database-container'),
                 ], className='item-row item-select-height item-inline'),
+
+
                 # Mode field
                 html.Div([
                     html.H3([
                         'Mode'
-                    ], className='input-label item-element-margin'),
+                    ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-mode'),
                         html.Div([
                             'Select graph mode to determine number of parameters',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
-                    ], className='helper-text item-element-margin'),
-
-                    dcc.RadioItems(
-                        id='gen-mode-input-1',
-                        labelStyle={'display': 'block', 'margin-bottom': '6px'},
-                        options=[
-                            {'label': '2 Dimensions', 'value': '2D'},
-                            {'label': '3 Dimensions', 'value': '3D'}
-                        ],
-                        value="2D"
-                    ),
-                ], className='item-row item-select-height item-inline'),
+                    ], className='helper-text'),
+                    html.Div([
+                        dcc.RadioItems(
+                            id='gen-mode-input-1',
+                            labelStyle={'display': 'block', 'margin-bottom': '6px'},
+                            options=[
+                                {'label': '2 Dimensions', 'value': '2D'},
+                                {'label': '3 Dimensions', 'value': '3D'}
+                            ],
+                            value="2D"
+                        ),
+                    ], className='toggle-container item-element-margin-top', id='toggle-mode-container'),
+                    ], className='item-row item-select-height item-inline'),
 
                 # Param field
                 html.Div([
                     html.H3([
                         'Parameters'
-                    ], className='input-label item-element-margin'),
+                    ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-parameters'),
                         html.Div([
                             'Select the parameters of the graph',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
-                    ], className='helper-text item-element-margin'),
+                    ], className='helper-text'),
 
-                    # Axis Parameters
-                    html.Div(
-                        id="gen-params-wrapper",
-                        # className='custom-panel',
-                        # className='item-inline item-element-margin',
-                    ),
-                    # Hidden Axis Parameters dump
-                    html.Div(id='gen-params-dump', style={'display': 'none'}),
+                    html.Div([
+                        # Axis Parameters
+                        html.Div(
+                            id="gen-params-wrapper",
+                            # className='custom-panel',
+                            # className='item-inline item-element-margin',
+                        ),
+                        # Hidden Axis Parameters dump
+                        html.Div(id='gen-params-dump', style={'display': 'none'}),
+                    ], className='toggle-container item-element-margin-top', id='toggle-parameters-container'),
                 ], className='item-row item-select-height item-inline'),
 
                 # Vessel field
                 html.Div([
                     html.H3([
                         'Vessel'
-                    ], className='input-label item-element-margin'),
+                    ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-vessel'),
+
                         html.Div([
                             'Select the vessel series and name to be filtered',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
-                    ], className='helper-text item-element-margin'),
+                    ], className='helper-text'),
 
-                    # Series field
-                    dcc.Dropdown(
-                        id='gen-series-input-1',
-                        placeholder="Series",
-                        className='item-element-margin'),
-                    # Vessel field
-                    dcc.Dropdown(
-                        id='gen-vessel-input-1',
-                        placeholder="Vessel",
-                        multi=True
-                    ),
-                    html.Div(id='gen-vessel-store'),
+                    html.Div([
+                        # Series field
+                        dcc.Dropdown(
+                            id='gen-series-input-1',
+                            placeholder="Series",
+                            className='item-element-margin'),
+                        # Vessel field
+                        dcc.Dropdown(
+                            id='gen-vessel-input-1',
+                            placeholder="Vessel",
+                            multi=True
+                        ),
+                        html.Div(id='gen-vessel-store'),
 
-                    # Hidden Series/Vessels Elements
-                    html.Div(id='gen-series-dump', style={'display': 'none'}),
+                        # Hidden Series/Vessels Elements
+                        html.Div(id='gen-series-dump', style={'display': 'none'}),
+                    ], className='toggle-container item-element-margin-top', id='toggle-vessel-container'),
                 ], className='item-row item-select-height item-inline'),
 
                 # # Filter section 3
@@ -226,26 +239,30 @@ layout = html.Div([
                 html.Div([
                     html.H3([
                         'Filters'
-                    ], className='input-label item-element-margin'),
+                    ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-filters'),
+
                         html.Div([
                             'Add filters to scope down the data',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
-                    ], className='helper-text item-element-margin'),
+                    ], className='helper-text'),
 
-                    html.Div(id='gen-filter-dump', style={'display': 'none'}),
+                    html.Div([
+                        html.Div(id='gen-filter-dump', style={'display': 'none'}),
+                        html.Button([
+                            html.I(className="fas fa-plus-circle icon"),
+                            'Add Filter',
+                        ], className='button item-element-margin add-filter-btn',
+                            id='gen-filter-add'),
+                        # call filter layout
+                        html.Div(id='gen-filter'),
+                    ], className='toggle-container item-element-margin-top', id='toggle-filters-container'),
 
-                    html.Button([
-                        html.I(className="fas fa-plus-circle icon"),
-                        'Add Filter',
-                    ], className='button item-element-margin add-filter-btn',
-                        id='gen-filter-add'),
-                    # call filter layout
-                    html.Div(id='gen-filter'),
                 ], className='item-row item-select-height item-inline'),
                 #
                 # # Load File field
@@ -274,41 +291,45 @@ layout = html.Div([
                     #Heading and Description
                     html.H3([
                         'Settings'
-                    ], className='input-label item-element-margin'),
+                    ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-settings'),
+
                         html.Div([
                             'Customise the name and labels of the graph',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
-                    ], className='helper-text item-element-margin'),
-
-                    html.Div(id='gen-filter-dump', style={'display': 'none'}),
-
-                    dcc.Checklist(
-                        id="gen-settings-input-1",
-                        options=[
-                            {'label': 'Toggle Regression', 'value': 'regression'},
-                            {'label': 'Toggle Clustering', 'value': 'clustering'},
-                            {'label': 'Toggle Datapoints', 'value': 'datapoints'}
-                        ],
-                        labelStyle={'display': 'block', 'margin-bottom': '6px'},
-                        values=[]
-                    ),
-
+                    ], className='helper-text'),
+                    html.Div([
+                        html.Div(id='gen-filter-dump', style={'display': 'none'}),
+                        dcc.Checklist(
+                            id="gen-settings-input-1",
+                            options=[
+                                {'label': 'Toggle Regression', 'value': 'regression'},
+                                {'label': 'Toggle Clustering', 'value': 'clustering'},
+                                {'label': 'Toggle Datapoints', 'value': 'datapoints'}
+                            ],
+                            labelStyle={'display': 'block', 'margin-bottom': '6px'},
+                            values=[]
+                        ),
+                    ], className='toggle-container item-element-margin-top', id='toggle-settings-container'),
                 ], className='item-row item-select-height item-inline'),
+
                 html.Div([
 
                     #Heading and Description
                     html.H3([
                         'Advanced Settings'
-                    ], className='input-label item-element-margin'),
+                    ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-advSettings'),
+
                         html.Div([
                             'Advanced settings to tweak the graph.' +
                             'Graph Mode selects the regression degree.' +
@@ -316,31 +337,32 @@ layout = html.Div([
                             'Clusters select the number of clusters of the graph',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
-                    ], className='helper-text item-element-margin'),
+                    ], className='helper-text'),
 
-                    # Regression type input
-                    dcc.Dropdown(
-                        id='gen-regression-input-1',
-                        placeholder="Graph Mode",
-                        className='item-element-margin'),
-                    html.Div(id='gen-regression-input-dump', style={'display': 'none'}),
+                    html.Div([
+                        # Regression type input
+                        dcc.Dropdown(
+                            id='gen-regression-input-1',
+                            placeholder="Graph Mode",
+                            className='item-element-margin'),
+                        html.Div(id='gen-regression-input-dump', style={'display': 'none'}),
 
-                    # Outliers  input
-                    dcc.Dropdown(
-                        id='gen-threshold-input-1',
-                        placeholder="Threshold",
-                        className='item-element-margin',
-                        value='None'),
-                    html.Div(id='gen-threshold-input-dump', style={'display': 'none'}),
+                        # Outliers  input
+                        dcc.Dropdown(
+                            id='gen-threshold-input-1',
+                            placeholder="Threshold",
+                            className='item-element-margin',
+                            value='None'),
+                        html.Div(id='gen-threshold-input-dump', style={'display': 'none'}),
 
-                    # Clusters input
-                    dcc.Input(
-                        id='gen-kmeans-cluster',
-                        placeholder="Cluster",
-                        type='number',
-                        className='item-element-margin form-control form-control-sm',
-                    ),
-
+                        # Clusters input
+                        dcc.Input(
+                            id='gen-kmeans-cluster',
+                            placeholder="Cluster",
+                            type='number',
+                            className='item-element-margin form-control form-control-sm',
+                        ),
+                    ], className='toggle-container item-element-margin-top', id='toggle-advSettings-container'),
                 ], className='item-row item-select-height item-inline'),
 
                 # Customise settings
@@ -354,13 +376,15 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-customise'),
+
                         html.Div([
                             'Customise the name and axis labels',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
 
-
+                    html.Div([
                     # Graph name input
                     dcc.Input(
                         id='gen-graph-name',
@@ -393,7 +417,8 @@ layout = html.Div([
                         value='',
                         id='z-axis-label'
                     ),
-                    ], className='item-row item-select-height item-inline'),
+                    ], className='toggle-container item-element-margin-top', id='toggle-customise-container'),
+                ], className='item-row item-select-height item-inline'),
 
                 html.Button([
                     html.I(className="fas fa-caret-right icon"),
@@ -544,7 +569,7 @@ def add_hidden_filters(n_clicks):
                     )
                 ], id="gen-filter-wrapper-{}".format(k)),
                 html.Div(id="gen-filter-dump-{}".format(k))
-            ], className='item-row item-select-height item-inline', style={'display': 'none'})
+            ], className='item-select-height item-inline', style={'display': 'none'})
             for k in range(1, n_clicks + 1)
         ], className='item-row item-filter-section'),
 
@@ -576,39 +601,34 @@ def generate_graph(mode, options):
 
         # Information Panel
         html.Div([
-            # Customise Panel
+            html.H2('Information Panel', className='item-element-margin'),
             html.Div([
-                html.H2('Information Panel', className='item-element-margin'),
-                html.Div([
-                    html.H6('Settings Information', className='item-element-margin'),
-                    html.Span([], className="settings-info", id='gen-settings-mode-1'),
-                    html.Span([], className="settings-info", id='gen-settings-series-1'),
-                    html.Span([], className="settings-info", id='gen-settings-vessel-1'),
-                    html.Span([], className="settings-info", id='gen-paramX-output-1'),
-                    html.Span([], className="settings-info", id='gen-paramY-output-1'),
-                    html.Span([], className="settings-info", id='gen-paramZ-output-1'),
-                    html.Span([], className="settings-info", id='gen-settings-output-1'),
-                ], className='custom-panel', id="item-wrapper"),
+                html.H6('Settings Information', className='item-element-margin'),
+                html.Span([], className="settings-info", id='gen-settings-mode-1'),
+                html.Span([], className="settings-info", id='gen-settings-series-1'),
+                html.Span([], className="settings-info", id='gen-settings-vessel-1'),
+                html.Span([], className="settings-info", id='gen-paramX-output-1'),
+                html.Span([], className="settings-info", id='gen-paramY-output-1'),
+                html.Span([], className="settings-info", id='gen-paramZ-output-1'),
+                html.Span([], className="settings-info", id='gen-settings-output-1'),
+            ], className='custom-panel', id="item-wrapper"),
 
-                html.Div([
-                    html.H6('Filter Information', className='item-element-margin'),
-                    html.Span([], className="settings-info", id='gen-settings-filter1-1'),
-                    html.Span([], className="settings-info", id='gen-settings-filter2-1'),
-                    html.Span([], className="settings-info", id='gen-settings-filter3-1'),
-                    html.Span([], className="settings-info", id='gen-output-value1-1'),
-                    html.Span([], className="settings-info", id='gen-output-value2-1'),
-                    html.Span([], className="settings-info", id='gen-output-value3-1'),
-                ], className='custom-panel'),
+            html.Div([
+                html.H6('Filter Information', className='item-element-margin'),
+                html.Span([], className="settings-info", id='gen-settings-filter1-1'),
+                html.Span([], className="settings-info", id='gen-settings-filter2-1'),
+                html.Span([], className="settings-info", id='gen-settings-filter3-1'),
+                html.Span([], className="settings-info", id='gen-output-value1-1'),
+                html.Span([], className="settings-info", id='gen-output-value2-1'),
+                html.Span([], className="settings-info", id='gen-output-value3-1'),
+            ], className='custom-panel'),
 
-                html.Div([
-                    html.H6('Graph Information', className='item-element-margin'),
-                    html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
-                    html.Span([], className="settings-info", id='gen-settings-sols-1'),
-                    html.Span([], className="settings-info", id='gen-settings-formula-1'),
-                ], className='custom-panel'),
-
-            ], className='item-select-height'),
-
+            html.Div([
+                html.H6('Graph Information', className='item-element-margin'),
+                html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
+                html.Span([], className="settings-info", id='gen-settings-sols-1'),
+                html.Span([], className="settings-info", id='gen-settings-formula-1'),
+            ], className='custom-panel'),
         ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
         # Graph Panel
         html.Div([

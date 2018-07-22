@@ -312,6 +312,10 @@ box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1), 0 3px 10px 0 rgba(0, 0, 0, 0.1);
 margin-bottom: 12px;
 }
 
+.item-element-margin-top{
+margin-top: 12px;
+}
+
 
 .item-inline > div{
   width:25%;
@@ -534,10 +538,19 @@ animation: action 1s infinite  alternate;
 
 .tooltip-icon{
   position: absolute;
+  right:16px;
+  top:12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tooltip-toggle{
+  position: absolute;
   right:0px;
   top:12px;
   cursor: pointer;
   font-size: 14px;
+  right:0px;
 }
 
 .tooltip-container{
@@ -557,6 +570,11 @@ animation: action 1s infinite  alternate;
   -webkit-transition: .25s ease-in-out;
 
 }
+
+.item-inline > .toggle-container{
+  display:none;
+}
+
 .tooltip-icon:hover ~ .tooltip-container {
   opacity: 100;
   transform: translateY(12px);

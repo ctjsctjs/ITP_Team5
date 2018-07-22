@@ -61,6 +61,18 @@ default_figure = {
     )}
 #threshold value
 threshold = ['None', 1, 1.5, 2, 2.5, 3]
+inputSection = ['database', 'mode', 'parameters', 'vessel', 'filters', 'settings', 'advSettings', 'customise']
+
+# Toggle show/hide input sections
+for n in inputSection:
+    @app.callback(
+        Output('toggle-{}-container'.format(n), 'style'),
+        [Input('toggle-{}'.format(n), 'n_clicks')])
+    def toggle(clicks):
+        if ((clicks % 2) == 1):
+            return {
+            'display':'inline-block'
+            }
 
 # Populate Database field options
 @app.callback(
