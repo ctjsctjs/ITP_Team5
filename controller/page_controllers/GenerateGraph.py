@@ -28,12 +28,15 @@ temp_store = {}
 path = 'C:/Users/YC/Documents/GitHub/ITP_Team5(UI)/'
 arr_txt = [x for x in os.listdir('archive') if x.endswith(".txt")]
 # TEMPORARY Variables. TO replace if there is a better way
-gr_squared = 0.0
-gsols = 0.0
-gformula = ""
+
 global gr_squared
 global gsols
 global gformula
+global minSet
+gr_squared = 0.0
+gsols = 0.0
+gformula = ""
+minSet = []
 global xName
 global yName
 global zName
@@ -372,25 +375,37 @@ def get_params_input(mode, input_x, input_y, input_z):
     # ])
 
 @app.callback(
+    Output('gen-settings-3dminy-1', 'children'),
+    [Input('g2', 'figure')])
+def update_minset(temp):
+    print "3D Testing..."
+    print minSet
+    if minSet != []:
+        return "Lowest Point: X=" + str(minSet[0]) + " Y=" + str(minSet[1]) + " Z=" + str(minSet[2])
+
+@app.callback(
     Output('gen-settings-rsquared-1', 'children'),
     [Input('g2', 'figure')])
 def update_rsquared(temp):
-    return "R-Squared: " + str(round(gr_squared, 4))
+    if gr_squared != 0.0:
+        return "R-Squared: " + str(round(gr_squared, 4))
 
 
 @app.callback(
     Output('gen-settings-sols-1', 'children'),
     [Input('g2', 'figure')])
 def update_sols(temp):
-    return "Sum of Least Squares: " + str(round(gsols, 4))
+    if gsols != 0.0:
+        return "Sum of Least Squares: " + str(round(gsols, 4))
 
 
 @app.callback(
     Output('gen-settings-formula-1', 'children'),
     [Input('g2', 'figure')])
 def update_formula(temp):
-    eqString, supScript = generateEquationString(gformula)
-    return "Formula: " + eqString.format(*supScript)
+    if gformula != "":
+        eqString, supScript = generateEquationString(gformula)
+        return "Formula: " + eqString.format(*supScript)
 
 # Generate the template string and the list of subscript values
 def generateEquationString(baseFormula):
@@ -462,6 +477,10 @@ def get_filtered_df(*values):
 def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel,figure, vessels, *filter_settings):
     if figure is not None:
         figure['data'] = []
+        minSet = []
+        gformula = ""
+        gsols = 0.0
+        gr_squared = 0.0
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
@@ -678,7 +697,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         print "Sum of Least Squares: " + str(sols)
                         print "A Formula: "
                         print formula
-                        global gr_squared, gsols, gformula
+                        # global gr_squared, gsols, gformula
                         gr_squared = r_squared
                         gsols = sols
                         gformula = formula
@@ -730,12 +749,15 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     if len(figure['data']) < 2:
                         figure['data'].append({})
                     if 'regression' in settings:
-                        surfacePlot, surfaceLayout = plot_3d(dfsDF[value[1].encode('utf8')],
+                        surfacePlot, surfaceLayout, minimumSet = plot_3d(dfsDF[value[1].encode('utf8')],
                                                              dfsDF[value[2].encode('utf8')],
                                                              dfsDF[value[3].encode('utf8')], value[1], value[2],
                                                              value[3])
                         figure['data'][1] = surfacePlot
                         figure['layout'] = surfaceLayout
+                        minSet = minimumSet
+                        print "MINSET"
+                        print minSet
                     else:
                         figure['data'][1] = None
 
