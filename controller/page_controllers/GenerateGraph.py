@@ -271,7 +271,9 @@ def load_vessel_field(series, db_table):
     if series is not None or series != u'None' or db_table is not None or db_table != u'None':
         vessels_in_series = SQL().get_vessel_from_series(series=series, db_table=db_table)
         if vessels_in_series is not None:
-            return [{'label': i, 'value': i} for i in vessels_in_series]
+            vesselsInSeries = [{'label': i, 'value': i} for i in vessels_in_series]
+            # vesselsInSeries.append({'value': 'All', 'label': 'All'})
+            return vesselsInSeries
     return
 
 
@@ -495,8 +497,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
         gformula = ""
         gsols = 0.0
         gr_squared = 0.0
-        print "Extras:"
-        print extraMin, extraMax
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
@@ -643,7 +643,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                             if benchmark == 0:
                                 benchmark = max(line_data['y'])
                             annotation.append(go.Annotation(
-                                x=0,
+                                x=min(line_data['x']) + 10,
                                 y=benchmark - counter * benchmark * 0.1,
                                 text=vessel + ": " + eqString.format(*supScript),
                                 showarrow=False
@@ -727,9 +727,9 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                             mode='lines',
                         )
                         annotation = go.Annotation(
-                            x=min(line_data['x']),
+                            x=min(line_data['x']) + 10,
                             y=max(line_data['y']),
-                            text="Formula: " + eqString.format(*supScript),
+                            text="y=" + eqString.format(*supScript),
                             showarrow=False
                         )
 
