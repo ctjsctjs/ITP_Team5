@@ -613,7 +613,6 @@ def generate_graph(mode, options):
                 html.Span([], className="settings-info", id='gen-settings-output-1'),
             ], className='custom-panel', id="item-wrapper"),
 
-<<<<<<< HEAD
             html.Div([
                 html.H6('Filter Information', className='item-element-margin'),
                 html.Span([], className="settings-info", id='gen-settings-filter1-1'),
@@ -623,7 +622,6 @@ def generate_graph(mode, options):
                 html.Span([], className="settings-info", id='gen-output-value2-1'),
                 html.Span([], className="settings-info", id='gen-output-value3-1'),
             ], className='custom-panel'),
-=======
                 html.Div([
                     html.H6('Graph Information', className='item-element-margin'),
                     html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
@@ -633,7 +631,6 @@ def generate_graph(mode, options):
                 ], className='custom-panel'),
 
             ], className='item-select-height'),
->>>>>>> 7a0ed31fcbd6067a8f004600cd925bf397dcb049
 
             html.Div([
                 html.H6('Graph Information', className='item-element-margin'),
