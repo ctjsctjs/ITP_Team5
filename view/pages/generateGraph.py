@@ -99,10 +99,16 @@ layout = html.Div([
                     html.H3([
                         'Database'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Select database of dataset'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.Div([
+                            'Select database of dataset',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
+
                     # Database field
                     dcc.Dropdown(
                         id='gen-database-input-1',
@@ -116,10 +122,17 @@ layout = html.Div([
                     html.H3([
                         'Mode'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Select graph mode to determine number of parameters'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+
+                        html.Div([
+                            'Select graph mode to determine number of parameters',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
+
                     dcc.RadioItems(
                         id='gen-mode-input-1',
                         labelStyle={'display': 'block', 'margin-bottom': '6px'},
@@ -136,10 +149,16 @@ layout = html.Div([
                     html.H3([
                         'Parameters'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Select the parameters of the graph'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.Div([
+                            'Select the parameters of the graph',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
+
                     # Axis Parameters
                     html.Div(
                         id="gen-params-wrapper",
@@ -155,10 +174,16 @@ layout = html.Div([
                     html.H3([
                         'Vessel'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Select the vessel series and name to be filtered'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.Div([
+                            'Select the vessel series and name to be filtered',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
+
                     # Series field
                     dcc.Dropdown(
                         id='gen-series-input-1',
@@ -202,9 +227,14 @@ layout = html.Div([
                     html.H3([
                         'Filters'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Add filters to scope down the data'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.Div([
+                            'Add filters to scope down the data',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
 
                     html.Div(id='gen-filter-dump', style={'display': 'none'}),
@@ -245,18 +275,24 @@ layout = html.Div([
                     html.H3([
                         'Settings'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Customise the name and labels of the graph'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.Div([
+                            'Customise the name and labels of the graph',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
+
+                    html.Div(id='gen-filter-dump', style={'display': 'none'}),
 
                     dcc.Checklist(
                         id="gen-settings-input-1",
                         options=[
                             {'label': 'Toggle Regression', 'value': 'regression'},
                             {'label': 'Toggle Clustering', 'value': 'clustering'},
-                            {'label': 'Toggle Datapoints', 'value': 'datapoints'},
-                            {'label': 'Toggle Individual Lines', 'value': 'multiline'}
+                            {'label': 'Toggle Datapoints', 'value': 'datapoints'}
                         ],
                         labelStyle={'display': 'block', 'margin-bottom': '6px'},
                         values=[]
@@ -269,13 +305,20 @@ layout = html.Div([
                     html.H3([
                         'Advanced Settings'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Advanced settings to tweak the graph'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.Div([
+                            'Advanced settings to tweak the graph.' +
+                            'Graph Mode selects the regression degree.' +
+                            'Threshold selects the outliers threshold level of the graph. ' +
+                            'Clusters select the number of clusters of the graph',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
 
                     # Regression type input
-                    html.H5('Select the regression degree of the graph', className='item-element-margin'),
                     dcc.Dropdown(
                         id='gen-regression-input-1',
                         placeholder="Graph Mode",
@@ -283,7 +326,6 @@ layout = html.Div([
                     html.Div(id='gen-regression-input-dump', style={'display': 'none'}),
 
                     # Outliers  input
-                    html.H5('Select the outliers threshold level of the graph', className='item-element-margin'),
                     dcc.Dropdown(
                         id='gen-threshold-input-1',
                         placeholder="Threshold",
@@ -292,9 +334,9 @@ layout = html.Div([
                     html.Div(id='gen-threshold-input-dump', style={'display': 'none'}),
 
                     # Clusters input
-                    html.H5('Select the number of clusters of the graph', className='item-element-margin'),
                     dcc.Input(
                         id='gen-kmeans-cluster',
+                        placeholder="Cluster",
                         type='number',
                         className='item-element-margin form-control form-control-sm',
                     ),
@@ -308,10 +350,16 @@ layout = html.Div([
                     html.H3([
                         'Customise'
                     ], className='input-label item-element-margin'),
+
+                    #Tooltip
                     html.H5([
-                        html.I(className="fas fa-exclamation-circle icon"),
-                        'Customise the name and axis labels'
+                        html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
+                        html.Div([
+                            'Customise the name and axis labels',
+                            html.Div(className='tooltip-triangle')
+                        ], className='tooltip-container')
                     ], className='helper-text item-element-margin'),
+
 
                     # Graph name input
                     dcc.Input(
@@ -381,7 +429,7 @@ layout = html.Div([
             ], id="gen-right-panel-wrapper"),
 
         ], className='content-wrapper page-width')
-    ], className='wrapper-grey')
+    ], className='wrapper-grey'),
 ])
 
 
@@ -525,28 +573,14 @@ def generate_dropdown_filter(n):
 
 def generate_graph(mode, options):
     return html.Div([
-        # Graph Panel
-        html.Div([
-            html.H2('Graph Panel', className='item-element-margin'),
-            dcc.Graph(
-                id='g2'
-            ),
-
-        ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
-
-        # Hidden Graph Store
-        html.Div(id='g2-store', style={'display': 'none'}),
-        html.Div(id='g2-param-store', style={'display': 'none'}),
-        html.Div(id='gen-filter-store', style={'display': 'none'}),
 
         # Information Panel
         html.Div([
-
             # Customise Panel
             html.Div([
                 html.H2('Information Panel', className='item-element-margin'),
                 html.Div([
-                    html.H5('Settings Information', className='item-element-margin'),
+                    html.H6('Settings Information', className='item-element-margin'),
                     html.Span([], className="settings-info", id='gen-settings-mode-1'),
                     html.Span([], className="settings-info", id='gen-settings-series-1'),
                     html.Span([], className="settings-info", id='gen-settings-vessel-1'),
@@ -556,31 +590,8 @@ def generate_graph(mode, options):
                     html.Span([], className="settings-info", id='gen-settings-output-1'),
                 ], className='custom-panel', id="item-wrapper"),
 
-                # DIV to populate paramater fields TODO: shift to left panel
-                # html.Div([
-                #     html.H5('Settings options', className='item-element-margin'),
-                #     # Graph name input
-                #     dcc.Input(
-                #         placeholder='Graph Name',
-                #         type='text',
-                #         value=''
-                #     ),
-                #     # X axis label input
-                #     dcc.Input(
-                #         placeholder='X axis label',
-                #         type='text',
-                #         value=''
-                #     ),
-                #     # Y axis label input
-                #     dcc.Input(
-                #         placeholder='Y axis label',
-                #         type='text',
-                #         value=''
-                #     ),
-                # ], className='custom-panel'),
-
                 html.Div([
-                    html.H5('Filter Information', className='item-element-margin'),
+                    html.H6('Filter Information', className='item-element-margin'),
                     html.Span([], className="settings-info", id='gen-settings-filter1-1'),
                     html.Span([], className="settings-info", id='gen-settings-filter2-1'),
                     html.Span([], className="settings-info", id='gen-settings-filter3-1'),
@@ -590,17 +601,26 @@ def generate_graph(mode, options):
                 ], className='custom-panel'),
 
                 html.Div([
-                    html.H5('Graph Information', className='item-element-margin'),
-                    # html.Span([], className="settings-info", id='gen-settings-graphInfo-1'),
+                    html.H6('Graph Information', className='item-element-margin'),
                     html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
                     html.Span([], className="settings-info", id='gen-settings-sols-1'),
                     html.Span([], className="settings-info", id='gen-settings-formula-1'),
                     html.Span([], className="settings-info", id='gen-settings-3dminy-1'),
                 ], className='custom-panel'),
 
-            ], className='item-row item-select-height'),
+            ], className='item-select-height'),
 
         ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+        # Graph Panel
+        html.Div([
+            dcc.Graph(id='g2'),
+        ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+
+        # Hidden Graph Store
+        html.Div(id='g2-store', style={'display': 'none'}),
+        html.Div(id='g2-param-store', style={'display': 'none'}),
+        html.Div(id='gen-filter-store', style={'display': 'none'}),
+
     ])
 
 # def generate_graph():
