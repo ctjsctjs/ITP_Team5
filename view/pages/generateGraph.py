@@ -622,33 +622,26 @@ def generate_graph(mode, options):
                 html.Span([], className="settings-info", id='gen-output-value2-1'),
                 html.Span([], className="settings-info", id='gen-output-value3-1'),
             ], className='custom-panel'),
-                html.Div([
-                    html.H6('Graph Information', className='item-element-margin'),
-                    html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
-                    html.Span([], className="settings-info", id='gen-settings-sols-1'),
-                    html.Span([], className="settings-info", id='gen-settings-formula-1'),
-                    html.Span([], className="settings-info", id='gen-settings-3dminy-1'),
-                ], className='custom-panel'),
-
-            ], className='item-select-height'),
 
             html.Div([
                 html.H6('Graph Information', className='item-element-margin'),
                 html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
                 html.Span([], className="settings-info", id='gen-settings-sols-1'),
                 html.Span([], className="settings-info", id='gen-settings-formula-1'),
+                html.Span([], className="settings-info", id='gen-settings-3dminy-1'),
             ], className='custom-panel'),
-        ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
-        # Graph Panel
-        html.Div([
-            dcc.Graph(id='g2'),
-        ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
 
-        # Hidden Graph Store
-        html.Div(id='g2-store', style={'display': 'none'}),
-        html.Div(id='g2-param-store', style={'display': 'none'}),
-        html.Div(id='gen-filter-store', style={'display': 'none'}),
+            ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
 
+            # Graph Panel
+            html.Div([
+                dcc.Graph(id='g2'),
+            ], className='item-wrapper item-settings-panel right-panel', id="item-wrapper"),
+
+            # Hidden Graph Store
+            html.Div(id='g2-store', style={'display': 'none'}),
+            html.Div(id='g2-param-store', style={'display': 'none'}),
+            html.Div(id='gen-filter-store', style={'display': 'none'}),
     ])
 
 # def generate_graph():
