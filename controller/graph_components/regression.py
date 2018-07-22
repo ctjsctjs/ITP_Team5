@@ -82,9 +82,12 @@ def plot_3d(x,y,z, xAxis, yAxis, zAxis):
         z=Z,
         x=X,
         y=Y,
-        colorscale='RdBu',
+        # colorscale='RdBu',
         opacity=0.999
     )
+    yList = Y.tolist()
+    indexY = yList.index(min(yList))
+    minSet = [X[indexY], Y[indexY], Z[indexY]]
 
     layout = go.Layout(
         title=xAxis + " vs " + yAxis + " vs " + zAxis,
@@ -101,4 +104,4 @@ def plot_3d(x,y,z, xAxis, yAxis, zAxis):
             t=90
         )
     )
-    return trace3, layout
+    return trace3, layout, minSet
