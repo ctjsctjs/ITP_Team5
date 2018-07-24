@@ -582,7 +582,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 counter = 0
                 benchmark = 0
                 annotation = []
-                sfList = SQL().get_vessel_code();
+                sfList = SQL().get_vessel_codes();
                 for vessel in unqVessels:
                     print list(dfsDF)
                     if vessel == "All":

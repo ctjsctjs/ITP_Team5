@@ -141,7 +141,6 @@ class SQL:
         # TODO: Better handle 'No column given' condition
         if column is None:
             column = 'Vessel'
-            # column = 'DISTINCT `Vessel Code`'
 
         result = self.__select(table=table, columns=column, distinct=True)
         if result is not None:
@@ -168,23 +167,27 @@ class SQL:
         df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel`='{}'".format(table, vessel), con=self.__connection)
         return DataFrame(df)
 
-    def get_vessel_code(self):
-        self.__reconnect()
-        sql = "SELECT `Vessel Code`, `Vessel` FROM `__series`"
-        results = self.__query(sql, expect_result=True)
-        sfList = {}
-        if results is not None:
-            for result in results:
-                sfList[result[1]] = result[0]
-        return sfList
-    # Obtain Vessel short forms within a given series NOTE: not working for me
-    # def get_vessel_code(self, vessel):
-    #     vessels = self.__select(
-    #         columns="Vessel Code",
-    #         table="__series",
-    #         condition={'Vessel': '{}'.format(vessel)}
-    #     )
-    #     return [value[0] for value in vessels]
+    # Obtain Vessel short form for a given series
+    def get_vessel_codes(self):
+        vessels = self.__select(
+            columns=["Vessel", "Vessel Code"],
+            table="__series"
+        )
+
+        result = {}
+        if vessels is not None:
+            for vessel in vessels:
+                result[vessel[0]] = vessel[1]
+        return result
+
+    # Obtain all Vessel short forms
+    def get_vessel_code(self, vessel):
+        vessels = self.__select(
+            columns="Vessel Code",
+            table="__series",
+            condition={'Vessel': '{}'.format(vessel)}
+        )
+        return [value[0] for value in vessels]
 
     # Method to obtain data of all vessels in series
     def get_df_from_series(self, table=None, series=None):
@@ -343,11 +346,14 @@ class SQL:
         elif not table.__contains__('INFORMATION_SCHEMA'):
             table = '`{}`'.format(table)
 
+        if type(columns) is list:
+            columns = '{}'.format('`, `'.join(columns))
+
         if distinct:
-            sql = "SELECT DISTINCT {} FROM {}".format(columns, table)
+            sql = "SELECT DISTINCT `{}` FROM {}".format(columns, table)
         # Construct SELECT Query
         else:
-            sql = "SELECT {} FROM {}".format(columns, table)
+            sql = "SELECT `{}` FROM {}".format(columns, table)
 
         # If condition given
         if condition is not None:
@@ -446,6 +452,7 @@ class SQL:
     # Basic Query Function
     def __query(self, statement, expect_result=False):
         self.__reconnect()
+        print(statement)
         result = True
         try:
             with self.__cursor as cursor:
