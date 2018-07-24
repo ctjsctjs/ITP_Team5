@@ -168,6 +168,16 @@ class SQL:
         df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel`='{}'".format(table, vessel), con=self.__connection)
         return DataFrame(df)
 
+    # Obtain Vessel short forms within a given series
+    def get_vessel_code(self, vessel):
+        vessels = self.__select(
+            columns="Vessel Code",
+            table="__series",
+            condition={'vessel': '{}'.format(vessel)}
+        )
+
+        return [vessel[0] for vessel in vessels]
+
     # Method to obtain data of all vessels in series
     def get_df_from_series(self, table=None, series=None):
         # TODO: # TODO: Better 'default table' handling
@@ -181,7 +191,9 @@ class SQL:
         self.__reconnect()
         # TODO: Stop using pd
         # TODO: Remvoe hardcoded 'vessel' name
-        df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel` IN (SELECT `Vessel` FROM `vessel_series` WHERE `Series` = '{}')".format(table, series), con=self.__connection)
+        df = pd.read_sql(
+            sql="SELECT * FROM `{}` WHERE `Vessel` IN (SELECT `Vessel` FROM `vessel_series` WHERE `Series` = '{}')".format(
+                table, series), con=self.__connection)
         return df
 
     # Method to obtain vessel short forms
