@@ -574,7 +574,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 counter = 0
                 benchmark = 0
                 annotation = []
-                sfList = SQL().get_vessel_shortform();
                 for vessel in unqVessels:
                     print list(dfsDF)
                     if vessel == "All":
@@ -658,16 +657,10 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
 
                             if benchmark == 0:
                                 benchmark = max(line_data['y'])
-
-                            if vessel == "All":
-                                annotationVessel = "All"
-                            else:
-                                annotationVessel = sfList[vessel]
-                                
                             annotation.append(go.Annotation(
                                 x=min(line_data['x']) + 10,
                                 y=benchmark - counter * benchmark * 0.1,
-                                text=annotationVessel + ": " + eqString.format(*supScript),
+                                text=vessel + ": " + eqString.format(*supScript),
                                 showarrow=False
                             ))
                             layout2d = go.Layout(
