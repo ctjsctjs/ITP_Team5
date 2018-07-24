@@ -184,6 +184,17 @@ class SQL:
         df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel` IN (SELECT `Vessel` FROM `vessel_series` WHERE `Series` = '{}')".format(table, series), con=self.__connection)
         return df
 
+    # Method to obtain vessel short forms
+    def get_vessel_shortform(self):
+        self.__reconnect()
+        sql = "SELECT * FROM `vesselshortform`"
+        results = self.__query(sql, expect_result=True)
+        sfList = {}
+        if results is not None:
+            for result in results:
+                sfList[result[2]] = result[1]
+        return sfList
+
     # Method to obtain all distinct vessels in a given table from a given series
     def get_vessel_from_series(self, series, db_table):
         vessels_in_series = self.get_series('{}'.format(series))
