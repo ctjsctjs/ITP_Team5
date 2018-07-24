@@ -299,7 +299,7 @@ class SQL:
     # Obtain existing attributes from a given table
     def get_attributes(self, db_table):
         attributes = self.__select(
-            columns="attribute, column_name",
+            columns=["attribute", "column_name"],
             table="__important_attributes",
             condition={'db_table': '{}'.format(db_table)}
         )
