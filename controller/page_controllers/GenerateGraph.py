@@ -272,7 +272,7 @@ def load_vessel_field(series, db_table):
         vessels_in_series = SQL().get_vessel_from_series(series=series, db_table=db_table)
         if vessels_in_series is not None:
             vesselsInSeries = [{'label': i, 'value': i} for i in vessels_in_series]
-            # vesselsInSeries.append({'value': 'All', 'label': 'All'})
+            vesselsInSeries.append({'value': 'All', 'label': 'All'})
             return vesselsInSeries
     return
 
@@ -285,6 +285,8 @@ def load_vessel_field(series, db_table):
 def load_vessel_df(vessels, table):
     if vessels is not None:
         for vessel in vessels:
+            if vessel == "All":
+                continue
             if vessel not in dfs:
                 dfs[vessel] = SQL().get_vessel(table=table, vessel=vessel)
 
@@ -486,11 +488,13 @@ def get_filtered_df(*values):
      Input('y-axis-label','value'),
      Input('z-axis-label', 'value'),
      Input('gen-extra-min', 'value'),
-     Input('gen-extra-max', 'value')],
+     Input('gen-extra-max', 'value'),
+     Input('gen-series-input-1', 'value'),
+     Input('gen-database-input-1', 'value')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')]
     + filter_state_inputs)
-def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel, extraMin, extraMax, figure, vessels, *filter_settings):
+def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel, extraMin, extraMax, seriesInput, dbTableInput, figure, vessels, *filter_settings):
     if figure is not None:
         figure['data'] = []
         minSet = []
@@ -515,6 +519,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             # Obtain filtered df
             df = []
             for vessel in filter_settings[0]:
+                if vessel == "All":
+                    continue
                 df.append(dfs[vessel].get_filtered(conditions=conditions))
             dfsDF = pd.concat(df)
 
@@ -543,8 +549,9 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     print "Mean: " + str(mean) + " Std: " + str(stdio)
                     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold * stdio)]
 
-            unqVessels = dfsDF['Vessel'].unique().tolist()
-
+            #unqVessels = dfsDF['Vessel'].unique().tolist()
+            unqVessels = filter_settings[0]
+            print unqVessels
             # Set axis labels if any
             if xLabel == "":
                 xName = value[1]
@@ -569,7 +576,15 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 annotation = []
                 for vessel in unqVessels:
                     print list(dfsDF)
-                    vesselRow = dfsDF.loc[dfsDF['Vessel'] == vessel]
+                    if vessel == "All":
+                        vesselRow = SQL().get_df_from_series(dbTableInput, seriesInput)
+                        if value[0] == "2D":
+                            vesselRow = vesselRow.dropna(subset=[value[1], value[2]])
+                        else:
+                            vesselRow = vesselRow.dropna(subset=[value[1], value[2], value[3]])
+                    else:
+                        vesselRow = dfsDF.loc[dfsDF['Vessel'] == vessel]
+
                     # Clustering & Hover Data Generation
                     hoverData = []
                     if 'clustering' in settings:

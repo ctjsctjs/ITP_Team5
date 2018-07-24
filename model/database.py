@@ -168,6 +168,22 @@ class SQL:
         df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel`='{}'".format(table, vessel), con=self.__connection)
         return DataFrame(df)
 
+    # Method to obtain data of all vessels in series
+    def get_df_from_series(self, table=None, series=None):
+        # TODO: # TODO: Better 'default table' handling
+        if table is None:
+            table = self.__default_table
+
+        # TODO: Handle 'No vessel given' event
+        if series is None:
+            return
+
+        self.__reconnect()
+        # TODO: Stop using pd
+        # TODO: Remvoe hardcoded 'vessel' name
+        df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel` IN (SELECT `Vessel` FROM `vessel_series` WHERE `Series` = '{}')".format(table, series), con=self.__connection)
+        return df
+
     # Method to obtain all distinct vessels in a given table from a given series
     def get_vessel_from_series(self, series, db_table):
         vessels_in_series = self.get_series('{}'.format(series))
