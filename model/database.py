@@ -168,15 +168,23 @@ class SQL:
         df = pd.read_sql(sql="SELECT * FROM `{}` WHERE `Vessel`='{}'".format(table, vessel), con=self.__connection)
         return DataFrame(df)
 
-    # Obtain Vessel short forms within a given series
-    def get_vessel_code(self, vessel):
-        vessels = self.__select(
-            columns="Vessel Code",
-            table="__series",
-            condition={'vessel': '{}'.format(vessel)}
-        )
-
-        return [vessel[0] for vessel in vessels]
+    def get_vessel_code(self):
+        self.__reconnect()
+        sql = "SELECT `Vessel Code`, `Vessel` FROM `__series`"
+        results = self.__query(sql, expect_result=True)
+        sfList = {}
+        if results is not None:
+            for result in results:
+                sfList[result[1]] = result[0]
+        return sfList
+    # Obtain Vessel short forms within a given series NOTE: not working for me
+    # def get_vessel_code(self, vessel):
+    #     vessels = self.__select(
+    #         columns="Vessel Code",
+    #         table="__series",
+    #         condition={'Vessel': '{}'.format(vessel)}
+    #     )
+    #     return [value[0] for value in vessels]
 
     # Method to obtain data of all vessels in series
     def get_df_from_series(self, table=None, series=None):

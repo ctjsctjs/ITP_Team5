@@ -518,11 +518,19 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
 
             # Obtain filtered df
             df = []
+            singleLineAll = False
             for vessel in filter_settings[0]:
-                if vessel == "All":
+                if vessel == "All" and 'multiline' not in settings:
+                    df = SQL().get_df_from_series(dbTableInput, seriesInput)
+                    singleLineAll = True
+                    break
+                elif vessel == "All":
                     continue
                 df.append(dfs[vessel].get_filtered(conditions=conditions))
-            dfsDF = pd.concat(df)
+            if singleLineAll:
+                dfsDF = df
+            else:
+                dfsDF = pd.concat(df)
 
             # Remove any NaN values
             print("THIS IS VALUE: {}".format(value))
@@ -574,6 +582,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 counter = 0
                 benchmark = 0
                 annotation = []
+                sfList = SQL().get_vessel_code();
                 for vessel in unqVessels:
                     print list(dfsDF)
                     if vessel == "All":
@@ -657,10 +666,16 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
 
                             if benchmark == 0:
                                 benchmark = max(line_data['y'])
+
+                            if vessel == "All":
+                                vslCde = "All"
+                            else:
+                                vslCde = sfList[vessel]
+
                             annotation.append(go.Annotation(
                                 x=min(line_data['x']) + 10,
                                 y=benchmark - counter * benchmark * 0.1,
-                                text=vessel + ": " + eqString.format(*supScript),
+                                text=vslCde + ": " + eqString.format(*supScript),
                                 showarrow=False
                             ))
                             layout2d = go.Layout(
