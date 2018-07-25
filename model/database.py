@@ -348,12 +348,14 @@ class SQL:
 
         if type(columns) is list:
             columns = '{}'.format('`, `'.join(columns))
+        elif "COUNT" not in columns:
+            columns = '`{}`'.format(columns)
 
         if distinct:
-            sql = "SELECT DISTINCT `{}` FROM {}".format(columns, table)
+            sql = "SELECT DISTINCT {} FROM {}".format(columns, table)
         # Construct SELECT Query
         else:
-            sql = "SELECT `{}` FROM {}".format(columns, table)
+            sql = "SELECT {} FROM {}".format(columns, table)
 
         # If condition given
         if condition is not None:
