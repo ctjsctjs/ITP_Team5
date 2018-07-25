@@ -62,7 +62,7 @@ default_figure = {
         margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
         hovermode='closest'
     )}
-#threshold value
+# threshold value
 threshold = ['None', 1, 1.5, 2, 2.5, 3]
 inputSection = ['database', 'mode', 'parameters', 'vessel', 'filters', 'settings', 'advSettings', 'customise']
 
@@ -74,8 +74,9 @@ for n in inputSection:
     def toggle(clicks):
         if ((clicks % 2) == 1):
             return {
-            'display':'inline-block'
+                'display': 'inline-block'
             }
+
 
 # Populate Database field options
 @app.callback(
@@ -83,6 +84,8 @@ for n in inputSection:
     [Input('gen-database-input-dump', 'children')])
 def load_series_field(dump):
     return [{'label': table, 'value': table} for table in SQL().get_table_names()]
+
+
 #
 # # Populate Line field options
 # @app.callback(
@@ -384,11 +387,11 @@ def get_params_input(mode, input_x, input_y, input_z):
 #         displayStr += " Sum of Least Squares: " + str(round(value[1], 4))
 #         eqString, supScript = generateEquationString(value[2])
 #         displayStr += " Formula: " + eqString.format(*supScript)
-        # displayStr += "<br>"
-    # return displayStr
-    # return html.Div([
-    #     html.Div(displayStr)
-    # ])
+# displayStr += "<br>"
+# return displayStr
+# return html.Div([
+#     html.Div(displayStr)
+# ])
 
 @app.callback(
     Output('gen-settings-3dminy-1', 'children'),
@@ -398,6 +401,7 @@ def update_minset(temp):
     print minSet
     if minSet != []:
         return "Lowest Point: X=" + str(minSet[0]) + " Y=" + str(minSet[1]) + " Z=" + str(minSet[2])
+
 
 @app.callback(
     Output('gen-settings-rsquared-1', 'children'),
@@ -423,6 +427,7 @@ def update_formula(temp):
         eqString, supScript = generateEquationString(gformula)
         return "Formula: " + eqString.format(*supScript)
 
+
 # Generate the template string and the list of subscript values
 def generateEquationString(baseFormula):
     fVariableList = list(baseFormula)
@@ -439,17 +444,18 @@ def generateEquationString(baseFormula):
             supVal = variableCount - 1
             displayString += "x"
             if supVal == 2:
-                displayString += "{"+str(len(tmpList))+"}"
+                displayString += "{" + str(len(tmpList)) + "}"
                 tmpList.append(u'\u00b2')
             elif supVal == 3:
-                displayString += "{"+str(len(tmpList))+"}"
+                displayString += "{" + str(len(tmpList)) + "}"
                 tmpList.append(u'\u00b3')
             elif supVal == 4:
-                displayString += "{"+str(len(tmpList))+"}"
+                displayString += "{" + str(len(tmpList)) + "}"
                 tmpList.append(u'\u2074')
         variableCount -= 1
         displayString += " "
     return displayString, tmpList
+
 
 @app.callback(
     Output('gen-filter-store', 'children'),
@@ -483,9 +489,9 @@ def get_filtered_df(*values):
      Input('gen-regression-input-1', 'value'),
      Input('gen-kmeans-cluster', 'value'),
      Input('gen-threshold-input-1', 'value'),
-     Input('gen-graph-name','value'),
-     Input('x-axis-label','value'),
-     Input('y-axis-label','value'),
+     Input('gen-graph-name', 'value'),
+     Input('x-axis-label', 'value'),
+     Input('y-axis-label', 'value'),
      Input('z-axis-label', 'value'),
      Input('gen-extra-min', 'value'),
      Input('gen-extra-max', 'value'),
@@ -494,7 +500,8 @@ def get_filtered_df(*values):
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')]
     + filter_state_inputs)
-def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName,xLabel,yLabel,zLabel, extraMin, extraMax, seriesInput, dbTableInput, figure, vessels, *filter_settings):
+def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName, xLabel, yLabel, zLabel,
+                 extraMin, extraMax, seriesInput, dbTableInput, figure, vessels, *filter_settings):
     if figure is not None:
         figure['data'] = []
         minSet = []
@@ -557,7 +564,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     print "Mean: " + str(mean) + " Std: " + str(stdio)
                     dfsDF = dfsDF[np.abs(dfsDF[value[3]] - mean) <= (threshold * stdio)]
 
-            #unqVessels = dfsDF['Vessel'].unique().tolist()
+            # unqVessels = dfsDF['Vessel'].unique().tolist()
             unqVessels = filter_settings[0]
             print unqVessels
             # Set axis labels if any
@@ -640,7 +647,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                     if 'regression' in settings:
                         if value[0] == "2D":
                             line_data, r_squared, sols, formula = regression(vesselRow[value[1].encode('utf8')],
-                                                                             vesselRow[value[2].encode('utf8')], graph_mode, extraMin, extraMax)
+                                                                             vesselRow[value[2].encode('utf8')],
+                                                                             graph_mode, extraMin, extraMax)
 
                             # tmpLst = []
                             # tmpLst.append(r_squared)
@@ -681,7 +689,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                             layout2d = go.Layout(
                                 title=gName,
                                 plot_bgcolor='rgb(229, 229, 229)',
-                                xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
+                                xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)',
+                                               gridcolor='rgb(255,255,255)'),
                                 yaxis=dict(title=yName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
                                 annotations=annotation,
                                 # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
@@ -689,13 +698,13 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                             figure['layout'] = layout2d
                         else:
                             surfacePlot, surfaceLayout = plot_3d(vesselRow[value[1].encode('utf8')],
-                                                         vesselRow[value[2].encode('utf8')],
-                                                         vesselRow[value[3].encode('utf8')], value[1], value[2],
-                                                         value[3])
+                                                                 vesselRow[value[2].encode('utf8')],
+                                                                 vesselRow[value[3].encode('utf8')], value[1], value[2],
+                                                                 value[3])
                             figure['data'].append(surfacePlot)
                             figure['layout'] = surfaceLayout
                     counter += 1
-            else: # If no multiline
+            else:  # If no multiline
                 # Clustering & Hover Data Generation
                 hoverData = []
                 if 'clustering' in settings:
@@ -738,7 +747,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         figure['data'].append({})
                     if 'regression' in settings:
                         line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
-                                                                         dfsDF[value[2].encode('utf8')], graph_mode, extraMin, extraMax)
+                                                                         dfsDF[value[2].encode('utf8')], graph_mode,
+                                                                         extraMin, extraMax)
                         print "R-Squared: " + str(r_squared)
                         print "Sum of Least Squares: " + str(sols)
                         print "A Formula: "
@@ -796,9 +806,10 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         figure['data'].append({})
                     if 'regression' in settings:
                         surfacePlot, surfaceLayout, minimumSet = plot_3d(dfsDF[value[1].encode('utf8')],
-                                                             dfsDF[value[2].encode('utf8')],
-                                                             dfsDF[value[3].encode('utf8')], value[1], value[2],
-                                                             value[3])
+                                                                         dfsDF[value[2].encode('utf8')],
+                                                                         dfsDF[value[3].encode('utf8')], value[1],
+                                                                         value[2],
+                                                                         value[3])
                         figure['data'][1] = surfacePlot
                         figure['layout'] = surfaceLayout
                         minSet = minimumSet
@@ -821,20 +832,21 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
 # save current state of
 @app.callback(
     Output('save-setting', 'children'),
-    [Input('save-all-btn','n_clicks')],
-    [State('gen-params-store','children'),
-    State('gen-settings-input-1', 'values'),
-    State('gen-regression-input-1', 'value'),
-    State('gen-kmeans-cluster', 'value'),
-    State('gen-vessel-input-1', 'value'),
-    State('gen-series-input-1','value'),
-    State('gen-graph-name','value'),
-    State('x-axis-label','value'),
-    State('y-axis-label','value'),
-    State('z-axis-label','value'),
-    State('gen-database-input-1','value'),
-    State('gen-threshold-input-1','value')])
-def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,seriesState,graphState,xState,yState,zState,databaseState,thresholdState):
+    [Input('save-all-btn', 'n_clicks')],
+    [State('gen-params-store', 'children'),
+     State('gen-settings-input-1', 'values'),
+     State('gen-regression-input-1', 'value'),
+     State('gen-kmeans-cluster', 'value'),
+     State('gen-vessel-input-1', 'value'),
+     State('gen-series-input-1', 'value'),
+     State('gen-graph-name', 'value'),
+     State('x-axis-label', 'value'),
+     State('y-axis-label', 'value'),
+     State('z-axis-label', 'value'),
+     State('gen-database-input-1', 'value'),
+     State('gen-threshold-input-1', 'value')])
+def saveAll(saveClick, paramState, settingState, regState, clusterState, vesselState, seriesState, graphState, xState,
+            yState, zState, databaseState, thresholdState):
     if saveClick > 0:
         temp_store['param'] = paramState
         temp_store['setting'] = settingState
@@ -842,9 +854,9 @@ def saveAll(saveClick,paramState,settingState,regState,clusterState,vesselState,
         temp_store['cluster'] = clusterState
         temp_store['vessel'] = vesselState
         temp_store['series'] = seriesState
-        temp_store['database']=databaseState
+        temp_store['database'] = databaseState
         temp_store['threshold'] = thresholdState
-        temp_store['xLabel']=xState
+        temp_store['xLabel'] = xState
         temp_store['yLabel'] = yState
         temp_store['zLabel'] = zState
         temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
@@ -894,6 +906,7 @@ def update_filer(value, mode):
         options = [{'label': i, 'value': i} for i in SQL().get_column_names()]
         return generate_graph(mode, options)
 
+
 #
 # callback to hide generate graph button and show update button after graph generated
 # @app.callback(
@@ -933,11 +946,13 @@ def update_output(value):
     [Input('gen-vessel-input-1', 'value')])
 def update_output(value):
     vesselString = ""
-    for vesselName in value:
-        vesselString += str(vesselName).encode('ascii','ignore')
-        if vesselName != value[-1]:
-            vesselString += ", "
-    return "Vessels: " + vesselString
+    if value is not None and value != u'None':
+        for vesselName in value:
+            vesselString += str(vesselName).encode('ascii', 'ignore')
+            if vesselName != value[-1]:
+                vesselString += ", "
+        return "Vessels: " + vesselString
+    return
 
 
 @app.callback(
@@ -1053,7 +1068,6 @@ def add_filter(n_clicks, dump, container):
         container[0]['props']['children'][n_clicks - 1]['props']['style'] = {}
         # print container[0]['props']['children'][n_clicks - 1]['props']['style']
     return container
-
 
     #     print container[0]['props']['children'][n_clicks]
     #     container[0]['props']['children'][n_clicks] = generate_dropdown_filter(n_clicks)

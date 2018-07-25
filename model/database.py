@@ -347,7 +347,7 @@ class SQL:
             table = '`{}`'.format(table)
 
         if type(columns) is list:
-            columns = '{}'.format('`, `'.join(columns))
+            columns = '`{}`'.format('`, `'.join(columns))
         elif "COUNT" not in columns:
             columns = '`{}`'.format(columns)
 
@@ -454,7 +454,6 @@ class SQL:
     # Basic Query Function
     def __query(self, statement, expect_result=False):
         self.__reconnect()
-        print(statement)
         result = True
         try:
             with self.__cursor as cursor:
