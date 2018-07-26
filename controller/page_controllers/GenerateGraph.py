@@ -46,7 +46,7 @@ yName = ""
 zName = ""
 gName = ""
 
-colorList = ['blue', 'red', 'green', 'orange', 'brown', 'purple', 'cyan']
+colorList = ['blue', 'red', 'green', 'orange', 'brown', 'purple', 'cyan', 'coral', 'aqua', 'violet', 'peach']
 
 default_figure = {
     'data': [],
@@ -85,7 +85,29 @@ for n in inputSection:
 def load_series_field(dump):
     return [{'label': table, 'value': table} for table in SQL().get_table_names()]
 
+@app.callback(
+    Output('gen-database-state-1', 'options'),
+    [Input('gen-database-input-dump', 'children')])
+def load_series_field(dump):
+    return [{'label': "After", 'value': "After"}, {'label': "Before", 'value': "Before"}]
 
+@app.callback(
+    Output('gen-database-state-1', 'value'),
+    [Input('gen-database-input-dump', 'children')])
+def load_series_field(dump):
+    return "After"
+
+@app.callback(
+    Output('gen-database-state-2', 'options'),
+    [Input('gen-database-input-dump', 'children')])
+def load_series_field(dump):
+    return [{'label': "Disabled", 'value': "Disabled"}, {'label': "After", 'value': "After"}, {'label': "Before", 'value': "Before"}]
+
+@app.callback(
+    Output('gen-database-state-2', 'value'),
+    [Input('gen-database-input-dump', 'children')])
+def load_series_field(dump):
+    return "Disabled"
 #
 # # Populate Line field options
 # @app.callback(
@@ -496,12 +518,14 @@ def get_filtered_df(*values):
      Input('gen-extra-min', 'value'),
      Input('gen-extra-max', 'value'),
      Input('gen-series-input-1', 'value'),
-     Input('gen-database-input-1', 'value')],
+     Input('gen-database-input-1', 'value'),
+     Input('gen-database-state-1', 'value'),
+     Input('gen-database-state-2', 'value')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')]
     + filter_state_inputs)
 def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName, xLabel, yLabel, zLabel,
-                 extraMin, extraMax, seriesInput, dbTableInput, figure, vessels, *filter_settings):
+                 extraMin, extraMax, seriesInput, dbTableInput, firstState, secondState, figure, vessels, *filter_settings):
     if figure is not None:
         figure['data'] = []
         minSet = []
@@ -707,9 +731,20 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             else:  # If no multiline
                 # Clustering & Hover Data Generation
                 hoverData = []
+                hoverData2 = []
+                if secondState == "Disabled":
+                    dfsDF = dfsDF[(dfsDF["State"] == firstState)]
+                else:
+                    dfsDF2 = dfsDF[(dfsDF["State"] == secondState)]
+                    dfsDF = dfsDF[(dfsDF["State"] == firstState)]
+
                 if 'clustering' in settings:
                     dfsDF = k_means(value, dfsDF, clusters)
                     hoverData = np.c_[dfsDF[value[1]], dfsDF[value[2]]]
+
+                    if secondState != "Disabled":
+                        dfsDF2 = k_means(value, dfsDF2, clusters)
+                        hoverData2 = np.c_[dfsDF2[value[1]], dfsDF2[value[2]]]
                 else:
                     # Generate the Hover Data
                     # Iterate each row from db
@@ -726,19 +761,46 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                                         placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
                                     break
                         hoverData.append(placeholderText)
+                    if secondState != "Disabled":
+                        for key, value1 in dfsDF2.iterrows():
+                            placeholderText = ""
+                            # Iterate each column in the row
+                            for index, row in value1.items():
+                                # Compare the value in important_attributes
+                                for col in full_attributes:
+                                    if col == index:
+                                        if isinstance(row, float):
+                                            placeholderText += "<b>" + index + "</b>: " + str(round(row, 3)) + "<br>"
+                                        else:
+                                            placeholderText += "<b>" + index + "</b>: " + str(row) + "<br>"
+                                        break
+                            hoverData2.append(placeholderText)
 
                 if value[0] == "2D":
                     # Add scatter from data set if 'datapoints' toggled
                     if len(figure['data']) < 1:
                         figure['data'].append({})
                     if 'datapoints' in settings:
-                        figure['data'][0] = go.Scatter(
+                        firstLine = go.Scatter(
                             x=dfsDF[value[1].encode('utf8')],
                             y=dfsDF[value[2].encode('utf8')],
-                            name='Data Marker',
+                            name=firstState + ' Marker',
                             mode='markers',
                             text=hoverData,
+                            marker=go.Marker(color=colorList[0]),
                         )
+                        figure['data'].append(firstLine)
+
+                        if secondState != "Disabled":
+                            secondLine = go.Scatter(
+                                x=dfsDF2[value[1].encode('utf8')],
+                                y=dfsDF2[value[2].encode('utf8')],
+                                name=secondState + ' Marker',
+                                mode='markers',
+                                text=hoverData2,
+                                marker=go.Marker(color=colorList[1]),
+                            )
+                            figure['data'].append(secondLine)
                     else:
                         figure['data'][0] = None
 
@@ -749,36 +811,62 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                         line_data, r_squared, sols, formula = regression(dfsDF[value[1].encode('utf8')],
                                                                          dfsDF[value[2].encode('utf8')], graph_mode,
                                                                          extraMin, extraMax)
-                        print "R-Squared: " + str(r_squared)
-                        print "Sum of Least Squares: " + str(sols)
-                        print "A Formula: "
-                        print formula
                         # global gr_squared, gsols, gformula
                         gr_squared = r_squared
                         gsols = sols
                         gformula = formula
-
                         eqString, supScript = generateEquationString(formula)
 
-                        figure['data'][1] = go.Scatter(
+                        firstReg = go.Scatter(
                             x=line_data['x'],
                             y=line_data['y'],
-                            name='Line',
+                            name=firstState + ' Line',
                             mode='lines',
+                            marker=go.Marker(color=colorList[0]),
                         )
                         annotation = go.Annotation(
                             x=min(line_data['x']) + 10,
                             y=max(line_data['y']),
-                            text="y=" + eqString.format(*supScript),
+                            text="{}: ".format(firstState) + eqString.format(*supScript),
                             showarrow=False
                         )
+                        figure['data'].append(firstReg)
+
+                        if secondState != "Disabled":
+                            line_data2, r_squared2, sols2, formula2 = regression(dfsDF2[value[1].encode('utf8')],
+                                                                             dfsDF2[value[2].encode('utf8')], graph_mode,
+                                                                             extraMin, extraMax)
+                            gr_squared = r_squared2
+                            gsols = sols2
+                            gformula = formula2
+                            eqString2, supScript2 = generateEquationString(formula2)
+
+                            secondReg = go.Scatter(
+                                x=line_data2['x'],
+                                y=line_data2['y'],
+                                name=secondState + ' Line',
+                                mode='lines',
+                                marker=go.Marker(color=colorList[1]),
+                            )
+                            annotation2 = go.Annotation(
+                                x=min(line_data['x']) + 10,
+                                y=max(line_data['y']) - (max(line_data['y']) * 0.10),
+                                text="{}: ".format(secondState) + eqString2.format(*supScript2),
+                                showarrow=False
+                            )
+                            figure['data'].append(secondReg)
+
+                        annotationGrp = []
+                        annotationGrp.append(annotation)
+                        if secondState != "Disabled":
+                            annotationGrp.append(annotation2)
 
                         layout2d = go.Layout(
                             title=gName,
                             plot_bgcolor='rgb(229, 229, 229)',
                             xaxis=go.XAxis(title=xName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
                             yaxis=dict(title=yName, zerolinecolor='rgb(255,255,255)', gridcolor='rgb(255,255,255)'),
-                            annotations=[annotation],
+                            annotations=annotationGrp,
                             # yaxis2=dict(title='Percentage', gridcolor='blue', overlaying='y', side='right', range=[100,0]),
                         )
                         figure['layout'] = layout2d

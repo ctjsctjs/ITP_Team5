@@ -105,7 +105,7 @@ layout = html.Div([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
                         html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-database'),
                         html.Div([
-                            'Select database of dataset',
+                            'Select database of dataset. Note when using the state selectors, current implementation will only work for 2D mode and when multiline is toggled OFF. Both lines will use the same settings.',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
                     ], className='helper-text'),
@@ -115,6 +115,14 @@ layout = html.Div([
                         dcc.Dropdown(
                             id='gen-database-input-1',
                             placeholder="Database",
+                            className='item-element-margin-top'),
+                        dcc.Dropdown(
+                            id='gen-database-state-1',
+                            placeholder="Data State",
+                            className='item-element-margin-top'),
+                        dcc.Dropdown(
+                            id='gen-database-state-2',
+                            placeholder="Compared State",
                             className='item-element-margin-top'),
                         # Hidden Database field dump
                         html.Div(id='gen-database-input-dump', style={'display': 'none'}),
@@ -336,7 +344,7 @@ layout = html.Div([
                             'Graph Mode selects the regression degree.' +
                             'Threshold selects the outliers threshold level of the graph. ' +
                             'Clusters select the number of clusters of the graph. ' +
-                            'Extrapolation Min Max sets the range of values for the X axis. ', 
+                            'Extrapolation Min Max sets the range of values for the X axis. ',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
                     ], className='helper-text'),

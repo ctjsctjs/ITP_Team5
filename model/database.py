@@ -20,7 +20,7 @@ class SQL:
         self.__encoding = encoding
         self.__filter_limit = 100
         # FOR TESTING/DEBUGGING TODO:remove when deemed unnecessary
-        self.__default_table = "dsme 10700_2018_combined_a_after_dd"
+        self.__default_table = "merged"
 
     def __del__(self):
         self.__close()
