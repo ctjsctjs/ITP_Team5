@@ -33,10 +33,12 @@ global gr_squared
 global gsols
 global gformula
 global minSet
+global valuesOrigin
 gr_squared = 0.0
 gsols = 0.0
 gformula = ""
 minSet = []
+valuesOrigin = ""
 global xName
 global yName
 global zName
@@ -108,6 +110,22 @@ def load_series_field(dump):
     [Input('gen-database-input-dump', 'children')])
 def load_series_field(dump):
     return "Disabled"
+
+# @app.callback(
+#     Output('gen-database-state-2', 'value'),
+#     [Input('gen-settings-input-1', 'values')])
+# def check_mode(chkList):
+#     if "multiline" in chkList:
+#         return "Disabled"
+
+@app.callback(
+    Output('gen-database-state-2', 'disabled'),
+    [Input('gen-settings-input-1', 'values')])
+def check_mode(chkList):
+    if "multiline" in chkList:
+        return True
+    else:
+        return False
 #
 # # Populate Line field options
 # @app.callback(
@@ -424,6 +442,12 @@ def update_minset(temp):
     if minSet != []:
         return "Lowest Point: X=" + str(minSet[0]) + " Y=" + str(minSet[1]) + " Z=" + str(minSet[2])
 
+@app.callback(
+    Output('gen-settings-origin-1', 'children'),
+    [Input('g2', 'figure')])
+def update_sols(temp):
+    if valuesOrigin != "":
+        return "Line: " + valuesOrigin
 
 @app.callback(
     Output('gen-settings-rsquared-1', 'children'),
@@ -520,13 +544,16 @@ def get_filtered_df(*values):
      Input('gen-series-input-1', 'value'),
      Input('gen-database-input-1', 'value'),
      Input('gen-database-state-1', 'value'),
-     Input('gen-database-state-2', 'value')],
+     Input('gen-database-state-2', 'value'),
+     Input('gen-database-state-2', 'disabled')],
     [State('g2', 'figure'),
      State('gen-vessel-input-1', 'value')]
     + filter_state_inputs)
 def update_graph(filtered_df_json, value, settings, graph_mode, clusters, threshold, graphName, xLabel, yLabel, zLabel,
-                 extraMin, extraMax, seriesInput, dbTableInput, firstState, secondState, figure, vessels, *filter_settings):
+                 extraMin, extraMax, seriesInput, dbTableInput, firstState, secondState, secondSDisabled, figure, vessels, *filter_settings):
     if figure is not None:
+        global gr_squared, gsols, gformula, valuesOrigin
+        valuesOrigin = firstState
         figure['data'] = []
         minSet = []
         gformula = ""
@@ -558,6 +585,11 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 elif vessel == "All":
                     continue
                 df.append(dfs[vessel].get_filtered(conditions=conditions))
+
+            if len(df) == 0 and vessel == "All":
+                singleLineAll = True
+                df = SQL().get_df_from_series(dbTableInput, seriesInput)
+
             if singleLineAll:
                 dfsDF = df
             else:
@@ -610,6 +642,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
 
             # Multiline Logic
             if 'multiline' in settings:
+                dfsDF = dfsDF.loc[dfsDF['State'] == firstState]
+
                 counter = 0
                 benchmark = 0
                 annotation = []
@@ -680,7 +714,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                             # tmpLst.append(formula)
                             # gformula[vessel] = tmpLst
                             # gformula[vessel] = [r_squared, sols, formula]
-                            global gr_squared, gsols, gformula
+
                             gr_squared = r_squared
                             gsols = sols
                             gformula = formula
@@ -728,13 +762,16 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                             figure['data'].append(surfacePlot)
                             figure['layout'] = surfaceLayout
                     counter += 1
+                valuesOrigin += ", " + vessel
             else:  # If no multiline
                 # Clustering & Hover Data Generation
                 hoverData = []
                 hoverData2 = []
+
                 if secondState == "Disabled":
                     dfsDF = dfsDF[(dfsDF["State"] == firstState)]
                 else:
+                    valuesOrigin = secondState
                     dfsDF2 = dfsDF[(dfsDF["State"] == secondState)]
                     dfsDF = dfsDF[(dfsDF["State"] == firstState)]
 

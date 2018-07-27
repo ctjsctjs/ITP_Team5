@@ -20,6 +20,7 @@ full_attributes = [
     'RPM',
     'Trim',
     'FO cons. / 24 hrs (tons)',
+    'ME cons/24h (tons)',
     'Wind speed',
     'MCR%'
 ]
