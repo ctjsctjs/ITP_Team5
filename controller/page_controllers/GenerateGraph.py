@@ -33,6 +33,8 @@ global gr_squared
 global gsols
 global gformula
 global minSet
+global valuesOrigin
+valuesOrigin = ""
 gr_squared = 0.0
 gsols = 0.0
 gformula = ""
@@ -456,6 +458,14 @@ def generateEquationString(baseFormula):
         displayString += " "
     return displayString, tmpList
 
+@app.callback(
+    Output('gen-settings-origin-1', 'children'),
+    [Input('g2', 'figure')])
+def update_origin(temp):
+    if valuesOrigin == "":
+        return valuesOrigin
+    else:
+        return "Line: " + valuesOrigin
 
 @app.callback(
     Output('gen-filter-store', 'children'),
@@ -508,6 +518,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
         gformula = ""
         gsols = 0.0
         gr_squared = 0.0
+        valuesOrigin = ""
         # Populate with 2D Data when X and Y set TODO: Remove hardcode + Account for 3D
         if value[1] is None or value[2] is None:
             figure['data'] = []
@@ -538,7 +549,6 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 df.append(dfs[vessel].get_filtered(conditions=conditions))
 
             if len(df) == 0 and secondAll:
-                print "SALALAHLAH"
                 singleLineAll = True
                 df = SQL().get_df_from_series(dbTableInput, seriesInput)
 
@@ -599,6 +609,8 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
                 annotation = []
                 sfList = SQL().get_vessel_codes();
                 for vessel in unqVessels:
+                    global valuesOrigin
+                    valuesOrigin = vessel
                     print list(dfsDF)
                     if vessel == "All":
                         vesselRow = SQL().get_df_from_series(dbTableInput, seriesInput)

@@ -336,7 +336,7 @@ layout = html.Div([
                             'Graph Mode selects the regression degree.' +
                             'Threshold selects the outliers threshold level of the graph. ' +
                             'Clusters select the number of clusters of the graph. ' +
-                            'Extrapolation Min Max sets the range of values for the X axis. ', 
+                            'Extrapolation Min Max sets the range of values for the X axis. ',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
                     ], className='helper-text'),
@@ -643,6 +643,7 @@ def generate_graph(mode, options):
 
             html.Div([
                 html.H6('Graph Information', className='item-element-margin'),
+                html.Span([], className="settings-info", id='gen-settings-origin-1'),
                 html.Span([], className="settings-info", id='gen-settings-rsquared-1'),
                 html.Span([], className="settings-info", id='gen-settings-sols-1'),
                 html.Span([], className="settings-info", id='gen-settings-formula-1'),
