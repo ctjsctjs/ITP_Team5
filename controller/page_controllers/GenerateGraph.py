@@ -46,7 +46,7 @@ yName = ""
 zName = ""
 gName = ""
 
-colorList = ['blue', 'red', 'green', 'orange', 'brown', 'purple', 'cyan']
+colorList = ['blue', 'red', 'green', 'orange', 'brown', 'purple', 'cyan', 'coral', 'aqua', 'violet', 'peach']
 
 default_figure = {
     'data': [],
@@ -526,14 +526,22 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             # Obtain filtered df
             df = []
             singleLineAll = False
+            secondAll = False
             for vessel in filter_settings[0]:
                 if vessel == "All" and 'multiline' not in settings:
                     df = SQL().get_df_from_series(dbTableInput, seriesInput)
                     singleLineAll = True
                     break
                 elif vessel == "All":
+                    secondAll = True
                     continue
                 df.append(dfs[vessel].get_filtered(conditions=conditions))
+
+            if len(df) == 0 and secondAll:
+                print "SALALAHLAH"
+                singleLineAll = True
+                df = SQL().get_df_from_series(dbTableInput, seriesInput)
+
             if singleLineAll:
                 dfsDF = df
             else:
