@@ -16,7 +16,7 @@ layout = html.Div([
 
     html.Div([
         html.Div([
-            html.Img(src='/static/img/graph-gen.jpg', className='img-1'),
+            html.Img(src='/static/img/img1.jpg', className='img-1'),
             html.H1('Ship Performance Analysis', className='header-title'),
             html.P([
             'The Ship Performance Analysis provides a Data Visualisation tool that allows the user to generate a meaningful and accurate graph. ',
@@ -32,7 +32,7 @@ layout = html.Div([
 
     html.Div([
         html.Div([
-            html.Img(src='https://ctjsctjs.com/host/graph-gen.jpg', className='img-1'),
+            html.Img(src='/static/img/img2.jpg', className='img-1'),
             html.H1('Data Analytics', className='header-title'),
             html.P([
             'The Ship Performance Analysis incorporates Data Analytic tools to aid in the accuracy of the graph. ',
@@ -48,7 +48,7 @@ layout = html.Div([
 
     html.Div([
         html.Div([
-            html.Img(src='http://ctjsctjs.com/host/graph-gen.jpg', className='img-1'),
+            html.Img(src='/static/img/img3.jpg', className='img-1'),
             html.H1('Data Cleaning', className='header-title'),
             html.P([
             'The system provides a feature for the user to upload an excel file, allowing them to update the database. ',
@@ -62,20 +62,20 @@ layout = html.Div([
         ], className='page-width sub-padding'),
     ], className='wrapper-grey header-wrapper'),
 
-    html.Div([
-        html.Div([
-            html.Img(src='http://ctjsctjs.com/host/graph-gen.jpg', className='img-1'),
-            html.H1('Save Settings', className='header-title'),
-            html.P([
-            'Users are able to save settings and load them through the archives. ',
-            'This allows them to easily access commonly used settings easily without having to re-enter the same input.',
-            ],className='title-desc'),
-            dcc.Link([
-                'Visit the archives',
-                ], className='button item-element-margin margin-top-12 white-overwrite',
-                href=pathname['Archive']
-            )
-        ], className='page-width sub-padding'),
-    ], className='wrapper-white header-wrapper'),
+    # html.Div([
+    #     html.Div([
+    #         html.Img(src='http://ctjsctjs.com/host/graph-gen.jpg', className='img-1'),
+    #         html.H1('Save Settings', className='header-title'),
+    #         html.P([
+    #         'Users are able to save settings and load them through the archives. ',
+    #         'This allows them to easily access commonly used settings easily without having to re-enter the same input.',
+    #         ],className='title-desc'),
+    #         dcc.Link([
+    #             'Visit the archives',
+    #             ], className='button item-element-margin margin-top-12 white-overwrite',
+    #             href=pathname['Archive']
+    #         )
+    #     ], className='page-width sub-padding'),
+    # ], className='wrapper-white header-wrapper'),
 
 ])

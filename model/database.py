@@ -219,7 +219,7 @@ class SQL:
 
         if len(vessels) > 0:
             return vessels
-        return
+        return []
 
     """
     'Database' Methods
@@ -454,6 +454,7 @@ class SQL:
     # Basic Query Function
     def __query(self, statement, expect_result=False):
         self.__reconnect()
+        print(statement)
         result = True
         try:
             with self.__cursor as cursor:

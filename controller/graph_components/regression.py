@@ -46,7 +46,7 @@ def k_means(graphSettings, df, clusters=None):
     if clusters is None:
         clusters = len(df.index) / 3
 
-    if int(clusters) > df.shape[0]:
+    if int(clusters) > df.shape[0] or int(clusters) <= 0:
         clusters = df.shape[0]
 
     if graphSettings[0] == "2D":

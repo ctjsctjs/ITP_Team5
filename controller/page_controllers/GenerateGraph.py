@@ -278,6 +278,7 @@ def load_vessel_field(series, db_table):
         if vessels_in_series is not None:
             vesselsInSeries = [{'label': i, 'value': i} for i in vessels_in_series]
             vesselsInSeries.append({'value': 'All', 'label': 'All'})
+            print("HELLO{}".format(vesselsInSeries))
             return vesselsInSeries
     return
 

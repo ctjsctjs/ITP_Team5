@@ -12,9 +12,8 @@ navbar = \
                 html.Ul([
                     html.Li(dcc.Link(html.Img(src='/static/img/APL-logo.svg', className='logo'), href=pathname['Home']), className='nav-li'),
                     html.Li(dcc.Link('Graphs', href=pathname['Graphs']), className='nav-li'),
-                    html.Li(dcc.Link('Archive', href=pathname['Archive']), className='nav-li'),
+                    # html.Li(dcc.Link('Archive', href=pathname['Archive']), className='nav-li'),
                     html.Li(dcc.Link('Database', href=pathname['Database']), className='nav-li'),
-                    html.Li(dcc.Link('Filter', href=pathname['Filter']), className='nav-li'),
                 ], className='nav-ul'),
             ], className='page-width'),
         ], id='nav-wrapper', className='nav-wrapper'),

@@ -62,8 +62,8 @@ layout = html.Div([
         html.H1('Ship Performance Analysis', className='header-title'),
 
         # item-button, generate graph
-        html.Button('Add Graph', className='button item-element-margin header-button'),
-        html.Button('Save Settings', className='button item-element-margin header-button', id='save-all-btn'),
+        # html.Button('Add Graph', className='button item-element-margin header-button'),
+        # html.Button('Save Settings', className='button item-element-margin header-button', id='save-all-btn'),
 
         html.P('Graph generation tool that provides an insight to ship performance',
                className='title-desc'),
@@ -105,7 +105,7 @@ layout = html.Div([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
                         html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-database'),
                         html.Div([
-                            'Select dataset',
+                            'Select the dataset to be used',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
                     ], className='helper-text'),
@@ -441,9 +441,8 @@ layout = html.Div([
                 html.Button([
                     html.I(className="fas fa-caret-right icon"),
                     'Generate Graph',
-                ], className='button item-element-margin margin-right-12',
+                ], className='button item-element-margin margin-right-12 hidden',
                     id="gen-button-1",
-                    style={'display': 'hidden'},
                     n_clicks='1'
                 ),
 
