@@ -16,7 +16,7 @@ layout = html.Div([
 
     html.Div([
         html.Div([
-            html.Img(src='http://ctjsctjs.com/host/graph-gen.jpg', className='img-1'),
+            html.Img(src='/static/img/graph-gen.jpg', className='img-1'),
             html.H1('Ship Performance Analysis', className='header-title'),
             html.P([
             'The Ship Performance Analysis provides a Data Visualisation tool that allows the user to generate a meaningful and accurate graph. ',
@@ -32,7 +32,7 @@ layout = html.Div([
 
     html.Div([
         html.Div([
-            html.Img(src='http://ctjsctjs.com/host/graph-gen.jpg', className='img-1'),
+            html.Img(src='https://ctjsctjs.com/host/graph-gen.jpg', className='img-1'),
             html.H1('Data Analytics', className='header-title'),
             html.P([
             'The Ship Performance Analysis incorporates Data Analytic tools to aid in the accuracy of the graph. ',

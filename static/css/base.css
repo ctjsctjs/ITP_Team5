@@ -111,7 +111,7 @@ background-color:#fafafa;
 .wrapper-img{
 
 /* The image used */
- background-image: url("http://ctjsctjs.com/host/APL-ship-dark.png");
+ background-image: url("/static/img/APL-ship-dark.png");
 
  /* Center and scale the image nicely */
  /* Create the parallax scrolling effect */

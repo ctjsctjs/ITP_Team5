@@ -14,9 +14,9 @@ def generate_filter_id():
 
 
 def generate_axis_parameters(mode, options):
-    label_x = "Parameter X"
-    label_y = "Parameter Y"
-    label_z = "Parameter Z"
+    label_x = "Select Parameter X"
+    label_y = "Select Parameter Y"
+    label_z = "Select Parameter Z"
 
     axis_parameters = [
         # Axis Parameters Input store
@@ -97,15 +97,15 @@ layout = html.Div([
                     # ),
 
                     html.H3([
-                        'Database'
+                        'Dataset'
                     ], className='input-label'),
 
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-database'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-database'),
                         html.Div([
-                            'Select database of dataset',
+                            'Select dataset',
                             html.Div(className='tooltip-triangle')
                         ], className='tooltip-container')
                     ], className='helper-text'),
@@ -114,7 +114,7 @@ layout = html.Div([
                     html.Div([
                         dcc.Dropdown(
                             id='gen-database-input-1',
-                            placeholder="Database",
+                            placeholder="Select Dataset",
                             className='item-element-margin-top'),
                         # Hidden Database field dump
                         html.Div(id='gen-database-input-dump', style={'display': 'none'}),
@@ -131,7 +131,7 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-mode'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-mode'),
                         html.Div([
                             'Select graph mode to determine number of parameters',
                             html.Div(className='tooltip-triangle')
@@ -159,7 +159,7 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-parameters'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-parameters'),
                         html.Div([
                             'Select the parameters of the graph',
                             html.Div(className='tooltip-triangle')
@@ -187,7 +187,7 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-vessel'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-vessel'),
 
                         html.Div([
                             'Select the vessel series and name to be filtered',
@@ -199,12 +199,12 @@ layout = html.Div([
                         # Series field
                         dcc.Dropdown(
                             id='gen-series-input-1',
-                            placeholder="Series",
+                            placeholder="Select Series",
                             className='item-element-margin'),
                         # Vessel field
                         dcc.Dropdown(
                             id='gen-vessel-input-1',
-                            placeholder="Vessel",
+                            placeholder="Select Vessel",
                             multi=True
                         ),
                         html.Div(id='gen-vessel-store'),
@@ -244,7 +244,7 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-filters'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-filters'),
 
                         html.Div([
                             'Add filters to scope down the data',
@@ -296,7 +296,7 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-settings'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-settings'),
 
                         html.Div([
                             'Customise the name and labels of the graph',
@@ -329,7 +329,7 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-advSettings'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-advSettings'),
 
                         html.Div([
                             'Advanced settings to tweak the graph.' +
@@ -394,7 +394,7 @@ layout = html.Div([
                     #Tooltip
                     html.H5([
                         html.I(className="fas fa-exclamation-circle icon tooltip-icon"),
-                        html.I(className="fas fa-angle-up icon tooltip-toggle", id='toggle-customise'),
+                        html.I(className="fas fa-angle-down icon tooltip-toggle", id='toggle-customise'),
 
                         html.Div([
                             'Customise the name and axis labels',
@@ -483,12 +483,12 @@ def generate_filter_input(option_type, option_id):
         label1 = 'Text'
     elif option_type == 'int' or option_type == 'float':
         input_type = 'number'
-        label1 = 'Min'
-        label2 = 'Max'
+        label1 = 'Enter Minimum Value'
+        label2 = 'Enter Maximum Value'
     elif option_type == 'datetime':
         input_type = 'date'
-        label1 = 'Start'
-        label2 = 'End'
+        label1 = 'Enter Start Date'
+        label2 = 'Enter End Date'
     else:
         input_type = None
         label1 = None
@@ -513,7 +513,7 @@ def generate_filter_input(option_type, option_id):
             dcc.Input(
                 id='gen-filter-value1-%d' % option_id,
                 className='item-element-margin form-control form-control-sm ',
-                placeholder='',
+                placeholder='Enter Value',
                 type=input_type,
                 value=''
             ),
@@ -529,7 +529,7 @@ def generate_filter_input(option_type, option_id):
             dcc.Input(
                 id='gen-filter-value1-%d' % option_id,
                 className='item-element-margin form-control form-control-sm ',
-                placeholder='',
+                placeholder=label1,
                 type=input_type,
                 value=''
             ),
@@ -537,7 +537,7 @@ def generate_filter_input(option_type, option_id):
             dcc.Input(
                 id='gen-filter-value2-%d' % option_id,
                 className='item-element-margin form-control form-control-sm ',
-                placeholder='',
+                placeholder=label2,
                 type=input_type,
                 value=''
             ),
