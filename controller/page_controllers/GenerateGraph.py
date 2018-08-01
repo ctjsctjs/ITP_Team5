@@ -5,6 +5,7 @@ import plotly.graph_objs as go
 import pandas as pd
 import json
 import os
+import sys
 import datetime
 import numpy as np
 from pandas.api.types import is_numeric_dtype
@@ -25,8 +26,7 @@ n_filters = 10
 dfs = {}
 temp_store = {}
 # PATH of your Proj:TODO CHANGE PATH TO YOUR PROJ PATH
-path = 'C:/Users/YC/Documents/GitHub/ITP_Team5(UI)/'
-arr_txt = [x for x in os.listdir('archive') if x.endswith(".txt")]
+path = os.path.dirname(sys.modules['__main__'].__file__) + "/"
 # TEMPORARY Variables. TO replace if there is a better way
 
 global gr_squared
@@ -586,6 +586,7 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
             # unqVessels = dfsDF['Vessel'].unique().tolist()
             unqVessels = filter_settings[0]
             print unqVessels
+
             # Set axis labels if any
             if xLabel == "":
                 xName = value[1]
@@ -865,9 +866,11 @@ def update_graph(filtered_df_json, value, settings, graph_mode, clusters, thresh
      State('y-axis-label', 'value'),
      State('z-axis-label', 'value'),
      State('gen-database-input-1', 'value'),
+     State('gen-extra-min','value'),
+     State('gen-extra-max','value'),
      State('gen-threshold-input-1', 'value')])
 def saveAll(saveClick, paramState, settingState, regState, clusterState, vesselState, seriesState, graphState, xState,
-            yState, zState, databaseState, thresholdState):
+            yState, zState, databaseState,minState,maxState, thresholdState):
     if saveClick > 0:
         temp_store['param'] = paramState
         temp_store['setting'] = settingState
@@ -877,14 +880,26 @@ def saveAll(saveClick, paramState, settingState, regState, clusterState, vesselS
         temp_store['series'] = seriesState
         temp_store['database'] = databaseState
         temp_store['threshold'] = thresholdState
-        temp_store['xLabel'] = xState
-        temp_store['yLabel'] = yState
-        temp_store['zLabel'] = zState
+        temp_store['extrapolationMin'] = minState
+        temp_store['extrapolationMax'] = maxState
+        if xState != "":
+            temp_store['xLabel'] = xState
+        else:
+            temp_store['xLabel'] = paramState[1]
+        if yState != "":
+            temp_store['yLabel'] = yState
+        else:
+            temp_store['yLabel'] = paramState[2]
+        if zState != "":
+            temp_store['zLabel'] = zState
+        else:
+            temp_store['zLabel'] = paramState[3]
         temp_store['dateTime'] = str(datetime.datetime.now().strftime("%d/%m/%y %H:%M"))
         temp_store['graphName'] = graphState
         if os.path.isfile(path + "archive/" + temp_store.get('graphName') + '.txt') == True:
             time = str(datetime.datetime.now().strftime('%H%M%S'))
             temp_store.update({'graphName': graphState + "(" + time + ")"})
+
         # if os.path.isfile(path+"archive/"+temp_store.get('graphName')+'.txt') == False:
         #     with open(os.path.join(path+'archive',temp_store.get('graphName')+'.txt'),'w') as file:
         #         file.write(json.dumps(temp_store))

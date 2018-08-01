@@ -1,6 +1,6 @@
 from dash.dependencies import Input, Output
 
-from view.pages.filter import layout
+#from view.pages.filter import layout
 from view.templates.table import generate_table
 from model.database import SQL
 from app import app

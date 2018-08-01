@@ -63,7 +63,7 @@ layout = html.Div([
 
         # item-button, generate graph
         # html.Button('Add Graph', className='button item-element-margin header-button'),
-        # html.Button('Save Settings', className='button item-element-margin header-button', id='save-all-btn'),
+        html.Button('Save Settings', className='button item-element-margin header-button', id='save-all-btn'),
 
         html.P('Graph generation tool that provides an insight to ship performance',
                className='title-desc'),
